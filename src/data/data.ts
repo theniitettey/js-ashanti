@@ -1,0 +1,339 @@
+export const heroData = [
+    {
+      id: 1,
+      title: "Big Discounts!",
+      description: "Save up to 50% on kitchen appliances",
+      imageUrl: "/img/fridge.png",
+    },
+    {
+      id: 2,
+      title: "Turkey Cooking Pans",
+      description: "Enjpoy up to 30% off on Turkey sets",
+      imageUrl: "/img/blender.png",
+    },
+    {
+      id: 3,
+      title: "Big Discounts!",
+      description: "Save up to 50% on kitchen appliances",
+      imageUrl: "/img/mixed1.png",
+    },
+    {
+      id: 4,
+      title: "Complete Cooking Sets",
+      description: "Save up to 20% on cooking appliances",
+      imageUrl: "/img/cookingset.png",
+    },
+  ];
+
+export const categories = [
+  {
+    title: "Store",
+    link: "/products",
+  },
+  {
+    title: "Kitchen Appliances",
+    link: "/products#kitchen-appliances",
+    image: "/optimized/tableSets.webp",
+  }
+  , {
+    title: "Cookware",
+    link: "/products#cooking-ware",
+    image: "/optimized/blender.webp",
+  }, {
+    title: "Insulation & Food Storage",
+    link: "/products#insulations",
+    image: "/optimized/lunchPack.webp",
+  }, {
+    title: "Home Essentials",
+    link: "/products#home-essentials",
+    image: "/optimized/clothesRack.webp",
+  }, 
+]
+
+
+export const products = [
+  {
+    title: "Complete Tableware Set",
+    slug: "complete-tableware-set",
+    description: "Includes plates, bowls, and jugs for 6 people. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
+    rating: 5.0,
+    reviewCount: 154,
+    price: 2899,
+    badge: "Best Seller",
+    badgeColor: "bg-green-500",
+    link: "/products/complete-tableware-set",
+    images: [
+      "/products/tableSets.jpg",
+      "/optimized/blender.webp",
+      "/optimized/clothesRack.webp",
+      "/optimized/clothesRack.webp",],
+    colors: ["red", "green"] 
+  },
+  {
+    title: "8L Silver Crest Air Fryer",
+    slug: "8l-air-fryer",
+    description: "Healthy frying with no oil and digital display",
+    rating: 4.8,
+    reviewCount: 320,
+    price: 4599,
+    badge: "Hot Deal",
+    badgeColor: "bg-red-500",
+    link: "/products/8l-air-fryer",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: ["red", "green", "blue", "gold"]
+  },
+  {
+    title: "5L Rice Cooker - 3 Pins",
+    slug: "5l-rice-cooker",
+    description: "Efficient rice cooker for medium-sized families",
+    rating: 4.6,
+    reviewCount: 200,
+    price: 2399,
+    badge: "Popular",
+    badgeColor: "bg-blue-500",
+    link: "/products/5l-rice-cooker",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: [ "blue", "gold"]
+  },
+  {
+    title: "Silver Crest 3-in-1 Blender",
+    slug: "sc5532-blender",
+    description: "Powerful 5500W motor with multi-speed settings",
+    rating: 4.9,
+    reviewCount: 410,
+    price: 3299,
+    badge: "Top Rated",
+    badgeColor: "bg-yellow-500",
+    link: "/products/sc5532-blender",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: ["sliver", "gold"]
+  },
+  {
+    title: "13PCS Non-Stick Fry Pan Set",
+    slug: "13pcs-frypan-set",
+    description: "Cook like a pro with this complete fry pan set",
+    rating: 4.7,
+    reviewCount: 195,
+    price: 4999,
+    badge: "Limited Stock",
+    badgeColor: "bg-orange-500",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    link: "/products/13pcs-frypan-set",
+    colors: ["red", "green", "blue", "gold"]
+  },
+  {
+    title: "LS 2010 - 10PCS Pot Set",
+    slug: "ls2010-pot-set",
+    description: "Durable and elegant stainless steel pots",
+    rating: 4.5,
+    reviewCount: 240,
+    price: 6199,
+    badge: "Featured",
+    badgeColor: "bg-purple-500",
+    link: "/products/ls2010-pot-set",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+  },
+  {
+    title: "4L Electric Kettle",
+    slug: "4l-electric-kettle",
+    description: "Fast-boiling and energy-saving electric kettle",
+    rating: 4.3,
+    reviewCount: 130,
+    price: 1599,
+    badge: "Trending",
+    badgeColor: "bg-teal-500",
+    link: "/products/4l-electric-kettle",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "3PCS Insulation Barrel Set",
+    slug: "insulation-barrel-3pcs",
+    description: "Keeps food hot for hours – perfect for travel",
+    rating: 4.6,
+    reviewCount: 110,
+    price: 3999,
+    badge: "Customer Favorite",
+    badgeColor: "bg-pink-500",
+    link: "/products/insulation-barrel-3pcs",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "Vmigo Cast Iron Dutch Oven",
+    slug: "vmigo-dutch-oven",
+    description: "Heavy-duty cast iron, perfect for stews & baking",
+    rating: 4.9,
+    reviewCount: 75,
+    price: 7499,
+    badge: "Premium",
+    badgeColor: "bg-gray-800 text-white",
+    link: "/products/vmigo-dutch-oven",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "Fufu Pounding Machine",
+    slug: "fufu-maker",
+    description: "Pound fufu and banku effortlessly at home",
+    rating: 4.4,
+    reviewCount: 98,
+    price: 4699,
+    badge: "Ghana Choice",
+    badgeColor: "bg-red-600",
+    link: "/products/fufu-maker",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "Juicer Extractor",
+    slug: "juicer-extractor",
+    description: "Extract fresh juices with powerful blade motor",
+    rating: 4.2,
+    reviewCount: 140,
+    price: 3199,
+    badge: "Daily Pick",
+    badgeColor: "bg-cyan-500",
+    link: "/products/juicer-extractor",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "Slow Juicer – Big Mouth",
+    slug: "slow-juicer",
+    description: "Retains more nutrients with slow-press tech",
+    rating: 4.7,
+    reviewCount: 188,
+    price: 5899,
+    badge: "Healthy Choice",
+    badgeColor: "bg-lime-600",
+    link: "/products/slow-juicer",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "6-Slot Lunch Box",
+    slug: "lunch-box",
+    description: "Perfect for school, work, or travel meals",
+    rating: 4.5,
+    reviewCount: 112,
+    price: 899,
+    badge: "Budget Pick",
+    badgeColor: "bg-green-600",
+    link: "/products/lunch-box",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    title: "10L Round Cooking Pot",
+    slug: "round-cooking-pot",
+    description: "Even heat distribution with 3-pin plug",
+    rating: 4.6,
+    reviewCount: 230,
+    price: 4699,
+    badge: "Classic",
+    badgeColor: "bg-indigo-500",
+    link: "/products/round-cooking-pot",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/storage-rack.jpg",
+    title: "5-Layer Kitchen Storage Rack",
+    slug: "kitchen-storage-rack",
+    description: "Organize your kitchenware with ease",
+    rating: 4.1,
+    reviewCount: 93,
+    price: 2899,
+    badge: "Organizer's Pick",
+    badgeColor: "bg-yellow-400",
+    link: "/products/kitchen-storage-rack",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/clothes-rack.jpg",
+    title: "Double Rod Cloth Rack",
+    slug: "cloths-rack",
+    description: "Sturdy steel rack for daily clothing needs",
+    rating: 4.0,
+    reviewCount: 84,
+    price: 3299,
+    badge: "Space Saver",
+    badgeColor: "bg-blue-600",
+    link: "/products/cloths-rack",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/pot-set-bosch.jpg",
+    title: "Bosch 12PCS Pot Set – BO-2023",
+    slug: "bosch-pot-set",
+    description: "German precision with stainless finish",
+    rating: 4.9,
+    reviewCount: 200,
+    price: 7999,
+    badge: "Premium",
+    badgeColor: "bg-black text-white",
+    link: "/products/bosch-pot-set",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/commercial-blender.jpg",
+    title: "2L Commercial Blender",
+    slug: "commercial-blender",
+    description: "Built for heavy use – cafes and homes",
+    rating: 4.6,
+    reviewCount: 144,
+    price: 4199,
+    badge: "Power Pick",
+    badgeColor: "bg-rose-500",
+    link: "/products/commercial-blender",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/square-pot.jpg",
+    title: "8L Square Cooking Pot",
+    slug: "square-pot",
+    description: "Large family-size pot with quick heating",
+    rating: 4.3,
+    reviewCount: 102,
+    price: 4799,
+    badge: "Family Size",
+    badgeColor: "bg-orange-400",
+    link: "/products/square-pot",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  },
+  {
+    imageUrl: "/products/tableware-gold.jpg",
+    title: "24PCS Gold Tableware Set",
+    slug: "gold-tableware",
+    description: "Elegant dining set for classy meals",
+    rating: 5.0,
+    reviewCount: 70,
+    price: 6999,
+    badge: "Luxury",
+    badgeColor: "bg-yellow-700 text-white",
+    link: "/products/gold-tableware",
+    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    colors: []
+
+  }
+];
