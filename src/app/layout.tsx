@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { Lato } from "next/font/google";
 import { Nebula } from "@/lib/font";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider"
+import { ThemeProvider } from "@/components/theme-provider";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Toaster } from "react-hot-toast";
+import { SocketProvider } from "@/components/analytics/socket-provider";
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
@@ -22,21 +23,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${lato.variable} ${Nebula.variable}`}>
-        <body
-          className={`${lato.variable} antialiased bg-gradient-radial-light dark:bg-gradient-radial-dark`}
-        >
-
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${lato.variable} ${Nebula.variable}`}
+    >
+      <body
+        className={`${lato.variable} antialiased bg-gradient-radial-light dark:bg-gradient-radial-dark`}
+      >
         <ThemeProvider
-            attribute={"class"}
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          > 
+          attribute={"class"}
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SocketProvider>
             <LayoutWrapper>
-              <Toaster position="top-center" reverseOrder={false} /> 
+              <Toaster position="top-center" reverseOrder={false} />
               {children}
             </LayoutWrapper>
+          </SocketProvider>
         </ThemeProvider>
       </body>
     </html>
