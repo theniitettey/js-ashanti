@@ -60,7 +60,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     const fullEvent: UserEvent = {
       ...event,
-      eventId: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      eventId: `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
       timestamp: new Date().toISOString(),
     };
 
