@@ -222,6 +222,16 @@ exports.Prisma.OrderScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.InsightScalarFieldEnum = {
+  id: 'id',
+  summary: 'summary',
+  confidence: 'confidence',
+  patterns: 'patterns',
+  timeWindow: 'timeWindow',
+  eventCount: 'eventCount',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -256,7 +266,8 @@ exports.Prisma.ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   BusinessSettings: 'BusinessSettings',
-  Order: 'Order'
+  Order: 'Order',
+  Insight: 'Insight'
 };
 
 /**

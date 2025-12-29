@@ -127,3 +127,15 @@ model Order {
   items        Json      // store items as JSON array
   createdAt    DateTime  @default(now())
 }
+
+model Insight {
+  id         String   @id @default(cuid())
+  summary    String
+  confidence Float
+  patterns   String[] // Array of detected patterns
+  timeWindow String
+  eventCount Int
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}

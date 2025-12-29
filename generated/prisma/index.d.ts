@@ -53,6 +53,11 @@ export type BusinessSettings = $Result.DefaultSelection<Prisma.$BusinessSettings
  * 
  */
 export type Order = $Result.DefaultSelection<Prisma.$OrderPayload>
+/**
+ * Model Insight
+ * 
+ */
+export type Insight = $Result.DefaultSelection<Prisma.$InsightPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -258,6 +263,16 @@ export class PrismaClient<
     * ```
     */
   get order(): Prisma.OrderDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.insight`: Exposes CRUD operations for the **Insight** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Insights
+    * const insights = await prisma.insight.findMany()
+    * ```
+    */
+  get insight(): Prisma.InsightDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -705,7 +720,8 @@ export namespace Prisma {
     Account: 'Account',
     Verification: 'Verification',
     BusinessSettings: 'BusinessSettings',
-    Order: 'Order'
+    Order: 'Order',
+    Insight: 'Insight'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -724,7 +740,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "product" | "review" | "user" | "session" | "account" | "verification" | "businessSettings" | "order"
+      modelProps: "product" | "review" | "user" | "session" | "account" | "verification" | "businessSettings" | "order" | "insight"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1320,6 +1336,80 @@ export namespace Prisma {
           }
         }
       }
+      Insight: {
+        payload: Prisma.$InsightPayload<ExtArgs>
+        fields: Prisma.InsightFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InsightFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InsightFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findFirst: {
+            args: Prisma.InsightFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InsightFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          findMany: {
+            args: Prisma.InsightFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          create: {
+            args: Prisma.InsightCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          createMany: {
+            args: Prisma.InsightCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InsightCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          delete: {
+            args: Prisma.InsightDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          update: {
+            args: Prisma.InsightUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          deleteMany: {
+            args: Prisma.InsightDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InsightUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InsightUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>[]
+          }
+          upsert: {
+            args: Prisma.InsightUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InsightPayload>
+          }
+          aggregate: {
+            args: Prisma.InsightAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInsight>
+          }
+          groupBy: {
+            args: Prisma.InsightGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InsightGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InsightCountArgs<ExtArgs>
+            result: $Utils.Optional<InsightCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1412,6 +1502,7 @@ export namespace Prisma {
     verification?: VerificationOmit
     businessSettings?: BusinessSettingsOmit
     order?: OrderOmit
+    insight?: InsightOmit
   }
 
   /* Types for Logging */
@@ -10496,6 +10587,1061 @@ export namespace Prisma {
 
 
   /**
+   * Model Insight
+   */
+
+  export type AggregateInsight = {
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  export type InsightAvgAggregateOutputType = {
+    confidence: number | null
+    eventCount: number | null
+  }
+
+  export type InsightSumAggregateOutputType = {
+    confidence: number | null
+    eventCount: number | null
+  }
+
+  export type InsightMinAggregateOutputType = {
+    id: string | null
+    summary: string | null
+    confidence: number | null
+    timeWindow: string | null
+    eventCount: number | null
+    createdAt: Date | null
+  }
+
+  export type InsightMaxAggregateOutputType = {
+    id: string | null
+    summary: string | null
+    confidence: number | null
+    timeWindow: string | null
+    eventCount: number | null
+    createdAt: Date | null
+  }
+
+  export type InsightCountAggregateOutputType = {
+    id: number
+    summary: number
+    confidence: number
+    patterns: number
+    timeWindow: number
+    eventCount: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type InsightAvgAggregateInputType = {
+    confidence?: true
+    eventCount?: true
+  }
+
+  export type InsightSumAggregateInputType = {
+    confidence?: true
+    eventCount?: true
+  }
+
+  export type InsightMinAggregateInputType = {
+    id?: true
+    summary?: true
+    confidence?: true
+    timeWindow?: true
+    eventCount?: true
+    createdAt?: true
+  }
+
+  export type InsightMaxAggregateInputType = {
+    id?: true
+    summary?: true
+    confidence?: true
+    timeWindow?: true
+    eventCount?: true
+    createdAt?: true
+  }
+
+  export type InsightCountAggregateInputType = {
+    id?: true
+    summary?: true
+    confidence?: true
+    patterns?: true
+    timeWindow?: true
+    eventCount?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type InsightAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insight to aggregate.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Insights
+    **/
+    _count?: true | InsightCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InsightAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InsightSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InsightMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type GetInsightAggregateType<T extends InsightAggregateArgs> = {
+        [P in keyof T & keyof AggregateInsight]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInsight[P]>
+      : GetScalarType<T[P], AggregateInsight[P]>
+  }
+
+
+
+
+  export type InsightGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InsightWhereInput
+    orderBy?: InsightOrderByWithAggregationInput | InsightOrderByWithAggregationInput[]
+    by: InsightScalarFieldEnum[] | InsightScalarFieldEnum
+    having?: InsightScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InsightCountAggregateInputType | true
+    _avg?: InsightAvgAggregateInputType
+    _sum?: InsightSumAggregateInputType
+    _min?: InsightMinAggregateInputType
+    _max?: InsightMaxAggregateInputType
+  }
+
+  export type InsightGroupByOutputType = {
+    id: string
+    summary: string
+    confidence: number
+    patterns: string[]
+    timeWindow: string
+    eventCount: number
+    createdAt: Date
+    _count: InsightCountAggregateOutputType | null
+    _avg: InsightAvgAggregateOutputType | null
+    _sum: InsightSumAggregateOutputType | null
+    _min: InsightMinAggregateOutputType | null
+    _max: InsightMaxAggregateOutputType | null
+  }
+
+  type GetInsightGroupByPayload<T extends InsightGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InsightGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InsightGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InsightGroupByOutputType[P]>
+            : GetScalarType<T[P], InsightGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InsightSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    summary?: boolean
+    confidence?: boolean
+    patterns?: boolean
+    timeWindow?: boolean
+    eventCount?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    summary?: boolean
+    confidence?: boolean
+    patterns?: boolean
+    timeWindow?: boolean
+    eventCount?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    summary?: boolean
+    confidence?: boolean
+    patterns?: boolean
+    timeWindow?: boolean
+    eventCount?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["insight"]>
+
+  export type InsightSelectScalar = {
+    id?: boolean
+    summary?: boolean
+    confidence?: boolean
+    patterns?: boolean
+    timeWindow?: boolean
+    eventCount?: boolean
+    createdAt?: boolean
+  }
+
+  export type InsightOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "summary" | "confidence" | "patterns" | "timeWindow" | "eventCount" | "createdAt", ExtArgs["result"]["insight"]>
+
+  export type $InsightPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Insight"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      summary: string
+      confidence: number
+      patterns: string[]
+      timeWindow: string
+      eventCount: number
+      createdAt: Date
+    }, ExtArgs["result"]["insight"]>
+    composites: {}
+  }
+
+  type InsightGetPayload<S extends boolean | null | undefined | InsightDefaultArgs> = $Result.GetResult<Prisma.$InsightPayload, S>
+
+  type InsightCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InsightFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InsightCountAggregateInputType | true
+    }
+
+  export interface InsightDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Insight'], meta: { name: 'Insight' } }
+    /**
+     * Find zero or one Insight that matches the filter.
+     * @param {InsightFindUniqueArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InsightFindUniqueArgs>(args: SelectSubset<T, InsightFindUniqueArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Insight that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InsightFindUniqueOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InsightFindUniqueOrThrowArgs>(args: SelectSubset<T, InsightFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Insight that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InsightFindFirstArgs>(args?: SelectSubset<T, InsightFindFirstArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Insight that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindFirstOrThrowArgs} args - Arguments to find a Insight
+     * @example
+     * // Get one Insight
+     * const insight = await prisma.insight.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InsightFindFirstOrThrowArgs>(args?: SelectSubset<T, InsightFindFirstOrThrowArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Insights that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Insights
+     * const insights = await prisma.insight.findMany()
+     * 
+     * // Get first 10 Insights
+     * const insights = await prisma.insight.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const insightWithIdOnly = await prisma.insight.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InsightFindManyArgs>(args?: SelectSubset<T, InsightFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Insight.
+     * @param {InsightCreateArgs} args - Arguments to create a Insight.
+     * @example
+     * // Create one Insight
+     * const Insight = await prisma.insight.create({
+     *   data: {
+     *     // ... data to create a Insight
+     *   }
+     * })
+     * 
+     */
+    create<T extends InsightCreateArgs>(args: SelectSubset<T, InsightCreateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Insights.
+     * @param {InsightCreateManyArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InsightCreateManyArgs>(args?: SelectSubset<T, InsightCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Insights and returns the data saved in the database.
+     * @param {InsightCreateManyAndReturnArgs} args - Arguments to create many Insights.
+     * @example
+     * // Create many Insights
+     * const insight = await prisma.insight.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Insights and only return the `id`
+     * const insightWithIdOnly = await prisma.insight.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InsightCreateManyAndReturnArgs>(args?: SelectSubset<T, InsightCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Insight.
+     * @param {InsightDeleteArgs} args - Arguments to delete one Insight.
+     * @example
+     * // Delete one Insight
+     * const Insight = await prisma.insight.delete({
+     *   where: {
+     *     // ... filter to delete one Insight
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InsightDeleteArgs>(args: SelectSubset<T, InsightDeleteArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Insight.
+     * @param {InsightUpdateArgs} args - Arguments to update one Insight.
+     * @example
+     * // Update one Insight
+     * const insight = await prisma.insight.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InsightUpdateArgs>(args: SelectSubset<T, InsightUpdateArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Insights.
+     * @param {InsightDeleteManyArgs} args - Arguments to filter Insights to delete.
+     * @example
+     * // Delete a few Insights
+     * const { count } = await prisma.insight.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InsightDeleteManyArgs>(args?: SelectSubset<T, InsightDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Insights
+     * const insight = await prisma.insight.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InsightUpdateManyArgs>(args: SelectSubset<T, InsightUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Insights and returns the data updated in the database.
+     * @param {InsightUpdateManyAndReturnArgs} args - Arguments to update many Insights.
+     * @example
+     * // Update many Insights
+     * const insight = await prisma.insight.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Insights and only return the `id`
+     * const insightWithIdOnly = await prisma.insight.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InsightUpdateManyAndReturnArgs>(args: SelectSubset<T, InsightUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Insight.
+     * @param {InsightUpsertArgs} args - Arguments to update or create a Insight.
+     * @example
+     * // Update or create a Insight
+     * const insight = await prisma.insight.upsert({
+     *   create: {
+     *     // ... data to create a Insight
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Insight we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InsightUpsertArgs>(args: SelectSubset<T, InsightUpsertArgs<ExtArgs>>): Prisma__InsightClient<$Result.GetResult<Prisma.$InsightPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Insights.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightCountArgs} args - Arguments to filter Insights to count.
+     * @example
+     * // Count the number of Insights
+     * const count = await prisma.insight.count({
+     *   where: {
+     *     // ... the filter for the Insights we want to count
+     *   }
+     * })
+    **/
+    count<T extends InsightCountArgs>(
+      args?: Subset<T, InsightCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InsightCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InsightAggregateArgs>(args: Subset<T, InsightAggregateArgs>): Prisma.PrismaPromise<GetInsightAggregateType<T>>
+
+    /**
+     * Group by Insight.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InsightGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InsightGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InsightGroupByArgs['orderBy'] }
+        : { orderBy?: InsightGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InsightGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInsightGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Insight model
+   */
+  readonly fields: InsightFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Insight.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InsightClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Insight model
+   */
+  interface InsightFieldRefs {
+    readonly id: FieldRef<"Insight", 'String'>
+    readonly summary: FieldRef<"Insight", 'String'>
+    readonly confidence: FieldRef<"Insight", 'Float'>
+    readonly patterns: FieldRef<"Insight", 'String[]'>
+    readonly timeWindow: FieldRef<"Insight", 'String'>
+    readonly eventCount: FieldRef<"Insight", 'Int'>
+    readonly createdAt: FieldRef<"Insight", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Insight findUnique
+   */
+  export type InsightFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findUniqueOrThrow
+   */
+  export type InsightFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight findFirst
+   */
+  export type InsightFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findFirstOrThrow
+   */
+  export type InsightFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter, which Insight to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Insights.
+     */
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight findMany
+   */
+  export type InsightFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter, which Insights to fetch.
+     */
+    where?: InsightWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Insights to fetch.
+     */
+    orderBy?: InsightOrderByWithRelationInput | InsightOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Insights.
+     */
+    cursor?: InsightWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Insights from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Insights.
+     */
+    skip?: number
+    distinct?: InsightScalarFieldEnum | InsightScalarFieldEnum[]
+  }
+
+  /**
+   * Insight create
+   */
+  export type InsightCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data needed to create a Insight.
+     */
+    data: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+  }
+
+  /**
+   * Insight createMany
+   */
+  export type InsightCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Insight createManyAndReturn
+   */
+  export type InsightCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data used to create many Insights.
+     */
+    data: InsightCreateManyInput | InsightCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Insight update
+   */
+  export type InsightUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data needed to update a Insight.
+     */
+    data: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+    /**
+     * Choose, which Insight to update.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight updateMany
+   */
+  export type InsightUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Insights.
+     */
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyInput>
+    /**
+     * Filter which Insights to update
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Insight updateManyAndReturn
+   */
+  export type InsightUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The data used to update Insights.
+     */
+    data: XOR<InsightUpdateManyMutationInput, InsightUncheckedUpdateManyInput>
+    /**
+     * Filter which Insights to update
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Insight upsert
+   */
+  export type InsightUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * The filter to search for the Insight to update in case it exists.
+     */
+    where: InsightWhereUniqueInput
+    /**
+     * In case the Insight found by the `where` argument doesn't exist, create a new Insight with this data.
+     */
+    create: XOR<InsightCreateInput, InsightUncheckedCreateInput>
+    /**
+     * In case the Insight was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InsightUpdateInput, InsightUncheckedUpdateInput>
+  }
+
+  /**
+   * Insight delete
+   */
+  export type InsightDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+    /**
+     * Filter which Insight to delete.
+     */
+    where: InsightWhereUniqueInput
+  }
+
+  /**
+   * Insight deleteMany
+   */
+  export type InsightDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Insights to delete
+     */
+    where?: InsightWhereInput
+    /**
+     * Limit how many Insights to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Insight without action
+   */
+  export type InsightDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Insight
+     */
+    select?: InsightSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Insight
+     */
+    omit?: InsightOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -10633,6 +11779,19 @@ export namespace Prisma {
   };
 
   export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+  export const InsightScalarFieldEnum: {
+    id: 'id',
+    summary: 'summary',
+    confidence: 'confidence',
+    patterns: 'patterns',
+    timeWindow: 'timeWindow',
+    eventCount: 'eventCount',
+    createdAt: 'createdAt'
+  };
+
+  export type InsightScalarFieldEnum = (typeof InsightScalarFieldEnum)[keyof typeof InsightScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -11390,6 +12549,70 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"Order"> | Date | string
   }
 
+  export type InsightWhereInput = {
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    id?: StringFilter<"Insight"> | string
+    summary?: StringFilter<"Insight"> | string
+    confidence?: FloatFilter<"Insight"> | number
+    patterns?: StringNullableListFilter<"Insight">
+    timeWindow?: StringFilter<"Insight"> | string
+    eventCount?: IntFilter<"Insight"> | number
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+  }
+
+  export type InsightOrderByWithRelationInput = {
+    id?: SortOrder
+    summary?: SortOrder
+    confidence?: SortOrder
+    patterns?: SortOrder
+    timeWindow?: SortOrder
+    eventCount?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InsightWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: InsightWhereInput | InsightWhereInput[]
+    OR?: InsightWhereInput[]
+    NOT?: InsightWhereInput | InsightWhereInput[]
+    summary?: StringFilter<"Insight"> | string
+    confidence?: FloatFilter<"Insight"> | number
+    patterns?: StringNullableListFilter<"Insight">
+    timeWindow?: StringFilter<"Insight"> | string
+    eventCount?: IntFilter<"Insight"> | number
+    createdAt?: DateTimeFilter<"Insight"> | Date | string
+  }, "id">
+
+  export type InsightOrderByWithAggregationInput = {
+    id?: SortOrder
+    summary?: SortOrder
+    confidence?: SortOrder
+    patterns?: SortOrder
+    timeWindow?: SortOrder
+    eventCount?: SortOrder
+    createdAt?: SortOrder
+    _count?: InsightCountOrderByAggregateInput
+    _avg?: InsightAvgOrderByAggregateInput
+    _max?: InsightMaxOrderByAggregateInput
+    _min?: InsightMinOrderByAggregateInput
+    _sum?: InsightSumOrderByAggregateInput
+  }
+
+  export type InsightScalarWhereWithAggregatesInput = {
+    AND?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    OR?: InsightScalarWhereWithAggregatesInput[]
+    NOT?: InsightScalarWhereWithAggregatesInput | InsightScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Insight"> | string
+    summary?: StringWithAggregatesFilter<"Insight"> | string
+    confidence?: FloatWithAggregatesFilter<"Insight"> | number
+    patterns?: StringNullableListFilter<"Insight">
+    timeWindow?: StringWithAggregatesFilter<"Insight"> | string
+    eventCount?: IntWithAggregatesFilter<"Insight"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"Insight"> | Date | string
+  }
+
   export type ProductCreateInput = {
     id?: string
     name: string
@@ -12113,6 +13336,76 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type InsightCreateInput = {
+    id?: string
+    summary: string
+    confidence: number
+    patterns?: InsightCreatepatternsInput | string[]
+    timeWindow: string
+    eventCount: number
+    createdAt?: Date | string
+  }
+
+  export type InsightUncheckedCreateInput = {
+    id?: string
+    summary: string
+    confidence: number
+    patterns?: InsightCreatepatternsInput | string[]
+    timeWindow: string
+    eventCount: number
+    createdAt?: Date | string
+  }
+
+  export type InsightUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    patterns?: InsightUpdatepatternsInput | string[]
+    timeWindow?: StringFieldUpdateOperationsInput | string
+    eventCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    patterns?: InsightUpdatepatternsInput | string[]
+    timeWindow?: StringFieldUpdateOperationsInput | string
+    eventCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightCreateManyInput = {
+    id?: string
+    summary: string
+    confidence: number
+    patterns?: InsightCreatepatternsInput | string[]
+    timeWindow: string
+    eventCount: number
+    createdAt?: Date | string
+  }
+
+  export type InsightUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    patterns?: InsightUpdatepatternsInput | string[]
+    timeWindow?: StringFieldUpdateOperationsInput | string
+    eventCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InsightUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    summary?: StringFieldUpdateOperationsInput | string
+    confidence?: FloatFieldUpdateOperationsInput | number
+    patterns?: InsightUpdatepatternsInput | string[]
+    timeWindow?: StringFieldUpdateOperationsInput | string
+    eventCount?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -12766,6 +14059,44 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
+  export type InsightCountOrderByAggregateInput = {
+    id?: SortOrder
+    summary?: SortOrder
+    confidence?: SortOrder
+    patterns?: SortOrder
+    timeWindow?: SortOrder
+    eventCount?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InsightAvgOrderByAggregateInput = {
+    confidence?: SortOrder
+    eventCount?: SortOrder
+  }
+
+  export type InsightMaxOrderByAggregateInput = {
+    id?: SortOrder
+    summary?: SortOrder
+    confidence?: SortOrder
+    timeWindow?: SortOrder
+    eventCount?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InsightMinOrderByAggregateInput = {
+    id?: SortOrder
+    summary?: SortOrder
+    confidence?: SortOrder
+    timeWindow?: SortOrder
+    eventCount?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type InsightSumOrderByAggregateInput = {
+    confidence?: SortOrder
+    eventCount?: SortOrder
+  }
+
   export type ProductCreatesubcategoriesInput = {
     set: string[]
   }
@@ -13007,6 +14338,15 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutAccountsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
+  }
+
+  export type InsightCreatepatternsInput = {
+    set: string[]
+  }
+
+  export type InsightUpdatepatternsInput = {
+    set?: string[]
+    push?: string | string[]
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
