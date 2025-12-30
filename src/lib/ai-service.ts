@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { UserEvent, AIAnalysis } from "@/interface/analytics";
+import { aiCircuitBreaker } from "@/lib/circuit-breaker";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -7,6 +8,7 @@ const openai = new OpenAI({
 
 /**
  * Analyze batch of user events with AI
+ * Wrapped with circuit breaker to protect against cascading failures
  */
 export async function analyzeEventBatch(
   events: UserEvent[]
@@ -19,6 +21,16 @@ export async function analyzeEventBatch(
     throw new Error("No events to analyze");
   }
 
+  // Wrap AI call with circuit breaker
+  return aiCircuitBreaker.execute(async () => {
+    return performAnalysis(events);
+  });
+}
+
+/**
+ * Internal: Perform the actual AI analysis
+ */
+async function performAnalysis(events: UserEvent[]): Promise<AIAnalysis> {
   // Prepare event summary for AI
   const eventSummary = events.map((e) => ({
     type: e.eventType,
