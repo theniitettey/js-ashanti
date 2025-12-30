@@ -1,9 +1,9 @@
-import OpenAI from "openai";
+import Groq from "groq-sdk";
 import { UserEvent, AIAnalysis } from "@/interface/analytics";
 import { aiCircuitBreaker } from "@/lib/circuit-breaker";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 /**
@@ -13,8 +13,8 @@ const openai = new OpenAI({
 export async function analyzeEventBatch(
   events: UserEvent[]
 ): Promise<AIAnalysis> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY not configured");
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY not configured");
   }
 
   if (events.length === 0) {
@@ -46,22 +46,20 @@ Below is a batch of ${events.length} user events from the last time window.
 Events:
 ${JSON.stringify(eventSummary, null, 2)}
 
-Analyze these events and provide:
-1. A concise summary (1-2 sentences) of user behavior patterns
-2. Confidence score (0-1) in your analysis
-3. List of detected patterns (e.g., "cart_abandonment", "product_browsing", "price_sensitivity")
-
-Respond in JSON format:
+Analyze these events and provide a JSON response with the following structure:
 {
-  "summary": "string",
-  "confidence": number,
-  "patterns": ["string"]
+  "summary": "concise 1-2 sentence summary of user behavior patterns",
+  "confidence": 0.85,
+  "patterns": ["pattern1", "pattern2"]
 }
+
+You MUST respond with ONLY valid JSON, no markdown, no backticks, no additional text.
 `;
 
   try {
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const completion = await groq.chat.completions.create({
+      // Groq production model (see https://console.groq.com/docs/deprecations)
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -73,7 +71,6 @@ Respond in JSON format:
           content: prompt,
         },
       ],
-      response_format: { type: "json_object" },
       temperature: 0.7,
     });
 

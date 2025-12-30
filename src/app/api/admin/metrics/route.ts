@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
     const batchMetrics = await getBatchMetrics();
     const performanceMetrics = await getPerformanceMetrics();
     const circuitBreakerMetrics = getCircuitBreakerMetrics();
+    const deadLetterQueueMetrics = await getDeadLetterQueueMetrics();
 
     const metrics = {
       timestamp: new Date().toISOString(),
@@ -41,6 +42,7 @@ export async function GET(request: NextRequest) {
       batches: batchMetrics,
       performance: performanceMetrics,
       circuit_breaker: circuitBreakerMetrics,
+      dead_letter_queue: deadLetterQueueMetrics,
     };
 
     return NextResponse.json(metrics);
@@ -83,16 +85,12 @@ async function getJobMetrics() {
     ? Math.floor((Date.now() - oldestPending.created_at.getTime()) / 1000)
     : 0;
 
-  // Count in dead letter queue
-  const dlqCount = await prisma.deadLetterJob.count();
-
   return {
     pending,
     running,
     success_last_hour: success,
     failed_last_hour: failed,
     oldest_pending_age_seconds: oldestPendingAgeSec,
-    dead_letter_queue_total: dlqCount,
   };
 }
 
@@ -165,6 +163,22 @@ async function getPerformanceMetrics() {
     p99_analysis_time_ms: times[p99Index] || 0,
     max_analysis_time_ms: Math.max(...times),
     completed_jobs_count: times.length,
+  };
+}
+
+async function getDeadLetterQueueMetrics() {
+  const total = await prisma.deadLetterJob.count();
+  const last24hours = await prisma.deadLetterJob.count({
+    where: {
+      failed_at: {
+        gte: new Date(Date.now() - 24 * 3600000),
+      },
+    },
+  });
+
+  return {
+    total,
+    last_24_hours: last24hours,
   };
 }
 

@@ -117,7 +117,7 @@ export function MetricsDashboard() {
         ? "bg-red-500"
         : "bg-yellow-500";
 
-  const hasDLQIssues = metrics.dead_letter_queue.total > 0;
+  const hasDLQIssues = metrics.dead_letter_queue?.total > 0 || false;
 
   return (
     <div className="space-y-4">
