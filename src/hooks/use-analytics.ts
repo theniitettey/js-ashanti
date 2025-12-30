@@ -32,7 +32,7 @@ export function useAnalytics() {
   }, [pathname, emitEvent]);
 
   // Manual tracking methods
-  const trackEvent = (eventType: string, metadata?: Record<string, any>) => {
+  const trackEvent = (eventType: string, metadata?: Record<any, any>) => {
     emitEvent({
       eventType,
       userId: getUserId(),

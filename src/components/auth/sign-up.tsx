@@ -22,7 +22,8 @@ import {
 import { JSX, SVGProps } from "react";
 import { useRouter } from "next/navigation";
 import { signUp } from "@/lib/auth-client";
-import { useForm, SubmitHandler } from "react-hook-form"
+import { useForm, SubmitHandler } from "react-hook-form";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -145,7 +146,6 @@ const Checkbox = React.forwardRef<
 ));
 Checkbox.displayName = CheckboxPrimitive.Root.displayName;
 
-
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
@@ -238,168 +238,194 @@ const SelectItem = React.forwardRef<
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 
 type Inputs = {
-    name: string;
-    email: string;
-    password: string;
-  };
-  
-  export function SignupForm() {
-    const {
-      register,
-      handleSubmit,
-      formState: { errors },
-    } = useForm<Inputs>();
-  
-    const router = useRouter();
-    const [error, setError] = useState<string | null>(null);
-    const [showPassword, setShowPassword] = useState(false);
-  
-    const onSubmit: SubmitHandler<Inputs> = async (data) => {
-      setError(null);
-  
-      try {
-        const res = await signUp.email({
-          name: data.name,
-          email: data.email,
-          password: data.password,
+  name: string;
+  email: string;
+  password: string;
+};
+
+export function SignupForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Inputs>();
+
+  const router = useRouter();
+  const { trackEvent } = useAnalytics();
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    setError(null);
+
+    // Track signup attempt
+    trackEvent("signup_attempt", {
+      email: data.email,
+      name: data.name,
+    });
+
+    try {
+      const res = await signUp.email({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      });
+
+      if (res.error) {
+        // Track signup failure
+        trackEvent("signup_failed", {
+          error: res.error.message,
         });
-  
-        if (res.error) {
-          setError(res.error.message || "Something went wrong.");
-        } else {
-          router.push("/login");
-        }
-      } catch (err: any) {
-        setError("Unexpected error occurred.");
-        console.error(err);
+
+        setError(res.error.message || "Something went wrong.");
+      } else {
+        // Track successful signup
+        trackEvent("signup_success", {
+          email: data.email,
+        });
+
+        router.push("/login");
       }
-    };
-  
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-full max-w-lg px-4 sm:px-6 lg:px-8">
-          <Card className="border-none shadow-lg pb-0">
-            <CardHeader className="flex flex-col items-center space-y-1.5 pb-4 pt-6">
-              <a href="/">
-                <p className="logo">J's Ashanti's</p>
-              </a>
-              <div className="space-y-0.5 flex flex-col items-center">
-                <h2 className="text-2xl font-semibold text-foreground">
-                  Create an account
-                </h2>
-                <p className="text-muted-foreground">
-                  Welcome! Create an account to get started.
-                </p>
+    } catch (err: any) {
+      // Track unexpected error
+      trackEvent("signup_failed", {
+        error: "Unexpected error occurred",
+      });
+
+      setError("Unexpected error occurred.");
+      console.error(err);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-lg px-4 sm:px-6 lg:px-8">
+        <Card className="border-none shadow-lg pb-0">
+          <CardHeader className="flex flex-col items-center space-y-1.5 pb-4 pt-6">
+            <a href="/">
+              <p className="logo">J's Ashanti's</p>
+            </a>
+            <div className="space-y-0.5 flex flex-col items-center">
+              <h2 className="text-2xl font-semibold text-foreground">
+                Create an account
+              </h2>
+              <p className="text-muted-foreground">
+                Welcome! Create an account to get started.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6 px-8">
+            {/* Signup Form Starts */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <input
+                  id="name"
+                  placeholder="Full Name"
+                  className="w-full rounded-md border border-neutral-700 px-3 py-2"
+                  {...register("name", { required: "Full name is required" })}
+                />
+                {errors.name && (
+                  <span className="text-red-500">{errors.name.message}</span>
+                )}
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6 px-8">
-              {/* Signup Form Starts */}
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">Email address</Label>
+                <input
+                  id="email"
+                  placeholder="Email"
+                  className="w-full rounded-md border border-neutral-700 px-3 py-2"
+                  {...register("email", {
+                    required: "Email is required",
+                    pattern: {
+                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: "Invalid email address",
+                    },
+                  })}
+                />
+                {errors.email && (
+                  <span className="text-red-500">{errors.email.message}</span>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
                   <input
-                    id="name"
-                    placeholder="Full Name"
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
                     className="w-full rounded-md border border-neutral-700 px-3 py-2"
-                    {...register("name", { required: "Full name is required" })}
-                  />
-                  {errors.name && (
-                    <span className="text-red-500">{errors.name.message}</span>
-                  )}
-                </div>
-  
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email address</Label>
-                  <input
-                    id="email"
-                    placeholder="Email"
-                    className="w-full rounded-md border border-neutral-700 px-3 py-2"
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Invalid email address",
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: {
+                        value: 8,
+                        message: "Password must be at least 8 characters",
                       },
                     })}
                   />
-                  {errors.email && (
-                    <span className="text-red-500">{errors.email.message}</span>
-                  )}
-                </div>
-  
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Password"
-                      className="w-full rounded-md border border-neutral-700 px-3 py-2"
-                      {...register("password", {
-                        required: "Password is required",
-                        minLength: {
-                          value: 8,
-                          message: "Password must be at least 8 characters",
-                        },
-                      })}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {errors.password && (
-                    <span className="text-red-500">{errors.password.message}</span>
-                  )}
-                </div>
-  
-                {/* Terms */}
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" />
-                  <label
-                    htmlFor="terms"
-                    className="text-sm text-muted-foreground"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    I agree to the{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      Terms
-                    </a>{" "}
-                    and{" "}
-                    <a href="#" className="text-primary hover:underline">
-                      Conditions
-                    </a>
-                  </label>
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
-  
-                {/* Submit Button */}
-                <Button type="submit" className="w-full bg-primary text-primary-foreground">
-                  Create account
-                </Button>
-  
-                {/* Display backend error */}
-                {error && <p className="text-red-500 text-sm">{error}</p>}
-              </form>
-            </CardContent>
-            <CardFooter className="flex justify-center border-t !py-4">
-              <p className="text-center text-sm text-muted-foreground">
-                Already have an account?{" "}
-                <a href="/login" className="text-primary hover:underline">
-                  Sign in
-                </a>
-              </p>
-            </CardFooter>
-          </Card>
-        </div>
+                {errors.password && (
+                  <span className="text-red-500">
+                    {errors.password.message}
+                  </span>
+                )}
+              </div>
+
+              {/* Terms */}
+              <div className="flex items-center space-x-2">
+                <Checkbox id="terms" />
+                <label
+                  htmlFor="terms"
+                  className="text-sm text-muted-foreground"
+                >
+                  I agree to the{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    Terms
+                  </a>{" "}
+                  and{" "}
+                  <a href="#" className="text-primary hover:underline">
+                    Conditions
+                  </a>
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full bg-primary text-primary-foreground"
+              >
+                Create account
+              </Button>
+
+              {/* Display backend error */}
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center border-t !py-4">
+            <p className="text-center text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <a href="/login" className="text-primary hover:underline">
+                Sign in
+              </a>
+            </p>
+          </CardFooter>
+        </Card>
       </div>
-    );
-  }
-  
+    </div>
+  );
+}

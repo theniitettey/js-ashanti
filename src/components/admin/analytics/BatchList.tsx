@@ -148,10 +148,14 @@ export function BatchList() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Event Batches</CardTitle>
-        <CardDescription>
-          Manage and trigger analysis for event batches
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Event Batches</CardTitle>
+            <CardDescription>
+              Manage and trigger analysis for event batches
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
@@ -214,19 +218,28 @@ export function BatchList() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    {batch.status === "SEALED" && (
+                    {(batch.status === "OPEN" ||
+                      batch.status === "SEALED" ||
+                      batch.status === "ANALYZED") && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => triggerAnalysis(batch.batch_id)}
                         disabled={triggering === batch.batch_id}
+                        title={
+                          batch.status === "ANALYZED"
+                            ? "Re-analyze this batch"
+                            : "Trigger analysis"
+                        }
                       >
                         {triggering === batch.batch_id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <>
                             <PlayCircle className="mr-2 h-4 w-4" />
-                            Analyze
+                            {batch.status === "ANALYZED"
+                              ? "Re-analyze"
+                              : "Analyze"}
                           </>
                         )}
                       </Button>

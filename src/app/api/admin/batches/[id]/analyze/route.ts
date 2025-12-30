@@ -38,7 +38,7 @@ export async function POST(
     }
 
     // Find batch
-    const batch = await prisma.batch.findUnique({
+    let batch = await prisma.batch.findUnique({
       where: { batch_id: batchId },
     });
 
@@ -46,11 +46,21 @@ export async function POST(
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
 
-    // Check if batch is SEALED (required for analysis)
+    if (batch.status === "OPEN") {
+      // Manually seal so we can trigger analysis immediately without waiting for cron
+      batch = await prisma.batch.update({
+        where: { batch_id: batchId },
+        data: {
+          status: "SEALED",
+          sealed_at: new Date(),
+        },
+      });
+    }
+
     if (batch.status !== "SEALED" && batch.status !== "ANALYZED") {
       return NextResponse.json(
         {
-          error: `Batch cannot be analyzed in status: ${batch.status}. Must be SEALED or ANALYZED.`,
+          error: `Batch must be in SEALED or ANALYZED state to trigger analysis. Current state: ${batch.status}`,
         },
         { status: 400 }
       );
