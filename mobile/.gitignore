@@ -36,6 +36,11 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+app-example
+
+package-lock.json
+yarn.lock
+
 # generated native folders
 /ios
 /android
