@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "js-ashanti-mobile",
-    "slug": "js-ashanti-mobile",
+    "name": "js-ashanti",
+    "slug": "js-ashanti",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "js-ashanti-mobile",
+    "scheme": "jsashanti",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -23,7 +23,6 @@
     },
     "web": {
       "output": "static",
-      "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
