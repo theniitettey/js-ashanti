@@ -5,10 +5,11 @@ import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
 
   return (
     <Tabs
@@ -31,6 +32,18 @@ export default function TabLayout() {
         name="reports"
         options={{
           title: "Reports",
+          headerTitle: () => (
+            <View>
+              <Text
+                style={{ fontSize: 18, fontWeight: "600", color: theme.text }}
+              >
+                Reports
+              </Text>
+              <Text style={{ fontSize: 12, color: theme.tint }}>
+                Analytics & Insights
+              </Text>
+            </View>
+          ),
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
@@ -79,6 +92,7 @@ export default function TabLayout() {
         name="stock"
         options={{
           title: "Stock",
+          headerShown: true,
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="cube.box.fill" color={color} />
           ),
@@ -88,6 +102,8 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: "Settings",
+          headerShown: true,
+          headerBackButtonDisplayMode: "minimal",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="gearshape.fill" color={color} />
           ),

@@ -5,15 +5,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Image } from "expo-image";
 import Divider from "@/components/ui/divider";
 import { SFSymbol } from "expo-symbols";
-
-const Typography = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 18,
-  xl: 22,
-  xxl: 28,
-};
+import Typography from "@/constants/typography";
 
 interface SalesCardProps {
   iconName: SFSymbol;
@@ -82,11 +74,11 @@ const SalesCard = ({
       </View>
       <View
         style={{
-          flex: 1,
+          width: "100%",
           height: 8,
-          backgroundColor: "#e0e0e0",
+          backgroundColor: theme.tint,
           borderRadius: 4,
-          marginLeft: 16,
+          marginTop: 8,
           overflow: "hidden",
         }}
       >
@@ -329,29 +321,31 @@ export default function HomeScreen() {
           paddingHorizontal: 8,
         }}
       >
-        <IconSymbol
-          style={{
-            padding: 6,
-            borderRadius: 8,
-            backgroundColor: "#0c0e1f",
-          }}
-          size={24}
-          name="chart.bar.fill"
-          color={"#6366f1"}
-        />
-        <View>
-          <Text
+        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
+          <IconSymbol
             style={{
-              fontSize: Typography.lg,
-              fontWeight: "700",
-              color: theme.text,
+              padding: 6,
+              borderRadius: 8,
+              backgroundColor: "#0c0e1f",
             }}
-          >
-            Admin Dashboard
-          </Text>
-          <Text style={{ fontSize: Typography.sm, color: theme.icon }}>
-            Store Overview
-          </Text>
+            size={24}
+            name="chart.bar.fill"
+            color={"#6366f1"}
+          />
+          <View>
+            <Text
+              style={{
+                fontSize: Typography.lg,
+                fontWeight: "700",
+                color: theme.text,
+              }}
+            >
+              Admin Dashboard
+            </Text>
+            <Text style={{ fontSize: Typography.sm, color: theme.icon }}>
+              Store Overview
+            </Text>
+          </View>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View>
@@ -442,7 +436,7 @@ export default function HomeScreen() {
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
             >
-              <IconSymbol color={"green"} name="arrow.up.right" />
+              <IconSymbol size={12} color={"green"} name="arrow.up.right" />
               <Text style={{ color: "green" }}>+12%</Text>
             </View>
           </View>
