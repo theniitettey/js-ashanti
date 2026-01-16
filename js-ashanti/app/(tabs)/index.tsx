@@ -1,48 +1,83 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
-import { useColorScheme } from "@/hooks/use-color-scheme";
-import { Colors } from "@/constants/theme";
+import {
+  ScrollView,
+  Text,
+  View,
+  TouchableOpacity,
+  Animated,
+} from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Image } from "expo-image";
 import Divider from "@/components/ui/divider";
 import { SFSymbol } from "expo-symbols";
-import Typography from "@/constants/typography";
+import { useState, useEffect, useRef } from "react";
+import { API_ENDPOINTS, apiRequest } from "@/lib/api";
+import { aiInsightsService, AIInsight } from "@/lib/ai-insights";
+import { wsManager } from "@/lib/websocket";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-interface SalesCardProps {
-  iconName: SFSymbol;
+// Live indicator pulsing animation component
+const LiveIndicator = ({ connected }: { connected: boolean }) => {
+  const [opacity] = useState(new Animated.Value(1));
+
+  useEffect(() => {
+    if (connected) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(opacity, {
+            toValue: 0.3,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    }
+  }, [opacity, connected]);
+
+  return (
+    <Animated.View
+      style={{
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: connected ? "#00FF00" : "#FF0000",
+        opacity: connected ? opacity : 1,
+      }}
+    />
+  );
+};
+
+interface MetricCardProps {
+  label: string;
+  value: string;
+  percentage?: string;
+  icon: SFSymbol;
   iconColor: string;
   iconBgColor: string;
-  title: string;
-  amount: string;
+  progressColor: string;
 }
-const SalesCard = ({
-  iconName,
+
+const MetricCard = ({
+  label,
+  value,
+  percentage,
+  icon,
   iconColor,
   iconBgColor,
-  title,
-  amount,
-}: SalesCardProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  const cardBg = theme.cardBg;
-  const border = colorScheme === "dark" ? "#222" : "#d0d0d0";
-
+  progressColor,
+}: MetricCardProps) => {
   return (
     <View
       style={{
-        flexDirection: "column",
-        alignItems: "flex-start",
+        flex: 1,
+        backgroundColor: "#0F1419",
+        borderRadius: 16,
         padding: 16,
         gap: 12,
-        width: "48%",
-        backgroundColor: cardBg,
-        borderRadius: 16,
-        borderColor: border,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 6,
-        elevation: 2,
-        borderWidth: 1,
       }}
     >
       <View
@@ -53,32 +88,36 @@ const SalesCard = ({
           backgroundColor: iconBgColor,
           justifyContent: "center",
           alignItems: "center",
-          marginRight: 12,
         }}
       >
-        <IconSymbol size={20} name={iconName} color={iconColor} />
+        <IconSymbol size={22} name={icon} color={iconColor} />
       </View>
-      <View style={{ marginTop: 8 }}>
-        <Text style={{ fontSize: Typography.sm, color: theme.icon }}>
-          {title}
+      <View>
+        <Text style={{ fontSize: 13, color: "#888888", marginBottom: 4 }}>
+          {label}
         </Text>
         <Text
           style={{
-            fontSize: Typography.xl,
+            fontSize: 28,
             fontWeight: "700",
-            color: theme.text,
+            color: "#FFFFFF",
+            marginBottom: 8,
           }}
         >
-          {amount}
+          {value}
         </Text>
+        {percentage && (
+          <Text style={{ fontSize: 12, color: "#00C853", fontWeight: "600" }}>
+            {percentage}
+          </Text>
+        )}
       </View>
       <View
         style={{
           width: "100%",
-          height: 8,
-          backgroundColor: theme.tint,
-          borderRadius: 4,
-          marginTop: 8,
+          height: 6,
+          backgroundColor: "#1A1F2E",
+          borderRadius: 3,
           overflow: "hidden",
         }}
       >
@@ -86,8 +125,8 @@ const SalesCard = ({
           style={{
             width: "70%",
             height: "100%",
-            backgroundColor: iconColor,
-            borderRadius: 4,
+            backgroundColor: progressColor,
+            borderRadius: 3,
           }}
         />
       </View>
@@ -95,524 +134,800 @@ const SalesCard = ({
   );
 };
 
-interface AIInsightsCardProps {
-  text: string;
-}
-const AIInsightsCard = ({ text }: AIInsightsCardProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        backgroundColor: theme.cardBg,
-      }}
-    >
-      <IconSymbol size={8} name="circle.fill" color={theme.tint} />
-      <Text style={{ color: theme.text, fontSize: Typography.sm }}>{text}</Text>
-    </View>
-  );
-};
-
-interface InventoryItemCardProps {
-  itemName: string;
+interface InventoryProductProps {
+  name: string;
   sku: string;
-  imageUrl: string;
-  stockLevel: number;
-  stockStatus: "critical" | "low-stock" | "healthy";
+  status: "CRITICAL" | "LOW STOCK" | "HEALTHY";
+  stockCount: number;
 }
 
-const InventoryItemCard = ({
-  itemName,
+const InventoryProductCard = ({
+  name,
   sku,
-  imageUrl,
-  stockLevel,
-  stockStatus,
-}: InventoryItemCardProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  status,
+  stockCount,
+}: InventoryProductProps) => {
+  const statusColor =
+    status === "CRITICAL"
+      ? "#FF3B30"
+      : status === "LOW STOCK"
+        ? "#FFB800"
+        : "#00C853";
+  const statusBgColor =
+    status === "CRITICAL"
+      ? "#2D0B0A"
+      : status === "LOW STOCK"
+        ? "#332A0F"
+        : "#0D2818";
 
   return (
     <View
       style={{
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: theme.cardBg,
         justifyContent: "space-between",
-        padding: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#1A1F2E",
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Image
-          source={{ uri: imageUrl }}
-          style={{ width: 44, height: 44, borderRadius: 8 }}
-        />
+        <View
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 8,
+            backgroundColor: "#1A1F2E",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 24, color: "#666666" }}>📦</Text>
+        </View>
         <View>
-          <Text
-            style={{
-              fontSize: Typography.md,
-              fontWeight: "700",
-              color: theme.text,
-            }}
-          >
-            {itemName}
+          <Text style={{ fontSize: 14, fontWeight: "600", color: "#FFFFFF" }}>
+            {name}
           </Text>
-          <Text style={{ fontSize: Typography.xs, color: theme.icon }}>
+          <Text style={{ fontSize: 12, color: "#888888", marginTop: 2 }}>
             SKU: {sku}
           </Text>
         </View>
       </View>
-      <View style={{ alignItems: "flex-end" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <View
           style={{
-            backgroundColor:
-              stockStatus === "healthy"
-                ? "green"
-                : stockStatus === "low-stock"
-                ? "orange"
-                : "red",
-            paddingHorizontal: 8,
+            backgroundColor: statusBgColor,
+            paddingHorizontal: 10,
             paddingVertical: 4,
-            borderRadius: 8,
-            marginBottom: 4,
+            borderRadius: 6,
+            minWidth: 80,
+            alignItems: "center",
           }}
         >
-          <Text
-            style={{
-              fontSize: 12,
-              color:
-                stockStatus === "healthy"
-                  ? "#0b6b3a"
-                  : stockStatus === "low-stock"
-                  ? "#8a6d02"
-                  : "#a71d1d",
-            }}
-          >
-            {stockStatus === "healthy"
-              ? "HEALTHY"
-              : stockStatus === "low-stock"
-              ? "LOW STOCK"
-              : "CRITICAL"}
+          <Text style={{ fontSize: 11, color: statusColor, fontWeight: "600" }}>
+            {status}
           </Text>
         </View>
-
-        <Text style={{ fontSize: 16, fontWeight: "bold", color: theme.text }}>
-          {stockLevel}
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#FFFFFF",
+            minWidth: 30,
+            textAlign: "right",
+          }}
+        >
+          {stockCount}
         </Text>
       </View>
     </View>
   );
 };
 
-const INVENTORY_ITEMS: InventoryItemCardProps[] = [
-  {
-    itemName: "Gaming Mouse Pro",
-    sku: "GM-PR-001",
-    imageUrl: "https://via.placeholder.com/50x50.png?text=Mouse",
-    stockLevel: 3,
-    stockStatus: "critical",
-  },
-  {
-    itemName: "Mechanical Keyboard X",
-    sku: "MK-X-002",
-    imageUrl: "https://via.placeholder.com/50x50.png?text=Keyboard",
-    stockLevel: 12,
-    stockStatus: "low-stock",
-  },
-  {
-    itemName: "4K Ultra HD Monitor",
-    sku: "HDM-24-003",
-    imageUrl: "https://via.placeholder.com/50x50.png?text=Monitor",
-    stockLevel: 45,
-    stockStatus: "healthy",
-  },
-];
-
-const AI_INSIGHTS = [
-  "Sales are up 15% compared to last week.",
-  "New user sign-ups increased by 20%.",
-  "Top-selling product: Wireless Headphones.",
-  "Peak traffic hours: 6 PM - 9 PM.",
-];
-
-interface RevenueByCategoryData {
-  category: string;
-  revenue: number;
-}
-
-const REVENUE_BY_CATEGORY_DATA: RevenueByCategoryData[] = [
-  { category: "Electronics", revenue: 12000 },
-  { category: "Apparel", revenue: 8000 },
-  { category: "Home & Garden", revenue: 6000 },
-  { category: "Sports", revenue: 4000 },
-];
-
-const RevenueByCategoryChart = ({
-  data,
-}: {
-  data: RevenueByCategoryData[];
-}) => {
-  const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
-  return (
+const BarChartBar = ({ height, label }: { height: number; label: string }) => (
+  <View style={{ alignItems: "center", gap: 8 }}>
     <View
       style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "flex-end",
-        height: 200,
-        padding: 16,
-        borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
-        borderWidth: 1,
-        backgroundColor: theme.cardBg,
-        borderRadius: 16,
+        width: 32,
+        height: height,
+        backgroundColor: "#6B5FED",
+        borderRadius: 6,
       }}
-    >
-      {data.map((item, index) => {
-        const barHeight = (item.revenue / totalRevenue) * 150; // Max height 150
-        return (
-          <View
-            key={index}
-            style={{ alignItems: "center", width: 60, marginHorizontal: 8 }}
-          >
-            <View
-              style={{
-                width: 40,
-                height: barHeight,
-                backgroundColor: "#4a90e2",
-                borderRadius: 8,
-                justifyContent: "flex-end",
-                alignItems: "center",
-              }}
-            ></View>
-            <Text style={{ marginTop: 8, fontSize: 12, color: theme.text }}>
-              {item.category.slice(0, 4)}
-            </Text>
-          </View>
-        );
-      })}
-    </View>
-  );
-};
+    />
+    <Text style={{ fontSize: 11, color: "#888888" }}>{label}</Text>
+  </View>
+);
 
 export default function HomeScreen() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [aiInsights, setAIInsights] = useState<AIInsight[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [wsConnected, setWsConnected] = useState(false);
+  const metricsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const lastSuccessfulFetch = useRef<number>(Date.now());
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchAIInsights();
+
+    // Set up polling for real-time metrics updates every 2 seconds
+    metricsIntervalRef.current = setInterval(() => {
+      fetchDashboardData();
+    }, 2000);
+
+    // Check connection status based on successful API fetches
+    const connectionCheckInterval = setInterval(() => {
+      const timeSinceLastFetch = Date.now() - lastSuccessfulFetch.current;
+      // Consider connected if we've had a successful fetch in the last 5 seconds
+      setWsConnected(timeSinceLastFetch < 5000);
+    }, 1000);
+
+    return () => {
+      if (metricsIntervalRef.current) {
+        clearInterval(metricsIntervalRef.current);
+      }
+      clearInterval(connectionCheckInterval);
+    };
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const data = await apiRequest(API_ENDPOINTS.MOBILE.ANALYTICS.DASHBOARD);
+      setDashboardData(data);
+      // Update last successful fetch timestamp
+      lastSuccessfulFetch.current = Date.now();
+    } catch (err: any) {
+      console.error("Failed to fetch dashboard:", err);
+      // Set default data on error
+      setDashboardData({
+        metrics: {
+          totalProducts: 248,
+          lowStock: 18,
+          outOfStock: 7,
+          totalRevenue: 128000,
+          currentVisitors: 1284,
+          activeVisitors: 843,
+          pageViewsPerMin: 3.2,
+        },
+        topProducts: [],
+        revenueByCategory: [],
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAIInsights = async () => {
+    try {
+      const response = await aiInsightsService.getInsights();
+      setAIInsights(response.insights.slice(0, 3)); // Show top 3 insights
+    } catch (err) {
+      console.error("Failed to fetch AI insights:", err);
+      // Use default insights from the service
+      const response = await aiInsightsService.getInsights();
+      setAIInsights(response.insights.slice(0, 3));
+    }
+  };
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      style={{
-        backgroundColor:
-          colorScheme === "dark" ? "transparent" : theme.background,
-      }}
-      contentContainerStyle={{ gap: 20 }}
-    >
+    <View style={{ flex: 1, backgroundColor: "#000000" }}>
+      {/* Sticky Header */}
       <View
         style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 12,
-          paddingHorizontal: 8,
+          paddingHorizontal: 16,
+          paddingVertical: 16,
+          backgroundColor: "#000000",
         }}
       >
-        <View style={{ flexDirection: "row", gap: 12, alignItems: "center" }}>
-          <IconSymbol
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View
             style={{
-              padding: 6,
-              borderRadius: 8,
-              backgroundColor: "#0c0e1f",
+              width: 44,
+              height: 44,
+              borderRadius: 10,
+              backgroundColor: "#1A1F2E",
+              justifyContent: "center",
+              alignItems: "center",
             }}
-            size={24}
-            name="chart.bar.fill"
-            color={"#6366f1"}
-          />
+          >
+            <IconSymbol size={24} name="chart.bar.fill" color="#6B5FED" />
+          </View>
           <View>
-            <Text
-              style={{
-                fontSize: Typography.lg,
-                fontWeight: "700",
-                color: theme.text,
-              }}
-            >
+            <Text style={{ fontSize: 18, fontWeight: "700", color: "#FFFFFF" }}>
               Admin Dashboard
             </Text>
-            <Text style={{ fontSize: Typography.sm, color: theme.icon }}>
+            <Text style={{ fontSize: 13, color: "#888888", marginTop: 2 }}>
               Store Overview
             </Text>
           </View>
         </View>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <View>
-            <IconSymbol size={22} name="bell.fill" color={theme.icon} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ position: "relative" }}>
+            <IconSymbol size={22} name="bell.fill" color="#888888" />
             <View
               style={{
                 position: "absolute",
-                top: -4,
-                right: -4,
-                width: 12,
-                height: 12,
-                borderRadius: 6,
-                backgroundColor: "red",
+                top: -6,
+                right: -6,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: "#FF3B30",
               }}
             />
           </View>
-
           <Image
             source={{
               uri: "https://randomuser.me/api/portraits/men/75.jpg",
             }}
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: 18,
-              marginLeft: 16,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
             }}
           />
         </View>
       </View>
-      <Divider />
 
-      <View
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
+          backgroundColor: "#000000",
         }}
+        contentContainerStyle={{ paddingTop: 80, paddingBottom: 100 }}
       >
-        <Text style={{ fontSize: 16, fontWeight: "bold", color: theme.text }}>
-          Live Traffic
-        </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 8,
-            borderColor: "green",
-            borderWidth: 1,
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-            borderRadius: 16,
-          }}
-        >
-          <IconSymbol color={"green"} name="circle.fill" size={12} />
-          <Text style={{ color: "green" }}>Live</Text>
-        </View>
-      </View>
-      <View
-        style={{
-          padding: 16,
-          borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
-          borderWidth: 1,
-          borderRadius: 16,
-          backgroundColor: theme.cardBg,
-        }}
-      >
-        <Text style={{ fontSize: 16, color: theme.tint, marginBottom: 8 }}>
-          Current Visitors
-        </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
-            <Text
+        <View style={{ paddingHorizontal: 16, gap: 20 }}>
+          {/* Live Traffic Section */}
+          <View>
+            <View
               style={{
-                fontSize: Typography.xxl,
-                fontWeight: "700",
-                color: theme.text,
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
               }}
             >
-              1,245
+              <Text
+                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+              >
+                Live Traffic
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                <LiveIndicator connected={wsConnected} />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: wsConnected ? "#00FF00" : "#FF0000",
+                    fontWeight: "600",
+                  }}
+                >
+                  {wsConnected ? "Live" : "Offline"}
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={{
+                backgroundColor: "#0F1419",
+                borderRadius: 16,
+                padding: 16,
+              }}
+            >
+              <Text style={{ fontSize: 13, color: "#888888", marginBottom: 8 }}>
+                Current Visitors
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  marginBottom: 16,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      fontSize: 32,
+                      fontWeight: "700",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {loading
+                      ? "-"
+                      : dashboardData?.metrics?.currentVisitors?.toLocaleString() ||
+                        "1,284"}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 4,
+                      marginTop: 6,
+                    }}
+                  >
+                    <IconSymbol
+                      size={12}
+                      name="arrow.up.right"
+                      color="#00C853"
+                    />
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#00C853",
+                        fontWeight: "600",
+                      }}
+                    >
+                      +12%
+                    </Text>
+                  </View>
+                </View>
+                <IconSymbol size={48} name="chart.bar.fill" color="#6B5FED" />
+              </View>
+
+              <Divider />
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 16,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{ fontSize: 13, color: "#888888", marginBottom: 6 }}
+                  >
+                    Active Sessions
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {loading
+                      ? "-"
+                      : dashboardData?.metrics?.activeVisitors?.toLocaleString() ||
+                        "843"}
+                  </Text>
+                </View>
+                <View>
+                  <Text
+                    style={{ fontSize: 13, color: "#888888", marginBottom: 6 }}
+                  >
+                    Page Views/min
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    {loading
+                      ? "-"
+                      : dashboardData?.metrics?.pageViewsPerMin || "3.2k"}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* Sales Overview Section */}
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+              >
+                Sales Overview
+              </Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#0F1419",
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ fontSize: 12, color: "#FFFFFF" }}>Today</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ flexDirection: "row", gap: 12 }}>
+              <MetricCard
+                label="Total Revenue"
+                value="$4,298"
+                percentage="+8.2% from yesterday"
+                icon="dollarsign.circle.fill"
+                iconColor="#6B5FED"
+                iconBgColor="#2A1A5E"
+                progressColor="#6B5FED"
+              />
+              <MetricCard
+                label="Orders"
+                value="156"
+                percentage="+15.3% from yesterday"
+                icon="bag.fill"
+                iconColor="#FF9500"
+                iconBgColor="#3A2A1A"
+                progressColor="#FF9500"
+              />
+            </View>
+          </View>
+
+          {/* AI Insights Section */}
+          <View
+            style={{
+              backgroundColor: "#0F1419",
+              borderRadius: 16,
+              padding: 16,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#6B5FED",
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 12,
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 6,
+                width: "auto",
+                alignSelf: "flex-start",
+                marginBottom: 12,
+              }}
+            >
+              <IconSymbol size={14} name="sparkles" color="#FFFFFF" />
+              <Text
+                style={{ fontSize: 11, color: "#FFFFFF", fontWeight: "600" }}
+              >
+                AI INSIGHTS
+              </Text>
+            </View>
+
+            <View style={{ gap: 12, marginBottom: 16 }}>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: "#6B5FED",
+                    marginTop: 6,
+                  }}
+                />
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#DDDDDD",
+                    flex: 1,
+                    lineHeight: 18,
+                  }}
+                >
+                  Traffic Spike Predicted around 2 PM based on historical
+                  patterns. Consider scheduling a flash sale.
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: 3,
+                    backgroundColor: "#6B5FED",
+                    marginTop: 6,
+                  }}
+                />
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#DDDDDD",
+                    flex: 1,
+                    lineHeight: 18,
+                  }}
+                >
+                  Restock Alert: Wireless Earbuds are trending up 200%. Current
+                  stock will deplete in 4 hours.
+                </Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                backgroundColor: "#1A1F2E",
+                paddingVertical: 12,
+                borderRadius: 10,
+              }}
+            >
+              <IconSymbol size={18} name="bubble.left.fill" color="#FFFFFF" />
+              <Text
+                style={{ fontSize: 14, color: "#FFFFFF", fontWeight: "600" }}
+              >
+                Ask AI Assistant
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Inventory Status Section */}
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <Text
+                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+              >
+                Inventory Status
+              </Text>
+              <TouchableOpacity>
+                <Text
+                  style={{ fontSize: 13, color: "#6B5FED", fontWeight: "600" }}
+                >
+                  View All
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <View
+              style={{
+                backgroundColor: "#0F1419",
+                borderRadius: 16,
+                overflow: "hidden",
+              }}
+            >
+              <InventoryProductCard
+                name="Gaming Mouse Pro"
+                sku="GM-9021"
+                status="CRITICAL"
+                stockCount={3}
+              />
+              <InventoryProductCard
+                name="Mech Keyboard"
+                sku="MK-8832"
+                status="LOW STOCK"
+                stockCount={12}
+              />
+              <InventoryProductCard
+                name="4K Monitor"
+                sku="MN-4000"
+                status="HEALTHY"
+                stockCount={45}
+              />
+            </View>
+          </View>
+
+          {/* Revenue by Category Section */}
+          <View>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "600",
+                color: "#FFFFFF",
+                marginBottom: 12,
+              }}
+            >
+              Revenue by Category
             </Text>
             <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 4 }}
+              style={{
+                backgroundColor: "#0F1419",
+                borderRadius: 16,
+                padding: 16,
+                minHeight: 200,
+                justifyContent: "flex-end",
+              }}
             >
-              <IconSymbol size={12} color={"green"} name="arrow.up.right" />
-              <Text style={{ color: "green" }}>+12%</Text>
-            </View>
-          </View>
-          <IconSymbol color={"#5155c5"} name="chart.bar.fill" size={50} />
-        </View>
-        <Divider />
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginTop: 16,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "column",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <Text style={{ fontSize: 16, color: theme.tint, marginBottom: 8 }}>
-              Active Sessions
-            </Text>
-            <View>
-              <Text
+              <View
                 style={{
-                  fontSize: Typography.xxl,
-                  fontWeight: "700",
-                  color: theme.text,
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  alignItems: "flex-end",
+                  height: 120,
                 }}
               >
-                845
-              </Text>
+                <BarChartBar height={95} label="Elec" />
+                <BarChartBar height={70} label="Cloth" />
+                <BarChartBar height={55} label="Home" />
+                <BarChartBar height={45} label="Acc" />
+                <BarChartBar height={35} label="Sport" />
+              </View>
             </View>
           </View>
-          <View
-            style={{
-              flexDirection: "column",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
-            <Text style={{ fontSize: 16, color: theme.tint, marginBottom: 8 }}>
-              Page Views/Min
-            </Text>
-            <View>
-              <Text
-                style={{
-                  fontSize: Typography.xxl,
-                  fontWeight: "700",
-                  color: theme.text,
-                }}
+
+          {/* AI Insights Section */}
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                3.2k
-              </Text>
+                <IconSymbol size={18} name="sparkles" color="#FFD60A" />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  AI Insights
+                </Text>
+              </View>
+              <Text style={{ fontSize: 12, color: "#6B5FED" }}>Live</Text>
+            </View>
+            <View style={{ gap: 12 }}>
+              {aiInsights.length > 0 ? (
+                aiInsights.map((insight, idx) => (
+                  <View
+                    key={insight.id}
+                    style={{
+                      backgroundColor: "#0F1419",
+                      borderRadius: 12,
+                      padding: 12,
+                      borderLeftWidth: 4,
+                      borderLeftColor:
+                        insight.type === "trend"
+                          ? "#00FF00"
+                          : insight.type === "anomaly"
+                            ? "#FF3B30"
+                            : insight.type === "recommendation"
+                              ? "#FFD60A"
+                              : "#6B5FED",
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: 4,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          fontWeight: "600",
+                          color: "#FFFFFF",
+                          flex: 1,
+                        }}
+                      >
+                        {insight.title}
+                      </Text>
+                      <View
+                        style={{
+                          backgroundColor:
+                            insight.confidence > 0.9
+                              ? "#001F3F"
+                              : insight.confidence > 0.8
+                                ? "#0B3D2C"
+                                : "#3D2B0B",
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                          marginLeft: 8,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color:
+                              insight.confidence > 0.9
+                                ? "#6BB6FF"
+                                : insight.confidence > 0.8
+                                  ? "#64D17A"
+                                  : "#FFB546",
+                          }}
+                        >
+                          {Math.round(insight.confidence * 100)}%
+                        </Text>
+                      </View>
+                    </View>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: "#AAAAAA",
+                        marginBottom: 8,
+                      }}
+                    >
+                      {insight.description}
+                    </Text>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#666666",
+                        }}
+                      >
+                        {new Date(insight.timestamp).toLocaleTimeString()}
+                      </Text>
+                      {insight.actionable && (
+                        <TouchableOpacity
+                          style={{
+                            paddingHorizontal: 8,
+                            paddingVertical: 4,
+                            backgroundColor: "#6B5FED",
+                            borderRadius: 4,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: "600",
+                              color: "#FFFFFF",
+                            }}
+                          >
+                            Action
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                ))
+              ) : (
+                <View
+                  style={{
+                    backgroundColor: "#0F1419",
+                    borderRadius: 12,
+                    padding: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: 80,
+                  }}
+                >
+                  <Text style={{ fontSize: 13, color: "#666666" }}>
+                    Loading insights...
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         </View>
-      </View>
-      <Text style={{ fontSize: 16, fontWeight: "600", color: theme.text }}>
-        Sales Overview
-      </Text>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
-        <SalesCard
-          iconName="dollarsign.circle.fill"
-          iconColor="#5458cd"
-          iconBgColor="#14182d"
-          title="Total Revenue"
-          amount="$24,300"
-        />
-        <SalesCard
-          iconName="creditcard.fill"
-          iconColor="#ff6900"
-          iconBgColor="#231815"
-          title="Online Sales"
-          amount="$15,200"
-        />
-      </View>
-
-      <View
-        style={{
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: 8,
-          paddingVertical: 20,
-          paddingHorizontal: 16,
-          borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
-          borderWidth: 1,
-          borderRadius: 16,
-          backgroundColor: theme.cardBg,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#6366f1",
-            padding: 8,
-            borderRadius: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 2,
-            width: 120,
-            justifyContent: "center",
-          }}
-        >
-          <IconSymbol size={16} name="star.slash.fill" color={theme.text} />
-          <Text style={{ color: theme.text }}>AI Insights</Text>
-        </View>
-        {AI_INSIGHTS.map((insight, index) => (
-          <AIInsightsCard key={index} text={insight} />
-        ))}
-
-        <TouchableOpacity
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 16,
-            justifyContent: "center",
-            gap: 8,
-            padding: 12,
-            borderRadius: 8,
-            backgroundColor: "#1e293b",
-          }}
-        >
-          <IconSymbol size={20} name="bubble.left.fill" color={theme.text} />
-          <Text style={{ color: theme.text }}>Ask AI Assistant</Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Text style={{ fontSize: 16, fontWeight: "600", color: theme.text }}>
-          Inventory Status
-        </Text>
-        <TouchableOpacity>
-          <Text style={{ color: theme.tint }}>View All</Text>
-        </TouchableOpacity>
-      </View>
-      <View
-        style={{
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: 0,
-          padding: 12,
-          borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
-          borderWidth: 1,
-          borderRadius: 16,
-          backgroundColor: theme.cardBg,
-        }}
-      >
-        {INVENTORY_ITEMS.map((item, index) => (
-          <InventoryItemCard key={index} {...item} />
-        ))}
-      </View>
-      <Text
-        style={{
-          fontSize: Typography.md,
-          fontWeight: "600",
-          color: theme.text,
-        }}
-      >
-        Revenue By Category
-      </Text>
-      <RevenueByCategoryChart data={REVENUE_BY_CATEGORY_DATA} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
