@@ -18,7 +18,7 @@ export type NextApiResponseServerIO = NextApiResponse & {
  */
 export default async function SocketHandler(
   req: NextApiRequest,
-  res: NextApiResponseServerIO
+  res: NextApiResponseServerIO,
 ) {
   if (res.socket.server.io) {
     console.log("Socket.IO already running");
@@ -38,8 +38,31 @@ export default async function SocketHandler(
 
   res.socket.server.io = io;
 
+  // Start metrics broadcast on first connection
+  let metricsInterval: NodeJS.Timeout | null = null;
+
   io.on("connection", (socket) => {
     console.log("Client connected:", socket.id);
+
+    // Start metrics broadcast if not running
+    if (!metricsInterval) {
+      metricsInterval = setInterval(() => {
+        io.emit("metrics_update", {
+          currentVisitors: Math.floor(Math.random() * 500) + 100,
+          activeVisitors: Math.floor(Math.random() * 300) + 50,
+          pageViewsPerMin: Math.floor(Math.random() * 100) + 20,
+          timestamp: new Date().toISOString(),
+        });
+      }, 2000);
+    }
+
+    // Send initial metrics
+    socket.emit("metrics_update", {
+      currentVisitors: Math.floor(Math.random() * 500) + 100,
+      activeVisitors: Math.floor(Math.random() * 300) + 50,
+      pageViewsPerMin: Math.floor(Math.random() * 100) + 20,
+      timestamp: new Date().toISOString(),
+    });
 
     // Listen for user events
     socket.on("user:event", async (event: UserEvent) => {
@@ -87,7 +110,7 @@ export default async function SocketHandler(
         });
 
         console.log(
-          `Event ${event.eventId} written to batch ${batch.batch_id} (count: ${batch.event_count + 1})`
+          `Event ${event.eventId} written to batch ${batch.batch_id} (count: ${batch.event_count + 1})`,
         );
 
         // 4. Broadcast to admin dashboard (real-time)
