@@ -2,16 +2,12 @@ import Groq from "groq-sdk";
 import { UserEvent, AIAnalysis } from "@/interface/analytics";
 import { aiCircuitBreaker } from "@/lib/circuit-breaker";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
 /**
  * Analyze batch of user events with AI
  * Wrapped with circuit breaker to protect against cascading failures
  */
 export async function analyzeEventBatch(
-  events: UserEvent[]
+  events: UserEvent[],
 ): Promise<AIAnalysis> {
   if (!process.env.GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY not configured");
@@ -21,16 +17,23 @@ export async function analyzeEventBatch(
     throw new Error("No events to analyze");
   }
 
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+
   // Wrap AI call with circuit breaker
   return aiCircuitBreaker.execute(async () => {
-    return performAnalysis(events);
+    return performAnalysis(events, groq);
   });
 }
 
 /**
  * Internal: Perform the actual AI analysis
  */
-async function performAnalysis(events: UserEvent[]): Promise<AIAnalysis> {
+async function performAnalysis(
+  events: UserEvent[],
+  groq: Groq,
+): Promise<AIAnalysis> {
   // Prepare event summary for AI
   const eventSummary = events.map((e) => ({
     type: e.eventType,
