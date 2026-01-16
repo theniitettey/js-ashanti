@@ -3,20 +3,55 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
+import { useEffect } from "react";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { View, ActivityIndicator } from "react-native";
 
 export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-export default function RootLayout() {
+function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { isAuthenticated, isLoading } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === "(tabs)";
+
+    if (!isAuthenticated && inAuthGroup) {
+      // Redirect to login if not authenticated
+      router.replace("/login");
+    } else if (isAuthenticated && !inAuthGroup) {
+      // Redirect to tabs if authenticated
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, segments, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#000000",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size="large" color="#6B5FED" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -24,7 +59,6 @@ export default function RootLayout() {
         style={{
           flex: 1,
           backgroundColor:
-            // Use pure black for dark mode as requested, otherwise use theme background
             colorScheme === "dark"
               ? "#000"
               : Colors[colorScheme ?? "light"].background,
@@ -35,11 +69,20 @@ export default function RootLayout() {
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
         >
           <Stack>
+            <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
       </SafeAreaView>
     </SafeAreaProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
   );
 }
