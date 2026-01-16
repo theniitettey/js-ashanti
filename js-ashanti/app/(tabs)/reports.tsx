@@ -730,6 +730,325 @@ const CustomerAnalytics = ({ analyticsData }: CustomerAnalyticsProps) => {
   );
 };
 
+interface ExportHandlerProps {
+  onExport: (format: "pdf" | "csv" | "xlsx") => void;
+  format: "pdf" | "csv" | "xlsx";
+  iconName: SFSymbol;
+  iconColor: string;
+  iconBgColor: string;
+}
+
+const EXPORT_OPTONS = [
+  {
+    format: "pdf" as const,
+    iconName: "doc.richtext.fill" as SFSymbol,
+    iconColor: "#fb2c36",
+    iconBgColor: "#23121a",
+  },
+  {
+    format: "csv" as const,
+    iconName: "tablecells.fill" as SFSymbol,
+    iconColor: "#00c950",
+    iconBgColor: "#0a221d",
+  },
+  {
+    format: "xlsx" as const,
+    iconName: "tablecells.fill" as SFSymbol,
+    iconColor: "#2b7fff",
+    iconBgColor: "#0e1a2e",
+  },
+];
+
+const ExportHandler = ({
+  onExport,
+  format,
+  iconName,
+  iconColor,
+  iconBgColor,
+}: ExportHandlerProps) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 16,
+        backgroundColor: theme.cardBg,
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        width: "30%",
+        borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
+      }}
+    >
+      <TouchableOpacity
+        style={{
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          borderRadius: 16,
+        }}
+        onPress={() => onExport(format)}
+      >
+        <IconSymbol
+          name={iconName}
+          size={24}
+          color={iconColor}
+          style={{
+            backgroundColor: iconBgColor,
+            padding: 16,
+            borderRadius: 16,
+            marginBottom: 8,
+            alignSelf: "center",
+          }}
+        />
+        <Text style={{ color: theme.text, fontSize: Typography.md }}>
+          {format === "pdf" ? "PDF" : format === "csv" ? "CSV" : "XLSX"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+interface ScheduleReportProps {
+  reportsData: {
+    title: string;
+    schedule: string;
+  }[];
+}
+
+const SCHEDULED_REPORTS_DATA: { title: string; schedule: string }[] = [
+  {
+    title: "Weekly Sales Summary",
+    schedule: "Every Monday at 8:00 AM",
+  },
+  {
+    title: "Monthly Revenue Report",
+    schedule: "1st of every month at 9:00 AM",
+  },
+  {
+    title: "Quarterly Customer Insights",
+    schedule: "1st of Jan, Apr, Jul, Oct at 10:00 AM",
+  },
+];
+
+const ScheduledReports = ({ reportsData }: ScheduleReportProps) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  return (
+    <View
+      style={{
+        backgroundColor: theme.cardBg,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: "#222222",
+        padding: 16,
+        gap: 16,
+      }}
+    >
+      {reportsData.map((item, index) => (
+        <View
+          key={index}
+          style={{
+            flexDirection: "row",
+            paddingVertical: 12,
+            gap: 12,
+            width: "100%",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 16,
+              justifyContent: "center",
+            }}
+          >
+            <IconSymbol
+              name="calendar"
+              size={24}
+              color="#2059b2"
+              style={{
+                backgroundColor: "#0e1a2e",
+                padding: 16,
+                borderRadius: 8,
+              }}
+            />
+            <View
+              style={{
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.text,
+                  fontSize: Typography.md,
+                  fontWeight: "600",
+                }}
+              >
+                {item.title}
+              </Text>
+              <Text
+                style={{
+                  color: theme.tint,
+                  fontSize: Typography.sm,
+                }}
+              >
+                {item.schedule}
+              </Text>
+            </View>
+          </View>
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              backgroundColor: "#0a221d",
+              justifyContent: "center",
+              alignItems: "center",
+              marginLeft: "auto",
+            }}
+          >
+            <View
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: "#00c950",
+              }}
+            />
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+interface AIInsightsCardProps {
+  text: string;
+}
+const AIInsightsCard = ({ text }: AIInsightsCardProps) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        backgroundColor: theme.cardBg,
+      }}
+    >
+      <IconSymbol size={8} name="circle.fill" color={theme.tint} />
+      <Text style={{ color: theme.text, fontSize: Typography.sm }}>{text}</Text>
+    </View>
+  );
+};
+
+const AI_INSIGHTS = [
+  "Sales are up 15% compared to last week.",
+  "New user sign-ups increased by 20%.",
+  "Top-selling product: Wireless Headphones.",
+  "Peak traffic hours: 6 PM - 9 PM.",
+];
+
+interface ReportsHeaderProps {
+  onRefresh: () => void;
+  onBack: () => void;
+  title: string;
+  subtitle?: string;
+  onDownload: () => void;
+}
+
+const ReportsHeader = ({
+  onRefresh,
+  onBack,
+  title,
+  subtitle,
+  onDownload,
+}: ReportsHeaderProps) => {
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme ?? "light"];
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+      }}
+    >
+      <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+        <TouchableOpacity onPress={onBack} style={{ marginBottom: 8 }}>
+          <IconSymbol
+            name="arrow.left"
+            size={20}
+            color={theme.text}
+            style={{
+              padding: 16,
+              borderRadius: 8,
+              backgroundColor: theme.cardBg,
+            }}
+          />
+        </TouchableOpacity>
+        <View>
+          <Text
+            style={{
+              fontSize: Typography.lg,
+              fontWeight: "700",
+              color: theme.text,
+            }}
+          >
+            {title}
+          </Text>
+          {subtitle && (
+            <Text
+              style={{
+                fontSize: Typography.sm,
+                color: theme.tint,
+                marginTop: 4,
+              }}
+            >
+              {subtitle}
+            </Text>
+          )}
+        </View>
+      </View>
+
+      <View style={{ flexDirection: "row", gap: 16 }}>
+        <TouchableOpacity onPress={onRefresh}>
+          <IconSymbol name="arrow.clockwise" size={24} color={theme.icon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onDownload}>
+          <IconSymbol
+            name="arrow.down.circle.fill"
+            size={24}
+            color={theme.icon}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => {}}>
+          <View>
+            <IconSymbol size={22} name="bell.fill" color={theme.icon} />
+            <View
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: "red",
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
 export default function Reports() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
@@ -751,6 +1070,13 @@ export default function Reports() {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
+      <ReportsHeader
+        onBack={() => {}}
+        onRefresh={() => {}}
+        onDownload={() => {}}
+        title="Reports"
+        subtitle="Analytics & Insights"
+      />
       <View>
         <Text
           style={{
@@ -1031,7 +1357,97 @@ export default function Reports() {
         >
           Export Reports
         </Text>
-        <TopProductsTable data={TOP_PRODUCTS_DATA} />
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            justifyContent: "space-between",
+          }}
+        >
+          {EXPORT_OPTONS.map((option, index) => (
+            <ExportHandler
+              key={index}
+              onExport={(format) => {
+                // Handle export logic here
+              }}
+              format={option.format}
+              iconName={option.iconName}
+              iconColor={option.iconColor}
+              iconBgColor={option.iconBgColor}
+            />
+          ))}
+        </View>
+      </View>
+      <View>
+        <Text
+          style={{
+            fontSize: Typography.lg,
+            fontWeight: "semibold",
+            color: theme.text,
+            marginTop: 24,
+            marginBottom: 12,
+          }}
+        >
+          Scheduled Reports
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            gap: 12,
+            justifyContent: "space-between",
+          }}
+        >
+          <ScheduledReports reportsData={SCHEDULED_REPORTS_DATA} />
+        </View>
+      </View>
+      <View
+        style={{
+          flexDirection: "column",
+          justifyContent: "space-between",
+          gap: 8,
+          paddingVertical: 20,
+          paddingHorizontal: 16,
+          borderColor: colorScheme === "dark" ? "#222" : "#d0d0d0",
+          borderWidth: 1,
+          borderRadius: 16,
+          backgroundColor: theme.cardBg,
+          marginTop: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#6366f1",
+            padding: 8,
+            borderRadius: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 2,
+            width: 120,
+            justifyContent: "center",
+          }}
+        >
+          <IconSymbol size={16} name="star.slash.fill" color={theme.text} />
+          <Text style={{ color: theme.text }}>AI Insights</Text>
+        </View>
+        {AI_INSIGHTS.map((insight, index) => (
+          <AIInsightsCard key={index} text={insight} />
+        ))}
+
+        <TouchableOpacity
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 16,
+            justifyContent: "center",
+            gap: 8,
+            padding: 12,
+            borderRadius: 8,
+            backgroundColor: "#1e293b",
+          }}
+        >
+          <IconSymbol size={20} name="bubble.left.fill" color={theme.text} />
+          <Text style={{ color: theme.text }}>Get More Insights</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
