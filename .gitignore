@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -19,6 +19,7 @@
 
 # production
 /build
+dist/
 
 # misc
 .DS_Store
@@ -33,6 +34,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+!web/.env.example
 
 # vercel
 .vercel
@@ -43,7 +45,7 @@ next-env.d.ts
 
 # Prisma generated files (regenerated on npm install/build)
 /generated/
-/src/generated/
+**/generated/prisma/
 *.dll.node
 *.so.node
 *.dll.node.tmp*
@@ -77,5 +79,30 @@ logs/
 tmp/
 temp/
 
+# Expo / React Native
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Metro bundler
+.metro-health-check*
+
+# Expo EAS
+.easignore
+
+# Android/iOS builds (generated)
+mobile/android/
+mobile/ios/
+
 # Copilot instructions (local AI setup)
 .github/copilot-instructions.md
+
+references/
+
+mobile/package-lock.json
+package-lock.json
