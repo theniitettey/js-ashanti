@@ -55,7 +55,8 @@ export function AddProductForm() {
       const uploadedImageUrls = await Promise.all(uploadPromises);
   
       // Now send product data with uploaded image URLs
-      const res = await fetch("/api/products", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/products`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

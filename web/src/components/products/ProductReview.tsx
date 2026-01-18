@@ -37,7 +37,8 @@ export function ProductReviews({ productSlug }: { productSlug: string }) {
 
   const fetchReviews = async () => {
     try {
-      const res = await fetch(`/api/review/${productSlug}`);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/reviews/${productSlug}`);
       const data = await res.json();
       setReviews(data);
     } catch (err) {
@@ -54,7 +55,8 @@ export function ProductReviews({ productSlug }: { productSlug: string }) {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/review", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/reviews`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

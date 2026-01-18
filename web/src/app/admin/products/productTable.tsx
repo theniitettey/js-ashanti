@@ -16,8 +16,9 @@ import { useRouter } from "next/navigation";
 export function AdminProductsTable({ products }: { products: any[] }) {
     const router = useRouter();
     const deleteProduct = async (productId: string) => {
-        try {
-        const res = await fetch(`/api/products`, {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+        const res = await fetch(`${backendUrl}/api/products`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: productId }),
@@ -27,10 +28,10 @@ export function AdminProductsTable({ products }: { products: any[] }) {
 
         toast.success("Product deleted");
         router.refresh();
-        } catch (err) {
+      } catch (err) {
         toast.error("Failed to delete product");
         console.error(err);
-        }
+      }
     };
     const editProduct = async (slug: string) => {
       router.push(`/admin/products/${slug}/edit`)

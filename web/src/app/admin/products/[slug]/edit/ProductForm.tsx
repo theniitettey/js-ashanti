@@ -56,7 +56,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const onSubmit: SubmitHandler<ProductFormInputs> = async (data) => {
     try {
-      const response = await fetch(`/api/products/${product.slug}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4001'}/api/products/${product.slug}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

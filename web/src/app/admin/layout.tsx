@@ -5,7 +5,6 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -16,10 +15,8 @@ const lato = Lato({
   weight: ["400", "700"],
 });
 
-export const metadata = {
-    title: "Admin Dashboard",
-  };
-  
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+
 export default async function AdminLayout({
     children,
   }: {
@@ -27,15 +24,28 @@ export default async function AdminLayout({
   }) {
 
   const headersList = await headers();
-  const session = await auth.api.getSession({ headers: headersList });
-  if (!session) redirect("/login");
+  const cookie = headersList.get("cookie") ?? "";
 
-  const { success } = await auth.api.userHasPermission({
-    body: {
-      userId: session.user.id,
-      permissions: { Dashboard: ["create", "update", "delete"] },
-    },
+  // Get session from backend
+  const sessionRes = await fetch(`${BACKEND_URL}/api/auth/get-session`, {
+    headers: { cookie },
   });
+  const session = await sessionRes.json();
+  if (!session) return redirect("/login");
+
+  // Check permissions from backend
+  const permissionRes = await fetch(`${BACKEND_URL}/api/auth/user-has-permission`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      cookie 
+    },
+    body: JSON.stringify({
+      userId: session.user.id,
+      permission: { Dashboard: ["create", "update", "delete"] },
+    }),
+  });
+  const { success } = await permissionRes.json();
 
   if (!success) redirect("/");
 

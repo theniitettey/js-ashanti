@@ -13,7 +13,7 @@ export function ProductsList({ products: initialProducts }: { products: any[] })
 
   useEffect(() => {
     if (!initialProducts?.length) {
-      fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products`, { cache: "no-store" })
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001"}/api/products`)
         .then((res) => res.json())
         .then((data) => {
           setProducts(getRandomProducts(data, 16));
