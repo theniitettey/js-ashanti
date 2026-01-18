@@ -17,7 +17,8 @@ export function InsightsTimeline() {
 
   const fetchInsights = async () => {
     try {
-      const res = await fetch("/api/insights?limit=20");
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/insights?limit=20`);
       const data = await res.json();
       setInsights(data.insights);
     } catch (error) {

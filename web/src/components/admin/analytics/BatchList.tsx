@@ -80,7 +80,8 @@ export function BatchList() {
 
   const fetchBatches = async () => {
     try {
-      const res = await fetch("/api/admin/batches");
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/admin/batches`);
       if (!res.ok) {
         throw new Error(`Failed to fetch batches: ${res.statusText}`);
       }
@@ -98,7 +99,8 @@ export function BatchList() {
   const triggerAnalysis = async (batchId: string) => {
     setTriggering(batchId);
     try {
-      const res = await fetch(`/api/admin/batches/${batchId}/analyze`, {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      const res = await fetch(`${backendUrl}/api/admin/batches/${batchId}/analyze`, {
         method: "POST",
       });
 

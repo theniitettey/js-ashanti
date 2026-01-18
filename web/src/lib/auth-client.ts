@@ -11,7 +11,7 @@ export const authClient = createAuthClient({
       },
     }),
   ],
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001",
 });
 
 export const googlesignIn = async () => {

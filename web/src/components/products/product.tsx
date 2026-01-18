@@ -6,7 +6,7 @@ import { getRandomProducts } from "@/lib/utils";
 export default async function Products() {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/products`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001"}/api/products`,
       {
         next: { revalidate: 3600 }, // Cache for 1 hour
         cache: "force-cache",

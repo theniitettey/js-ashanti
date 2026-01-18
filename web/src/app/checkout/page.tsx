@@ -29,7 +29,8 @@ export default function CheckoutPage() {
 
   const onSubmit = async (data: ShippingForm) => {
     try {
-      await axios.post("/api/checkout", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      await axios.post(`${backendUrl}/api/orders/checkout`, {
         ...data,
         cartItems: items,
         total,

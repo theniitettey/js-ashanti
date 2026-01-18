@@ -1,13 +1,25 @@
 import { ProductsCardDetails } from "@/components/products/productsCard";
-import { prisma } from "@/lib/prisma";
 import Fuse from 'fuse.js';
+
+export const dynamic = "force-dynamic";
+
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+
+async function getAllProducts() {
+  const res = await fetch(`${BACKEND_URL}/api/products`, {
+    next: { revalidate: 600 } // Cache for 10 minutes
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
 
 interface SearchPageProps {
   searchParams: Promise<{ query?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const products = await prisma.product.findMany();
+  const products = await getAllProducts();
   
   const normalize = (text: string) =>
     text.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
@@ -43,12 +55,15 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 xs:landscape:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
+          {filteredProducts.map((product: any) => (
             <ProductsCardDetails
               key={product.id}
-              {...product}
+              id={product.id}
+              name={product.name}
+              price={product.price}
+              description={product.description}
+              slug={product.slug}
               mainImage={product.images?.[0]}
-              rating={product.ratingFromManufacturer}
             />
           ))}
         </div>

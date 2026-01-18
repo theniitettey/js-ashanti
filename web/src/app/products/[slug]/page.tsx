@@ -1,11 +1,33 @@
 //@ts-nocheck
 
 import { Metadata } from "next";
+
+export const dynamic = "force-dynamic";
+
 import { notFound } from "next/navigation";
 import { CustomerRatings } from "@/components/products/customerRating";
 import { ProductDisplayCarousel } from "@/components/products/displayCarousel";
 import { ColorPlatte } from "@/components/products/colorPlatte";
-import {prisma} from "@/lib/prisma";
+// import {prisma} from "@/lib/prisma"; // Removed Prisma
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+
+async function getProduct(slug: string) {
+    const res = await fetch(`${BACKEND_URL}/api/products/${slug}`, {
+        next: { revalidate: 3600 } // Cache for 1 hour
+    });
+    if (!res.ok) return null;
+    return res.json();
+}
+
+async function getAllProducts() {
+    const res = await fetch(`${BACKEND_URL}/api/products`, {
+        next: { revalidate: 3600 }
+    });
+    if (!res.ok) return [];
+    return res.json();
+}
+
 import { ProductCount } from "@/components/products/productCount";
 import { ProductReviews } from "@/components/products/ProductReview";
 import { PriceWithIcon } from "@/components/products/discoutProduct";
@@ -21,7 +43,7 @@ export async function generateMetadata(
   ): Promise<Metadata> {
     const { slug } = await params;
 
-    const product = await prisma.product.findUnique({ where: { slug } });
+    const product = await getProduct(slug);
 
     return {
       title: product?.name || "Product Not Found",
@@ -62,8 +84,8 @@ function getSimilarProducts(currentProduct: any, allProducts: any) {
 export default async function ProductDetailPage({ params }: Params) {
     const { slug } = await params;
 
-    const product = await prisma.product.findUnique({ where: { slug } });
-    const allproducts = await prisma.product.findMany();
+    const product = await getProduct(slug);
+    const allproducts = await getAllProducts();
     
     if (!product) return notFound();
 

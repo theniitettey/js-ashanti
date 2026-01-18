@@ -7,10 +7,29 @@ A full-stack e-commerce application with web and mobile clients.
 ## Project Structure
 
 ```
-├── web/          # Next.js web application
+├── web/          # Next.js web application (Frontend)
+├── backend/      # Node.js Express API & Background Workers
 ├── mobile/       # React Native Expo mobile app
 └── README.md
 ```
+
+## Backend (Node.js Express)
+
+The backend is located in the `backend/` folder and handles API requests, authentication, and background processing.
+
+### Getting Started
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+### Features
+- **Unified Entry Point**: Starts both the Express API and background workers (Batch Processor, Job Worker, Recovery Loop) with a single command.
+- **Database**: Prisma ORM with PostgreSQL.
+- **Auth**: Better-Auth integrated for secure session management.
+- **AI**: Background workers powered by Groq SDK.
 
 ## Web Application (Next.js)
 
@@ -71,5 +90,6 @@ npx expo start
 
 ## Notes
 
-- The `.env` file contains sensitive info - never commit it
-- See `web/QUICK_START.md` for detailed setup instructions
+- The `.env` files in `web/` and `backend/` contain sensitive info - never commit them.
+- Use `.env.example` in each directory as a template for your local setup.
+- The backend must be running for both web and mobile clients to function correctly.

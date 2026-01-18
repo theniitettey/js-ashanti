@@ -111,8 +111,8 @@ export default function AdminSettingsPage() {
         );
         logoUrl = res.data.secure_url;
       }
-
-      await axios.post("/api/business-settings", {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+      await axios.post(`${backendUrl}/api/business-settings`, {
         name: data.name,
         phone: data.phone,
         address: data.address,

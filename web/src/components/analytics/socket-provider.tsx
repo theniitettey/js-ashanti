@@ -23,12 +23,14 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = io({
-      path: "/api/socket",
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+    const socketInstance = io(backendUrl, {
+      secure: true,
+      rejectUnauthorized: false,
     });
 
     socketInstance.on("connect", () => {
-      console.log("Socket connected");
+      console.log("Socket connected to:", backendUrl);
       setIsConnected(true);
     });
 
