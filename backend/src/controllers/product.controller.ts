@@ -45,6 +45,8 @@ export class ProductController {
                         ratingFromManufacturer: product.ratingFromManufacturer ?? null,
                         customerRating: product.customerRating ?? null,
                         images: product.images ?? [],
+                        stock: product.stock ?? 0,
+                        sku: product.sku,
                     }))
                 });
 
@@ -70,6 +72,8 @@ export class ProductController {
                         ratingFromManufacturer: body.ratingFromManufacturer ?? null,
                         customerRating: body.customerRating ?? null,
                         images: body.images ?? [],
+                        stock: body.stock ?? 0,
+                        sku: body.sku,
                     }
                 });
 
@@ -148,9 +152,15 @@ export class ProductController {
                     name: data.name,
                     description: data.description,
                     category: data.category,
+                    subcategories: data.subcategories,
+                    colors: data.colors,
                     price: data.price,
                     discount: data.discount,
                     ratingFromManufacturer: data.ratingFromManufacturer,
+                    customerRating: data.customerRating,
+                    images: data.images,
+                    stock: data.stock,
+                    sku: data.sku,
                 }
             });
 

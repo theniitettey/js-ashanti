@@ -33,21 +33,8 @@ export default async function AdminLayout({
   const session = await sessionRes.json();
   if (!session) return redirect("/login");
 
-  // Check permissions from backend
-  const permissionRes = await fetch(`${BACKEND_URL}/api/auth/user-has-permission`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      cookie 
-    },
-    body: JSON.stringify({
-      userId: session.user.id,
-      permission: { Dashboard: ["create", "update", "delete"] },
-    }),
-  });
-  const { success } = await permissionRes.json();
-
-  if (!success) redirect("/");
+  // Check if user is admin
+  if (session.user.role !== "admin") return redirect("/");
 
     return (
         <div className={`${lato.variable} antialiased`}>

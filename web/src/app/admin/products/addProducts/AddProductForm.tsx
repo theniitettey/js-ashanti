@@ -27,6 +27,8 @@ export function AddProductForm() {
       discount: 0,
       ratingFromManufacturer: 0,
       customerRating: 0,
+      stock: 0,
+      sku: "",
       images: [],
     },
   });
@@ -220,6 +222,36 @@ export function AddProductForm() {
               </FormItem>
             )}
           />
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="stock"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Stock</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sku"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>SKU</FormLabel>
+                <FormControl>
+                  <Input placeholder="Optional SKU" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

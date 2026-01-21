@@ -81,7 +81,9 @@ export function BatchList() {
   const fetchBatches = async () => {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
-      const res = await fetch(`${backendUrl}/api/admin/batches`);
+      const res = await fetch(`${backendUrl}/api/admin/batches`, {
+        credentials: "include",
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch batches: ${res.statusText}`);
       }
@@ -102,6 +104,7 @@ export function BatchList() {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
       const res = await fetch(`${backendUrl}/api/admin/batches/${batchId}/analyze`, {
         method: "POST",
+        credentials: "include",
       });
 
       if (res.status === 409) {

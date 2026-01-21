@@ -7,7 +7,8 @@ import {
   IconDashboard,
   IconListDetails,
   IconSettings,
-  IconPlus
+  IconPlus,
+  IconChartArea
 } from "@tabler/icons-react"
 import { FaDollarSign } from "react-icons/fa6";
 
@@ -50,6 +51,11 @@ const data = {
       url: "/admin/products/discounts",
       icon: FaDollarSign,
     },
+    {
+      title: "Analytics",
+      url: "/admin/analytics",
+      icon: IconChartArea,  
+    }
  
   ],
   documents: [

@@ -21,6 +21,6 @@ export const googlesignIn = async () => {
     errorCallbackURL: "/login?error=1",
   });
 };
-export const { signIn, signUp, signOut, useSession } = createAuthClient();
+export const { signIn, signUp, signOut, useSession } = authClient;
 
 export type Session = typeof authClient.$Infer.Session.user;

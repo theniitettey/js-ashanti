@@ -69,7 +69,9 @@ export function MetricsDashboard() {
   const fetchMetrics = async () => {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
-      const res = await fetch(`${backendUrl}/api/admin/metrics`);
+      const res = await fetch(`${backendUrl}/api/admin/metrics`, {
+        credentials: "include",
+      });
       if (!res.ok) {
         throw new Error(`Failed to fetch metrics: ${res.statusText}`);
       }

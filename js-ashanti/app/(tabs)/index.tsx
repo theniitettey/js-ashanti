@@ -10,10 +10,11 @@ import { Image } from "expo-image";
 import Divider from "@/components/ui/divider";
 import { SFSymbol } from "expo-symbols";
 import { useState, useEffect, useRef } from "react";
-import { API_ENDPOINTS, apiRequest } from "@/lib/api";
+import { API_ENDPOINTS, apiRequest, apiRequestWithAuth } from "@/lib/api";
 import { aiInsightsService, AIInsight } from "@/lib/ai-insights";
 import { wsManager } from "@/lib/websocket";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Live indicator pulsing animation component
 const LiveIndicator = ({ connected }: { connected: boolean }) => {
@@ -240,6 +241,7 @@ const BarChartBar = ({ height, label }: { height: number; label: string }) => (
 );
 
 export default function HomeScreen() {
+  const { isAuthenticated } = useAuth();
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [aiInsights, setAIInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
@@ -250,6 +252,8 @@ export default function HomeScreen() {
   const lastSuccessfulFetch = useRef<number>(Date.now());
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     fetchDashboardData();
     fetchAIInsights();
 
@@ -271,12 +275,14 @@ export default function HomeScreen() {
       }
       clearInterval(connectionCheckInterval);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const data = await apiRequest(API_ENDPOINTS.MOBILE.ANALYTICS.DASHBOARD);
+      const data = await apiRequestWithAuth(
+        API_ENDPOINTS.MOBILE.ANALYTICS.DASHBOARD,
+      );
       setDashboardData(data);
       // Update last successful fetch timestamp
       lastSuccessfulFetch.current = Date.now();
@@ -307,9 +313,6 @@ export default function HomeScreen() {
       setAIInsights(response.insights.slice(0, 3)); // Show top 3 insights
     } catch (err) {
       console.error("Failed to fetch AI insights:", err);
-      // Use default insights from the service
-      const response = await aiInsightsService.getInsights();
-      setAIInsights(response.insights.slice(0, 3));
     }
   };
 

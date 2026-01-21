@@ -11,6 +11,8 @@ export const productSchema = z.object({
   discount: z.coerce.number().min(0).max(100),
   ratingFromManufacturer: z.coerce.number().min(0).max(5),
   customerRating: z.coerce.number().min(0).max(5),
+  stock: z.coerce.number().int().min(0),
+  sku: z.string().optional(),
   images: z.array(z.instanceof(File)),
   
 });

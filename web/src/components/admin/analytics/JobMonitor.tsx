@@ -109,8 +109,8 @@ export function JobMonitor() {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
       const [jobsRes, dlqRes] = await Promise.all([
-        fetch(`${backendUrl}/api/admin/jobs`),
-        fetch(`${backendUrl}/api/admin/dead-letter-queue`),
+        fetch(`${backendUrl}/api/admin/jobs`, { credentials: "include" }),
+        fetch(`${backendUrl}/api/admin/dead-letter-queue`, { credentials: "include" }),
       ]);
 
       if (!jobsRes.ok || !dlqRes.ok) {

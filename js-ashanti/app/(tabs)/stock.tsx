@@ -35,6 +35,8 @@ interface Product {
   stock: number;
   status: "CRITICAL" | "LOW" | "HEALTHY" | "OUT";
   image: string;
+  subcategories?: string[];
+  colors?: string[];
 }
 
 type StatusColors = {
@@ -110,6 +112,8 @@ const PRODUCTS: Product[] = [
     stock: 3,
     status: "CRITICAL",
     image: "",
+    subcategories: ["Peripherals", "Gaming"],
+    colors: ["Black", "RGB"],
   },
   {
     id: "2",
@@ -120,6 +124,8 @@ const PRODUCTS: Product[] = [
     stock: 12,
     status: "LOW",
     image: "",
+    subcategories: ["Peripherals", "Gaming"],
+    colors: ["Black", "White"],
   },
   {
     id: "3",
@@ -130,6 +136,8 @@ const PRODUCTS: Product[] = [
     stock: 45,
     status: "HEALTHY",
     image: "",
+    subcategories: ["Displays"],
+    colors: ["Black"],
   },
   {
     id: "4",
@@ -140,6 +148,8 @@ const PRODUCTS: Product[] = [
     stock: 0,
     status: "OUT",
     image: "",
+    subcategories: ["Audio"],
+    colors: ["White", "Black"],
   },
   {
     id: "5",
@@ -150,6 +160,8 @@ const PRODUCTS: Product[] = [
     stock: 38,
     status: "HEALTHY",
     image: "",
+    subcategories: ["Wearables"],
+    colors: ["Black", "Silver", "Gold"],
   },
   {
     id: "6",
@@ -160,6 +172,8 @@ const PRODUCTS: Product[] = [
     stock: 8,
     status: "LOW",
     image: "",
+    subcategories: ["Bags"],
+    colors: ["Grey", "Black"],
   },
 ];
 
@@ -319,8 +333,13 @@ export default function StockScreen() {
           );
           products = productsData.products || productsData || [];
         } catch {
-          // Fallback to metrics data
+          // Fallback handled below
         }
+      }
+
+      // Fallback to mock data ONLY if products list is empty
+      if (!products || products.length === 0) {
+        products = PRODUCTS;
       }
 
       setInventoryData({

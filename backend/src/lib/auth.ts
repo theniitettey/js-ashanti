@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from './prisma';
-import { customSession } from "better-auth/plugins";
+import { customSession, bearer } from "better-auth/plugins";
 import { admin as adminPlugin } from "better-auth/plugins";
 import { ac, admin } from "./permissions";
 import { EmailService } from '../services/email.service';
@@ -10,6 +10,7 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
+    trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:3000"],
     emailVerification: {
         sendVerificationEmail: async ({ url, user }) => {
             try {
@@ -59,6 +60,7 @@ export const auth = betterAuth({
                 admin,
             },
         }),
+        bearer(),
     ],
     advanced: {
         cookies: {

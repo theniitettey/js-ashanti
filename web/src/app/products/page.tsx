@@ -1,6 +1,7 @@
 //@ts-nocheck
 import type { Metadata } from "next"
 import { ProductsClient } from "@/components/products/ProductsClient";
+import { products as mockProducts } from "@/data/data";
 
 export const metadata: Metadata = {
      title: "J's Ashanti's Store Online - Products",
@@ -24,7 +25,12 @@ export default async function Products({ searchParams: searchParamsPromise }: Pr
     throw new Error("Failed to fetch products")
   }
 
-  const products = await res.json();
+  let products = await res.json();
+  
+  // Fallback to mock data if DB is empty
+  if (Array.isArray(products) && products.length === 0) {
+    products = mockProducts;
+  }
 
   return <ProductsClient products={products} searchParams={searchParams} />;
 }

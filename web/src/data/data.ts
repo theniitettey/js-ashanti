@@ -66,8 +66,11 @@ export const products = [
       "/products/tableSets.jpg",
       "/optimized/blender.webp",
       "/optimized/clothesRack.webp",
+      "/optimized/clothesRack.webp",
       "/optimized/clothesRack.webp",],
-    colors: ["red", "green"] 
+    colors: ["red", "green"],
+    stock: 15,
+    sku: "TAB-SET-001"
   },
   {
     title: "8L Silver Crest Air Fryer",
@@ -80,7 +83,9 @@ export const products = [
     badgeColor: "bg-red-500",
     link: "/products/8l-air-fryer",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: ["red", "green", "blue", "gold"]
+    colors: ["red", "green", "blue", "gold"],
+    stock: 8,
+    sku: "AIR-FRY-8L"
   },
   {
     title: "5L Rice Cooker - 3 Pins",
@@ -93,7 +98,9 @@ export const products = [
     badgeColor: "bg-blue-500",
     link: "/products/5l-rice-cooker",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: [ "blue", "gold"]
+    colors: [ "blue", "gold"],
+    stock: 20,
+    sku: "RICE-COOK-5L"
   },
   {
     title: "Silver Crest 3-in-1 Blender",
@@ -106,7 +113,9 @@ export const products = [
     badgeColor: "bg-yellow-500",
     link: "/products/sc5532-blender",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: ["sliver", "gold"]
+    colors: ["sliver", "gold"],
+    stock: 12,
+    sku: "BLEND-3IN1"
   },
   {
     title: "13PCS Non-Stick Fry Pan Set",
@@ -119,7 +128,9 @@ export const products = [
     badgeColor: "bg-orange-500",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
     link: "/products/13pcs-frypan-set",
-    colors: ["red", "green", "blue", "gold"]
+    colors: ["red", "green", "blue", "gold"],
+    stock: 5,
+    sku: "FRY-PAN-13"
   },
   {
     title: "LS 2010 - 10PCS Pot Set",
@@ -132,7 +143,9 @@ export const products = [
     badgeColor: "bg-purple-500",
     link: "/products/ls2010-pot-set",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 7,
+    sku: "POT-SET-10"
   },
   {
     title: "4L Electric Kettle",
@@ -145,7 +158,9 @@ export const products = [
     badgeColor: "bg-teal-500",
     link: "/products/4l-electric-kettle",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 25,
+    sku: "KETTLE-4L"
 
   },
   {
@@ -159,7 +174,9 @@ export const products = [
     badgeColor: "bg-pink-500",
     link: "/products/insulation-barrel-3pcs",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 18,
+    sku: "INSUL-BAR-3"
 
   },
   {
@@ -173,7 +190,9 @@ export const products = [
     badgeColor: "bg-gray-800 text-white",
     link: "/products/vmigo-dutch-oven",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 4,
+    sku: "DUTCH-OVEN"
 
   },
   {
@@ -187,7 +206,9 @@ export const products = [
     badgeColor: "bg-red-600",
     link: "/products/fufu-maker",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 9,
+    sku: "FUFU-MAKER"
 
   },
   {
@@ -201,7 +222,9 @@ export const products = [
     badgeColor: "bg-cyan-500",
     link: "/products/juicer-extractor",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 14,
+    sku: "JUICER-EX"
 
   },
   {
@@ -215,7 +238,9 @@ export const products = [
     badgeColor: "bg-lime-600",
     link: "/products/slow-juicer",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 6,
+    sku: "JUICER-SLOW"
 
   },
   {
@@ -229,7 +254,9 @@ export const products = [
     badgeColor: "bg-green-600",
     link: "/products/lunch-box",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 50,
+    sku: "LUNCH-BOX-6"
 
   },
   {
@@ -243,7 +270,9 @@ export const products = [
     badgeColor: "bg-indigo-500",
     link: "/products/round-cooking-pot",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 11,
+    sku: "POT-ROUND-10L"
 
   },
   {
@@ -258,7 +287,9 @@ export const products = [
     badgeColor: "bg-yellow-400",
     link: "/products/kitchen-storage-rack",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 22,
+    sku: "RACK-KITCHEN"
 
   },
   {
@@ -273,7 +304,9 @@ export const products = [
     badgeColor: "bg-blue-600",
     link: "/products/cloths-rack",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 16,
+    sku: "RACK-CLOTH"
 
   },
   {
@@ -288,7 +321,9 @@ export const products = [
     badgeColor: "bg-black text-white",
     link: "/products/bosch-pot-set",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 3,
+    sku: "POT-BOSCH-12"
 
   },
   {
@@ -303,7 +338,9 @@ export const products = [
     badgeColor: "bg-rose-500",
     link: "/products/commercial-blender",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 8,
+    sku: "BLEND-COM-2L"
 
   },
   {
@@ -318,7 +355,9 @@ export const products = [
     badgeColor: "bg-orange-400",
     link: "/products/square-pot",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 13,
+    sku: "POT-SQUARE-8L"
 
   },
   {
@@ -333,7 +372,9 @@ export const products = [
     badgeColor: "bg-yellow-700 text-white",
     link: "/products/gold-tableware",
     images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: []
+    colors: [],
+    stock: 5,
+    sku: "TABLE-GOLD-24"
 
   }
 ];

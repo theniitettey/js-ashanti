@@ -59,6 +59,8 @@ export default function AddScreen() {
     stock: "",
     category: "",
     sku: "",
+    subcategories: "",
+    colors: "",
   });
 
   const pickImageFromGallery = async () => {
@@ -148,6 +150,8 @@ export default function AddScreen() {
           stock: parseInt(formData.stock),
           category: formData.category,
           sku: formData.sku,
+          subcategories: formData.subcategories.split(",").map((s) => s.trim()).filter(Boolean),
+          colors: formData.colors.split(",").map((c) => c.trim()).filter(Boolean),
         }),
       });
 
@@ -275,6 +279,28 @@ export default function AddScreen() {
             style={styles.input}
             value={formData.sku}
             onChangeText={(text) => handleInputChange("sku", text)}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Label label="Subcategories (comma separated)" />
+          <TextInput
+            placeholder="e.g. Smartphones, Tablets"
+            placeholderTextColor={palette.textSecondary}
+            style={styles.input}
+            value={formData.subcategories}
+            onChangeText={(text) => handleInputChange("subcategories", text)}
+          />
+        </View>
+
+        <View style={styles.formGroup}>
+          <Label label="Colors (comma separated)" />
+          <TextInput
+            placeholder="e.g. Red, Blue, Black"
+            placeholderTextColor={palette.textSecondary}
+            style={styles.input}
+            value={formData.colors}
+            onChangeText={(text) => handleInputChange("colors", text)}
           />
         </View>
 
