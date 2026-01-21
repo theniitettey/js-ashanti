@@ -10,6 +10,7 @@ export const auth = betterAuth({
     database: prismaAdapter(prisma, {
         provider: 'postgresql',
     }),
+    trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:3000"],
     emailVerification: {
         sendVerificationEmail: async ({ url, user }) => {
             try {

@@ -11,9 +11,13 @@ router.use(getSession);
 
 // Analytics
 router.get('/analytics/stats', AnalyticsController.getStats);
+router.get('/admin/metrics', AnalyticsController.getMetrics);
 
 // Admin Batches
 router.get('/admin/batches', AdminController.getBatches);
+router.get('/admin/jobs', AdminController.getJobs);
+router.get('/admin/dead-letter-queue', AdminController.getDeadLetterQueue);
+router.post('/admin/batches/:batchId/analyze', AdminController.triggerBatchAnalysis);
 
 // Insights
 router.get('/insights', InsightController.getInsights);
