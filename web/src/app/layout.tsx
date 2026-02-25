@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import LayoutWrapper from "@/components/layout/LayoutWrapper";
 import { Toaster } from "react-hot-toast";
 import { SocketProvider } from "@/components/analytics/socket-provider";
+import { GlobalPageTracker } from "@/components/analytics/global-page-tracker";
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <SocketProvider>
+            <GlobalPageTracker />
             <LayoutWrapper>
               <Toaster position="top-center" reverseOrder={false} />
               {children}

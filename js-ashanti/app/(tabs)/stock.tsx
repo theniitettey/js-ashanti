@@ -13,6 +13,7 @@ import Typography from "@/constants/typography";
 import { useState, useEffect } from "react";
 import { apiRequestWithAuth, API_ENDPOINTS } from "@/lib/api";
 import { useRouter } from "expo-router";
+import { AppColors } from "@/constants/theme";
 
 // Types
 interface StockMetric {
@@ -238,7 +239,7 @@ const StockMetricCard = ({ metric }: { metric: StockMetric }) => {
 };
 
 const ProductCard = ({ product }: { product: Product }) => {
-  const statusColor = STATUS_COLORS[product.status];
+  const statusColor = STATUS_COLORS[product.status] ?? STATUS_COLORS.HEALTHY;
 
   return (
     <View style={styles.productCard}>
@@ -286,7 +287,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
         <View style={styles.productActions}>
           <TouchableOpacity style={styles.editButton}>
-            <IconSymbol name="pencil" size={16} color="#9CA3AF" />
+            <IconSymbol name="pencil" size={16} color={AppColors.textSecondary} />
             <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.restockButton}>
@@ -315,40 +316,93 @@ export default function StockScreen() {
     fetchInventoryMetrics();
   }, []);
 
+  // Normalize API product to the shape ProductCard expects (status, price string, image)
+  const normalizeProduct = (p: any): Product => {
+    const stock = Number(p.stock ?? p.stockCount ?? 0);
+    let status: Product["status"] = "HEALTHY";
+    if (stock === 0) status = "OUT";
+    else if (stock <= 10) status = "LOW";
+    const priceNum = typeof p.price === "number" ? p.price : parseFloat(p.price) || 0;
+    const priceStr = typeof p.price === "string" && p.price.startsWith("$") ? p.price : `$${priceNum.toFixed(2)}`;
+    const image = Array.isArray(p.images) && p.images[0] ? p.images[0] : p.image ?? "";
+    return {
+      id: p.id,
+      name: p.name ?? "",
+      sku: p.sku ?? "",
+      category: p.category ?? "",
+      price: priceStr,
+      stock,
+      status,
+      image,
+      subcategories: p.subcategories,
+      colors: p.colors,
+    };
+  };
+
+  // Build summary metrics from a products array
+  const buildMetricsFromProducts = (products: any[]): StockMetric[] => {
+    const total = products.length;
+    const lowStock = products.filter((p) => {
+      const s = Number(p.stock ?? p.stockCount ?? 0);
+      return s > 0 && s <= 10;
+    }).length;
+    const outOfStock = products.filter((p) => Number(p.stock ?? p.stockCount ?? 0) === 0).length;
+    const totalValue = products.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock ?? p.stockCount) || 0), 0);
+    return [
+      { ...STOCK_METRICS[0], value: String(total), progress: total ? Math.min(1, total / 500) : 0 },
+      { ...STOCK_METRICS[1], value: String(lowStock), progress: total ? lowStock / total : 0 },
+      { ...STOCK_METRICS[2], value: String(outOfStock), progress: total ? outOfStock / total : 0 },
+      { ...STOCK_METRICS[3], value: totalValue >= 1000 ? `$${(totalValue / 1000).toFixed(0)}k` : `$${totalValue}`, progress: 0.85 },
+    ];
+  };
+
   const fetchInventoryMetrics = async () => {
     try {
       setLoading(true);
 
-      // Fetch inventory metrics
-      const metricsData = await apiRequestWithAuth(
-        API_ENDPOINTS.MOBILE.INVENTORY.METRICS,
-      );
+      let products: any[] = [];
+      let inventoryItems: any[] = [];
 
-      // Also fetch products list
-      let products = metricsData.products || [];
-      if (!products || products.length === 0) {
-        try {
-          const productsData = await apiRequestWithAuth(
-            API_ENDPOINTS.MOBILE.PRODUCTS.LIST,
-          );
-          products = productsData.products || productsData || [];
-        } catch {
-          // Fallback handled below
+      try {
+        const metricsResponse = await apiRequestWithAuth(
+          API_ENDPOINTS.MOBILE.INVENTORY.METRICS,
+        );
+        inventoryItems = Array.isArray(metricsResponse) ? metricsResponse : metricsResponse?.products ?? [];
+      } catch {
+        // continue to fetch products
+      }
+
+      try {
+        const productsResponse = await apiRequestWithAuth(
+          API_ENDPOINTS.MOBILE.PRODUCTS.LIST,
+        );
+        products = Array.isArray(productsResponse) ? productsResponse : productsResponse?.products ?? [];
+      } catch {
+        // use inventory items as product list if we have them
+        if (inventoryItems.length) {
+          products = inventoryItems.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            sku: p.sku,
+            category: "",
+            price: 0,
+            stock: p.stockCount ?? 0,
+            images: [],
+          }));
         }
       }
 
-      // Fallback to mock data ONLY if products list is empty
-      if (!products || products.length === 0) {
-        products = PRODUCTS;
-      }
+      const normalizedProducts =
+        products.length > 0 ? products.map(normalizeProduct) : PRODUCTS;
+      const metrics =
+        products.length > 0 ? buildMetricsFromProducts(products) : STOCK_METRICS;
 
       setInventoryData({
-        ...metricsData,
-        products: products,
+        metrics,
+        products: normalizedProducts,
       });
     } catch (err: any) {
       console.error("Failed to fetch inventory metrics:", err);
-      // Set fallback data when not authenticated or error occurs
       setInventoryData({
         metrics: STOCK_METRICS,
         products: PRODUCTS,
@@ -364,7 +418,7 @@ export default function StockScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.headerIconContainer}>
-            <IconSymbol name="shippingbox.fill" size={28} color="#A855F7" />
+            <IconSymbol name="shippingbox.fill" size={28} color={AppColors.primary} />
           </View>
           <View>
             <Text style={styles.headerTitle}>Inventory</Text>
@@ -380,16 +434,16 @@ export default function StockScreen() {
             <IconSymbol
               name={loading ? "hourglass" : "arrow.clockwise"}
               size={22}
-              color="#9CA3AF"
+              color={AppColors.textSecondary}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerIconButton}>
-            <IconSymbol name="bell.fill" size={22} color="#9CA3AF" />
+            <IconSymbol name="bell.fill" size={22} color={AppColors.textSecondary} />
             <View style={styles.notificationBadge} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.profileButton}>
             <View style={styles.profileImage}>
-              <IconSymbol name="person.fill" size={20} color="#6B5FED" />
+              <IconSymbol name="person.fill" size={20} color={AppColors.primary} />
             </View>
           </TouchableOpacity>
         </View>
@@ -398,17 +452,17 @@ export default function StockScreen() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <IconSymbol name="magnifyingglass" size={20} color="#6B7280" />
+          <IconSymbol name="magnifyingglass" size={20} color={AppColors.textMuted} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search products, SKU, category..."
-            placeholderTextColor="#6B7280"
+            placeholderTextColor={AppColors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
         </View>
         <TouchableOpacity style={styles.filterButton}>
-          <IconSymbol name="slider.horizontal.3" size={20} color="#9CA3AF" />
+          <IconSymbol name="slider.horizontal.3" size={20} color={AppColors.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -425,9 +479,9 @@ export default function StockScreen() {
               ? [1, 2, 3, 4].map((i) => (
                   <View
                     key={i}
-                    style={[styles.metricCard, { backgroundColor: "#1A1F2E" }]}
+                    style={[styles.metricCard, { backgroundColor: AppColors.surface }]}
                   >
-                    <Text style={{ color: "#888" }}>Loading...</Text>
+                    <Text style={{ color: AppColors.textSecondary }}>Loading...</Text>
                   </View>
                 ))
               : (inventoryData?.metrics || STOCK_METRICS).map((metric: any) => (
@@ -478,9 +532,9 @@ export default function StockScreen() {
               ? [1, 2, 3].map((i) => (
                   <View
                     key={i}
-                    style={[styles.productCard, { backgroundColor: "#1A1F2E" }]}
+                    style={[styles.productCard, { backgroundColor: AppColors.surface }]}
                   >
-                    <Text style={{ color: "#888" }}>Loading...</Text>
+                    <Text style={{ color: AppColors.textSecondary }}>Loading...</Text>
                   </View>
                 ))
               : (inventoryData?.products || PRODUCTS).map((product: any) => (
@@ -493,8 +547,8 @@ export default function StockScreen() {
       </ScrollView>
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab} onPress={() => router.push("/add")}>
-        <IconSymbol name="plus" size={28} color="#FFFFFF" />
+      <TouchableOpacity style={[styles.fab, { backgroundColor: AppColors.primary }]} onPress={() => router.push("/add")}>
+        <IconSymbol name="plus" size={28} color={AppColors.white} />
       </TouchableOpacity>
     </View>
   );
@@ -521,18 +575,18 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#2D1B4E",
+    backgroundColor: "#FFEDD5",
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: {
     fontSize: Typography.xl,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#1C1917",
   },
   headerSubtitle: {
     fontSize: Typography.sm,
-    color: "#9CA3AF",
+    color: "#78716C",
     marginTop: 2,
   },
   headerRight: {
@@ -544,7 +598,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#1A1F2E",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
@@ -568,7 +622,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#2D1B4E",
+    backgroundColor: "#FFEDD5",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -582,7 +636,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1A1F2E",
+    backgroundColor: "#F5F5F5",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -591,13 +645,13 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: Typography.md,
-    color: "#FFFFFF",
+    color: "#1C1917",
   },
   filterButton: {
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#1A1F2E",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -613,7 +667,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.lg,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#1C1917",
     marginBottom: 16,
   },
   metricsGrid: {
@@ -623,9 +677,11 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     width: "48%",
-    backgroundColor: "#1A1F2E",
+    backgroundColor: "#FAFAFA",
     borderRadius: 12,
     padding: 16,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
   },
   metricIconContainer: {
     width: 40,
@@ -672,13 +728,13 @@ const styles = StyleSheet.create({
     borderColor: "#374151",
   },
   categoryPillActive: {
-    backgroundColor: "#6B5FED",
-    borderColor: "#6B5FED",
+    backgroundColor: "#EA580C",
+    borderColor: "#EA580C",
   },
   categoryPillText: {
     fontSize: Typography.sm,
     fontWeight: "500",
-    color: "#9CA3AF",
+    color: "#78716C",
   },
   categoryPillTextActive: {
     color: "#FFFFFF",
@@ -697,11 +753,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   productCard: {
-    backgroundColor: "#1A1F2E",
+    backgroundColor: "#FAFAFA",
     borderRadius: 12,
     padding: 12,
     flexDirection: "row",
     gap: 12,
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
   },
   productImageContainer: {
     position: "relative",
@@ -735,17 +793,17 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: Typography.md,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: "#1C1917",
     marginBottom: 4,
   },
   productSKU: {
     fontSize: Typography.xs,
-    color: "#6B7280",
+    color: "#78716C",
     marginBottom: 2,
   },
   productCategory: {
     fontSize: Typography.xs,
-    color: "#6B7280",
+    color: "#78716C",
   },
   productRight: {
     alignItems: "flex-end",
@@ -763,7 +821,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: Typography.lg,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: "#1C1917",
   },
   productFooter: {
     marginBottom: 8,
@@ -773,7 +831,7 @@ const styles = StyleSheet.create({
   },
   stockLabel: {
     fontSize: Typography.xs,
-    color: "#6B7280",
+    color: "#78716C",
   },
   stockValue: {
     fontSize: Typography.sm,
@@ -786,7 +844,7 @@ const styles = StyleSheet.create({
   editButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0F1419",
+    backgroundColor: "#F5F5F5",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
@@ -794,13 +852,13 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     fontSize: Typography.xs,
-    color: "#9CA3AF",
+    color: "#78716C",
     fontWeight: "500",
   },
   restockButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#6B5FED",
+    backgroundColor: "#EA580C",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
@@ -815,7 +873,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: "#0F1419",
+    backgroundColor: "#F5F5F5",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -826,10 +884,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#6B5FED",
+    backgroundColor: "#EA580C",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#6B5FED",
+    shadowColor: "#EA580C",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,

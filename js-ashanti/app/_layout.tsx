@@ -7,10 +7,15 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useEffect } from "react";
+import { Text } from "react-native";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+
+// Crisp text: disable font scaling so text aligns to pixel grid (reduces blurriness)
+if (Text.defaultProps == null) Text.defaultProps = {};
+Text.defaultProps.allowFontScaling = false;
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { Colors } from "@/constants/theme";
+import { AppColors, Colors } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
 
@@ -43,12 +48,12 @@ function RootLayoutNav() {
       <View
         style={{
           flex: 1,
-          backgroundColor: "#000000",
+          backgroundColor: AppColors.background,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <ActivityIndicator size="large" color="#6B5FED" />
+        <ActivityIndicator size="large" color={AppColors.primary} />
       </View>
     );
   }
@@ -60,7 +65,7 @@ function RootLayoutNav() {
           flex: 1,
           backgroundColor:
             colorScheme === "dark"
-              ? "#000"
+              ? "#1C1917"
               : Colors[colorScheme ?? "light"].background,
         }}
         edges={["top"]}
@@ -72,7 +77,7 @@ function RootLayoutNav() {
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
-          <StatusBar style="auto" />
+          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
         </ThemeProvider>
       </SafeAreaView>
     </SafeAreaProvider>

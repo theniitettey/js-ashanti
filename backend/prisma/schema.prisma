@@ -117,13 +117,20 @@ model BusinessSettings {
   @@map("business_settings")
 } 
 
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+}
+
 model Order {
   id           String    @id @default(cuid())
   customerName String
   email        String
   phone        String
   address      String
-  status       String    @default("pending")
+  status       OrderStatus @default(PENDING)
   totalAmount  Float
   items        Json      // store items as JSON array
   createdAt    DateTime  @default(now())

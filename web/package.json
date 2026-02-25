@@ -1,6 +1,7 @@
 {
   "name": "jsashantis",
   "version": "0.1.0",
+  "author": "Samuel Owusu Asante",
   "private": true,
   "scripts": {
     "dev": "next dev",

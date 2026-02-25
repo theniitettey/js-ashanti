@@ -15,6 +15,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tabIconSelected,
+        tabBarInactiveTintColor: Colors[colorScheme ?? "light"].tabIconDefault,
+        tabBarStyle: { backgroundColor: "#FFFFFF", borderTopColor: "#E5E5E5" },
         headerShown: false,
         tabBarButton: HapticTab,
       }}
@@ -73,7 +75,7 @@ export default function TabLayout() {
                   style={[
                     styles.whiteCircle,
                     {
-                      backgroundColor: Colors["light"].background,
+                      backgroundColor: "#FFFFFF",
                     },
                   ]}
                 >

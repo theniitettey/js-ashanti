@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npx prisma generate && node dist/index.js",
-    "dev": "npx prisma generate && nodemon src/index.ts",
+    "dev": "npx prisma generate && TS_NODE_TRANSPILE_ONLY=true nodemon src/index.ts",
     "worker": "npx prisma generate && ts-node src/index.ts",
     "build": "npx prisma generate && tsc"
   },

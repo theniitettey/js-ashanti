@@ -15,18 +15,19 @@ import { API_ENDPOINTS, apiRequestWithAuth } from "@/lib/api";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
+import { AppColors } from "@/constants/theme";
 
 const palette = {
-  background: "#000000",
-  card: "#1A1F2E",
-  navy: "#0F141E",
-  primary: "#6B5FED",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#9CA3AF",
-  inputBorder: "#1F2937",
-  danger: "#EF4444",
-  warning: "#F59E0B",
-  success: "#10B981",
+  background: AppColors.background,
+  card: AppColors.surface,
+  navy: AppColors.surfaceElevated,
+  primary: AppColors.primary,
+  textPrimary: AppColors.text,
+  textSecondary: AppColors.textSecondary,
+  inputBorder: AppColors.border,
+  danger: AppColors.error,
+  warning: AppColors.warning,
+  success: AppColors.success,
 };
 
 const Label = ({ label, required }: { label: string; required?: boolean }) => (

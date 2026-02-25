@@ -13,16 +13,17 @@ import Typography from "@/constants/typography";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/contexts/AuthContext";
-import { API_ENDPOINTS, apiRequest } from "@/lib/api";
+import { API_ENDPOINTS } from "@/lib/api";
+import { AppColors } from "@/constants/theme";
 
 const palette = {
-  background: "#000000",
-  card: "#1A1F2E",
-  primary: "#6B5FED",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#9CA3AF",
-  inputBorder: "#374151",
-  danger: "#EF4444",
+  background: AppColors.background,
+  card: AppColors.surface,
+  primary: AppColors.primary,
+  textPrimary: AppColors.text,
+  textSecondary: AppColors.textSecondary,
+  inputBorder: AppColors.border,
+  danger: AppColors.error,
 };
 
 export default function LoginScreen() {
@@ -51,34 +52,41 @@ export default function LoginScreen() {
     setLoading(true);
 
     try {
-      // Call better-auth API endpoint
-      const response = await apiRequest(API_ENDPOINTS.AUTH.LOGIN, {
+      // Use fetch directly so we can read set-auth-token header (Bearer plugin)
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: "POST",
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (response.error) {
-        setError(response.error.message || "Login failed");
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(
+          data?.error?.message || data?.message || "Login failed"
+        );
         setLoading(false);
         return;
       }
 
-      // Store session token and user info
+      // Bearer token is in response header (better-auth bearer plugin)
       const token =
-        response.token || response.session?.token || "authenticated";
-      await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userEmail", email);
-      if (response.user) {
-        await AsyncStorage.setItem("userData", JSON.stringify(response.user));
+        response.headers.get("set-auth-token") ||
+        data.token ||
+        data.session?.token;
+      if (!token) {
+        setError("Login succeeded but no session token received. Try again.");
+        setLoading(false);
+        return;
       }
 
-      // Update auth context state
-      await login(token);
+      await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userEmail", email);
+      if (data.user) {
+        await AsyncStorage.setItem("userData", JSON.stringify(data.user));
+      }
 
-      // Navigate to main app
+      await login(token);
       router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Login error:", error);

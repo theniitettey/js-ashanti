@@ -15,6 +15,7 @@ import { aiInsightsService, AIInsight } from "@/lib/ai-insights";
 import { wsManager } from "@/lib/websocket";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/contexts/AuthContext";
+import { AppColors } from "@/constants/theme";
 
 // Live indicator pulsing animation component
 const LiveIndicator = ({ connected }: { connected: boolean }) => {
@@ -75,10 +76,12 @@ const MetricCard = ({
     <View
       style={{
         flex: 1,
-        backgroundColor: "#0F1419",
+        backgroundColor: AppColors.surface,
         borderRadius: 16,
         padding: 16,
         gap: 12,
+        borderWidth: 1,
+        borderColor: AppColors.border,
       }}
     >
       <View
@@ -94,21 +97,21 @@ const MetricCard = ({
         <IconSymbol size={22} name={icon} color={iconColor} />
       </View>
       <View>
-        <Text style={{ fontSize: 13, color: "#888888", marginBottom: 4 }}>
+        <Text style={{ fontSize: 13, color: AppColors.textSecondary, marginBottom: 4 }}>
           {label}
         </Text>
         <Text
           style={{
             fontSize: 28,
             fontWeight: "700",
-            color: "#FFFFFF",
+            color: AppColors.text,
             marginBottom: 8,
           }}
         >
           {value}
         </Text>
         {percentage && (
-          <Text style={{ fontSize: 12, color: "#00C853", fontWeight: "600" }}>
+          <Text style={{ fontSize: 12, color: AppColors.success, fontWeight: "600" }}>
             {percentage}
           </Text>
         )}
@@ -117,7 +120,7 @@ const MetricCard = ({
         style={{
           width: "100%",
           height: 6,
-          backgroundColor: "#1A1F2E",
+          backgroundColor: AppColors.border,
           borderRadius: 3,
           overflow: "hidden",
         }}
@@ -153,7 +156,7 @@ const InventoryProductCard = ({
       ? "#FF3B30"
       : status === "LOW STOCK"
         ? "#FFB800"
-        : "#00C853";
+        : AppColors.success;
   const statusBgColor =
     status === "CRITICAL"
       ? "#2D0B0A"
@@ -170,7 +173,7 @@ const InventoryProductCard = ({
         paddingVertical: 12,
         paddingHorizontal: 12,
         borderBottomWidth: 1,
-        borderBottomColor: "#1A1F2E",
+        borderBottomColor: AppColors.surfaceElevated,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -179,7 +182,7 @@ const InventoryProductCard = ({
             width: 44,
             height: 44,
             borderRadius: 8,
-            backgroundColor: "#1A1F2E",
+            backgroundColor: AppColors.surfaceElevated,
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -187,10 +190,10 @@ const InventoryProductCard = ({
           <Text style={{ fontSize: 24, color: "#666666" }}>📦</Text>
         </View>
         <View>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#FFFFFF" }}>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: AppColors.white }}>
             {name}
           </Text>
-          <Text style={{ fontSize: 12, color: "#888888", marginTop: 2 }}>
+          <Text style={{ fontSize: 12, color: AppColors.textSecondary, marginTop: 2 }}>
             SKU: {sku}
           </Text>
         </View>
@@ -214,7 +217,7 @@ const InventoryProductCard = ({
           style={{
             fontSize: 16,
             fontWeight: "700",
-            color: "#FFFFFF",
+            color: AppColors.white,
             minWidth: 30,
             textAlign: "right",
           }}
@@ -232,11 +235,11 @@ const BarChartBar = ({ height, label }: { height: number; label: string }) => (
       style={{
         width: 32,
         height: height,
-        backgroundColor: "#6B5FED",
+        backgroundColor: AppColors.primary,
         borderRadius: 6,
       }}
     />
-    <Text style={{ fontSize: 11, color: "#888888" }}>{label}</Text>
+    <Text style={{ fontSize: 11, color: AppColors.textSecondary }}>{label}</Text>
   </View>
 );
 
@@ -317,7 +320,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000000" }}>
+    <View style={{ flex: 1, backgroundColor: AppColors.background }}>
       {/* Sticky Header */}
       <View
         style={{
@@ -331,7 +334,9 @@ export default function HomeScreen() {
           justifyContent: "space-between",
           paddingHorizontal: 16,
           paddingVertical: 16,
-          backgroundColor: "#000000",
+          backgroundColor: AppColors.white,
+          borderBottomWidth: 1,
+          borderBottomColor: AppColors.border,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
@@ -340,25 +345,25 @@ export default function HomeScreen() {
               width: 44,
               height: 44,
               borderRadius: 10,
-              backgroundColor: "#1A1F2E",
+              backgroundColor: "#FFEDD5",
               justifyContent: "center",
               alignItems: "center",
             }}
           >
-            <IconSymbol size={24} name="chart.bar.fill" color="#6B5FED" />
+            <IconSymbol size={24} name="chart.bar.fill" color={AppColors.primary} />
           </View>
           <View>
-            <Text style={{ fontSize: 18, fontWeight: "700", color: "#FFFFFF" }}>
+            <Text style={{ fontSize: 18, fontWeight: "700", color: AppColors.text }}>
               Admin Dashboard
             </Text>
-            <Text style={{ fontSize: 13, color: "#888888", marginTop: 2 }}>
+            <Text style={{ fontSize: 13, color: AppColors.textSecondary, marginTop: 2 }}>
               Store Overview
             </Text>
           </View>
         </View>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
           <View style={{ position: "relative" }}>
-            <IconSymbol size={22} name="bell.fill" color="#888888" />
+            <IconSymbol size={22} name="bell.fill" color={AppColors.textSecondary} />
             <View
               style={{
                 position: "absolute",
@@ -367,7 +372,7 @@ export default function HomeScreen() {
                 width: 10,
                 height: 10,
                 borderRadius: 5,
-                backgroundColor: "#FF3B30",
+                backgroundColor: AppColors.error,
               }}
             />
           </View>
@@ -387,7 +392,7 @@ export default function HomeScreen() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{
-          backgroundColor: "#000000",
+          backgroundColor: AppColors.background,
         }}
         contentContainerStyle={{ paddingTop: 80, paddingBottom: 100 }}
       >
@@ -403,7 +408,7 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
               >
                 Live Traffic
               </Text>
@@ -429,12 +434,12 @@ export default function HomeScreen() {
 
             <View
               style={{
-                backgroundColor: "#0F1419",
+                backgroundColor: AppColors.surface,
                 borderRadius: 16,
                 padding: 16,
               }}
             >
-              <Text style={{ fontSize: 13, color: "#888888", marginBottom: 8 }}>
+              <Text style={{ fontSize: 13, color: AppColors.textSecondary, marginBottom: 8 }}>
                 Current Visitors
               </Text>
               <View
@@ -450,7 +455,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 32,
                       fontWeight: "700",
-                      color: "#FFFFFF",
+                      color: AppColors.white,
                     }}
                   >
                     {loading
@@ -469,12 +474,12 @@ export default function HomeScreen() {
                     <IconSymbol
                       size={12}
                       name="arrow.up.right"
-                      color="#00C853"
+                      color={AppColors.success}
                     />
                     <Text
                       style={{
                         fontSize: 13,
-                        color: "#00C853",
+                        color: AppColors.success,
                         fontWeight: "600",
                       }}
                     >
@@ -482,7 +487,7 @@ export default function HomeScreen() {
                     </Text>
                   </View>
                 </View>
-                <IconSymbol size={48} name="chart.bar.fill" color="#6B5FED" />
+                <IconSymbol size={48} name="chart.bar.fill" color={AppColors.primary} />
               </View>
 
               <Divider />
@@ -496,7 +501,7 @@ export default function HomeScreen() {
               >
                 <View>
                   <Text
-                    style={{ fontSize: 13, color: "#888888", marginBottom: 6 }}
+                    style={{ fontSize: 13, color: AppColors.textSecondary, marginBottom: 6 }}
                   >
                     Active Sessions
                   </Text>
@@ -504,7 +509,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 20,
                       fontWeight: "700",
-                      color: "#FFFFFF",
+                      color: AppColors.white,
                     }}
                   >
                     {loading
@@ -515,7 +520,7 @@ export default function HomeScreen() {
                 </View>
                 <View>
                   <Text
-                    style={{ fontSize: 13, color: "#888888", marginBottom: 6 }}
+                    style={{ fontSize: 13, color: AppColors.textSecondary, marginBottom: 6 }}
                   >
                     Page Views/min
                   </Text>
@@ -523,7 +528,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 20,
                       fontWeight: "700",
-                      color: "#FFFFFF",
+                      color: AppColors.white,
                     }}
                   >
                     {loading
@@ -546,19 +551,19 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
               >
                 Sales Overview
               </Text>
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#0F1419",
+                  backgroundColor: AppColors.surface,
                   paddingHorizontal: 12,
                   paddingVertical: 6,
                   borderRadius: 8,
                 }}
               >
-                <Text style={{ fontSize: 12, color: "#FFFFFF" }}>Today</Text>
+                <Text style={{ fontSize: 12, color: AppColors.white }}>Today</Text>
               </TouchableOpacity>
             </View>
 
@@ -568,9 +573,9 @@ export default function HomeScreen() {
                 value="$4,298"
                 percentage="+8.2% from yesterday"
                 icon="dollarsign.circle.fill"
-                iconColor="#6B5FED"
+                iconColor={AppColors.primary}
                 iconBgColor="#2A1A5E"
-                progressColor="#6B5FED"
+                progressColor={AppColors.primary}
               />
               <MetricCard
                 label="Orders"
@@ -587,14 +592,14 @@ export default function HomeScreen() {
           {/* AI Insights Section */}
           <View
             style={{
-              backgroundColor: "#0F1419",
+              backgroundColor: AppColors.surface,
               borderRadius: 16,
               padding: 16,
             }}
           >
             <View
               style={{
-                backgroundColor: "#6B5FED",
+                backgroundColor: AppColors.primary,
                 paddingHorizontal: 10,
                 paddingVertical: 6,
                 borderRadius: 12,
@@ -606,9 +611,9 @@ export default function HomeScreen() {
                 marginBottom: 12,
               }}
             >
-              <IconSymbol size={14} name="sparkles" color="#FFFFFF" />
+              <IconSymbol size={14} name="sparkles" color={AppColors.white} />
               <Text
-                style={{ fontSize: 11, color: "#FFFFFF", fontWeight: "600" }}
+                style={{ fontSize: 11, color: AppColors.white, fontWeight: "600" }}
               >
                 AI INSIGHTS
               </Text>
@@ -621,7 +626,7 @@ export default function HomeScreen() {
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: "#6B5FED",
+                    backgroundColor: AppColors.primary,
                     marginTop: 6,
                   }}
                 />
@@ -643,7 +648,7 @@ export default function HomeScreen() {
                     width: 6,
                     height: 6,
                     borderRadius: 3,
-                    backgroundColor: "#6B5FED",
+                    backgroundColor: AppColors.primary,
                     marginTop: 6,
                   }}
                 />
@@ -667,14 +672,14 @@ export default function HomeScreen() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
-                backgroundColor: "#1A1F2E",
+                backgroundColor: AppColors.surfaceElevated,
                 paddingVertical: 12,
                 borderRadius: 10,
               }}
             >
-              <IconSymbol size={18} name="bubble.left.fill" color="#FFFFFF" />
+              <IconSymbol size={18} name="bubble.left.fill" color={AppColors.white} />
               <Text
-                style={{ fontSize: 14, color: "#FFFFFF", fontWeight: "600" }}
+                style={{ fontSize: 14, color: AppColors.white, fontWeight: "600" }}
               >
                 Ask AI Assistant
               </Text>
@@ -692,13 +697,13 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: "#FFFFFF" }}
+                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
               >
                 Inventory Status
               </Text>
               <TouchableOpacity>
                 <Text
-                  style={{ fontSize: 13, color: "#6B5FED", fontWeight: "600" }}
+                  style={{ fontSize: 13, color: AppColors.primary, fontWeight: "600" }}
                 >
                   View All
                 </Text>
@@ -707,7 +712,7 @@ export default function HomeScreen() {
 
             <View
               style={{
-                backgroundColor: "#0F1419",
+                backgroundColor: AppColors.surface,
                 borderRadius: 16,
                 overflow: "hidden",
               }}
@@ -739,7 +744,7 @@ export default function HomeScreen() {
               style={{
                 fontSize: 16,
                 fontWeight: "600",
-                color: "#FFFFFF",
+                color: AppColors.white,
                 marginBottom: 12,
               }}
             >
@@ -747,7 +752,7 @@ export default function HomeScreen() {
             </Text>
             <View
               style={{
-                backgroundColor: "#0F1419",
+                backgroundColor: AppColors.surface,
                 borderRadius: 16,
                 padding: 16,
                 minHeight: 200,
@@ -789,13 +794,13 @@ export default function HomeScreen() {
                   style={{
                     fontSize: 16,
                     fontWeight: "600",
-                    color: "#FFFFFF",
+                    color: AppColors.white,
                   }}
                 >
                   AI Insights
                 </Text>
               </View>
-              <Text style={{ fontSize: 12, color: "#6B5FED" }}>Live</Text>
+              <Text style={{ fontSize: 12, color: AppColors.primary }}>Live</Text>
             </View>
             <View style={{ gap: 12 }}>
               {aiInsights.length > 0 ? (
@@ -803,7 +808,7 @@ export default function HomeScreen() {
                   <View
                     key={insight.id}
                     style={{
-                      backgroundColor: "#0F1419",
+                      backgroundColor: AppColors.surface,
                       borderRadius: 12,
                       padding: 12,
                       borderLeftWidth: 4,
@@ -814,7 +819,7 @@ export default function HomeScreen() {
                             ? "#FF3B30"
                             : insight.type === "recommendation"
                               ? "#FFD60A"
-                              : "#6B5FED",
+                              : AppColors.primary,
                     }}
                   >
                     <View
@@ -829,7 +834,7 @@ export default function HomeScreen() {
                         style={{
                           fontSize: 13,
                           fontWeight: "600",
-                          color: "#FFFFFF",
+                          color: AppColors.white,
                           flex: 1,
                         }}
                       >
@@ -893,7 +898,7 @@ export default function HomeScreen() {
                           style={{
                             paddingHorizontal: 8,
                             paddingVertical: 4,
-                            backgroundColor: "#6B5FED",
+                            backgroundColor: AppColors.primary,
                             borderRadius: 4,
                           }}
                         >
@@ -901,7 +906,7 @@ export default function HomeScreen() {
                             style={{
                               fontSize: 11,
                               fontWeight: "600",
-                              color: "#FFFFFF",
+                              color: AppColors.white,
                             }}
                           >
                             Action
@@ -914,7 +919,7 @@ export default function HomeScreen() {
               ) : (
                 <View
                   style={{
-                    backgroundColor: "#0F1419",
+                    backgroundColor: AppColors.surface,
                     borderRadius: 12,
                     padding: 16,
                     alignItems: "center",

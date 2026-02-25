@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import { analyzeEventBatch } from "../services/ai.service";
+import { auth } from "../lib/auth";
+import { fromNodeHeaders } from "better-auth/node";
 
 export class MobileController {
   // GET /api/mobile/analytics/dashboard
@@ -19,9 +20,9 @@ export class MobileController {
       // Assuming Order model exists, otherwise 0
       const totalRevenueAgg = await prisma.order.aggregate({
         _sum: { totalAmount: true },
-        where: { status: "COMPLETED" },
+        where: { status: { in: ["PAID", "FULFILLED"] } },
       });
-      const totalRevenue = totalRevenueAgg._sum.totalAmount || 0;
+      const totalRevenue = totalRevenueAgg._sum?.totalAmount ?? 0;
 
       // 3. Visitor Metrics (from Events)
       // Active visitors: Unique users in last 5 minutes
@@ -141,6 +142,83 @@ export class MobileController {
     } catch (error) {
       console.error("[Mobile] Error fetching products:", error);
       res.status(500).json({ error: "Failed to fetch products" });
+    }
+  }
+
+  // POST /api/mobile/products (create product – same shape as web)
+  static async createProduct(req: Request, res: Response) {
+    try {
+      const session = (req as any).session;
+      if (!session?.user?.id) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const hasPermission = await auth.api.userHasPermission({
+        headers: fromNodeHeaders(req.headers),
+        body: {
+          userId: session.user.id,
+          permission: { Dashboard: ["create"] },
+        },
+      });
+      if (!hasPermission) {
+        return res
+          .status(403)
+          .json({ error: "Forbidden – You do not have permission to create products." });
+      }
+
+      const body = req.body;
+      if (typeof body !== "object" || body === null) {
+        return res.status(400).json({ error: "Invalid request body" });
+      }
+
+      const baseSlug = (body.name ?? "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "") || "product";
+      let slug = baseSlug;
+      let slugSuffix = 0;
+      while (await prisma.product.findUnique({ where: { slug } })) {
+        slugSuffix++;
+        slug = `${baseSlug}-${slugSuffix}`;
+      }
+
+      const skuValue = typeof body.sku === "string" && body.sku.trim() ? body.sku.trim() : undefined;
+      if (skuValue !== undefined) {
+        const existing = await prisma.product.findUnique({ where: { sku: skuValue } });
+        if (existing) {
+          return res.status(400).json({ error: "A product with this SKU already exists." });
+        }
+      }
+
+      const product = await prisma.product.create({
+        data: {
+          name: body.name,
+          slug,
+          description: body.description ?? "",
+          category: body.category ?? "",
+          subcategories: Array.isArray(body.subcategories) ? body.subcategories : [],
+          colors: Array.isArray(body.colors) ? body.colors : [],
+          price: Number(body.price) ?? 0,
+          discount: Number(body.discount) ?? 0,
+          ratingFromManufacturer: body.ratingFromManufacturer ?? null,
+          customerRating: body.customerRating ?? null,
+          images: Array.isArray(body.images) ? body.images : [],
+          stock: Number(body.stock) ?? 0,
+          ...(skuValue !== undefined ? { sku: skuValue } : {}),
+        },
+      });
+
+      return res.status(201).json({
+        message: "Product created successfully",
+        product,
+      });
+    } catch (error: any) {
+      console.error("[Mobile] Error creating product:", error);
+      const message = error?.message || "Failed to create product";
+      const isUniqueViolation = message.includes("Unique constraint") || message.includes("unique");
+      res.status(isUniqueViolation ? 400 : 500).json({
+        error: isUniqueViolation ? "A product with this name or SKU already exists." : message,
+      });
     }
   }
 

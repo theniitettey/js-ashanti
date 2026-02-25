@@ -62,12 +62,12 @@ cp .env.example .env
 
 ## Mobile Application (React Native Expo)
 
-The mobile app is located in the `mobile/` folder.
+The mobile app is located in the `js-ashanti/` folder.
 
 ### Getting Started
 
 ```bash
-cd mobile
+cd js-ashanti
 npm install
 npx expo start
 ```
@@ -93,3 +93,47 @@ npx expo start
 - The `.env` files in `web/` and `backend/` contain sensitive info - never commit them.
 - Use `.env.example` in each directory as a template for your local setup.
 - The backend must be running for both web and mobile clients to function correctly.
+
+## Analytics Event Taxonomy
+
+The platform now tracks both user events (frontend) and system events (backend) for commerce analytics and security monitoring.
+
+### Core event groups
+
+- **User behavior**
+  - `PAGE_VIEW`
+  - `PRODUCT_VIEW`
+  - `ADD_TO_CART`
+  - `REMOVE_FROM_CART`
+  - `CHECKOUT_START`
+  - `CHECKOUT_COMPLETE`
+  - `checkout_success`
+  - `checkout_failed`
+- **Commerce lifecycle**
+  - `PURCHASE_COMPLETED`
+  - `DELIVERY_STATUS_CHANGED`
+- **Operations**
+  - `INVENTORY_UPDATED`
+
+### Required payload fields (recommended standard)
+
+- `eventType`: string
+- `timestamp`: ISO datetime
+- `userId`: user id, email, or `"system"` for backend-generated events
+- `sessionId`: active session id or `"system"`
+- `page` (optional): current route/page context
+- `metadata` (optional object): event-specific attributes
+
+### Suggested metadata keys by event
+
+- **Product events**: `productId`, `slug`, `quantity`
+- **Checkout/purchase**: `orderId`, `itemCount`, `totalAmount`
+- **Payment/delivery**: `statusFrom`, `statusTo`, `paymentProvider`, `paymentRef`
+- **Inventory**: `updateType`, `stock`, `discount`
+
+### Security controls in place
+
+- Client-side throttle and dedupe in analytics hook (reduces noisy repeats)
+- Server-side websocket rate limits (per socket + per user)
+- Server-side dedupe window for near-identical events
+- Payload size and timestamp validation during ingestion

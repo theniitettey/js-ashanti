@@ -5,7 +5,7 @@ import { ProductsCardDetails } from "./productsCard";
 import { TiArrowRight } from "react-icons/ti";
 import { motion, useInView } from "framer-motion";
 import { ProductCardSkeleton } from "./ProductCardSkeleton";
-import { getRandomProducts } from "@/lib/utils";
+import { pickFeaturedProducts } from "@/lib/utils";
 
 export function ProductsList({ products: initialProducts }: { products: any[] }) {
   const [products, setProducts] = useState(initialProducts || []);
@@ -16,7 +16,7 @@ export function ProductsList({ products: initialProducts }: { products: any[] })
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001"}/api/products`)
         .then((res) => res.json())
         .then((data) => {
-          setProducts(getRandomProducts(data, 16));
+          setProducts(pickFeaturedProducts(data, 16));
           setIsLoading(false);
         })
         .catch(() => setIsLoading(false));

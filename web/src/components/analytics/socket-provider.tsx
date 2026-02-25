@@ -25,8 +25,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
     const socketInstance = io(backendUrl, {
-      secure: true,
-      rejectUnauthorized: false,
+      withCredentials: true,
+      transports: ["websocket", "polling"],
     });
 
     socketInstance.on("connect", () => {

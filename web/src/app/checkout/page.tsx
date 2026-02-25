@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 type ShippingForm = {
   fullName: string;
@@ -15,7 +17,15 @@ type ShippingForm = {
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
-  const subtotal = getTotalPrice();
+  const { trackCheckout, trackEvent } = useAnalytics();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const safeItems = mounted ? items : [];
+  const subtotal = mounted ? getTotalPrice() : 0;
   const shipping = 0;
   const tax = 0;
   const total = subtotal + shipping + tax;
@@ -30,16 +40,27 @@ export default function CheckoutPage() {
   const onSubmit = async (data: ShippingForm) => {
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
-      await axios.post(`${backendUrl}/api/orders/checkout`, {
+      trackCheckout("start", total);
+      const response = await axios.post(`${backendUrl}/api/orders/checkout`, {
         ...data,
-        cartItems: items,
+        cartItems: safeItems,
         total,
       });
 
+      trackCheckout("complete", total);
+      trackEvent("checkout_success", {
+        orderId: response?.data?.orderId,
+        itemCount: safeItems.length,
+        total,
+      });
       clearCart();
       router.push("/checkout/success");
     } catch (err) {
       console.error(err);
+      trackEvent("checkout_failed", {
+        itemCount: safeItems.length,
+        total,
+      });
       toast.error("Failed to place order");
     }
   };
@@ -89,7 +110,7 @@ export default function CheckoutPage() {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !mounted || safeItems.length === 0}
           className="w-full bg-indigo-600 text-white py-3 rounded-full hover:bg-indigo-700"
         >
           {isSubmitting ? "Placing Order..." : "Place Order"}
@@ -100,7 +121,7 @@ export default function CheckoutPage() {
       <div className="rounded-lg bg-gray-50 dark:text-black p-6 shadow-sm">
         <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
         <ul className="divide-y">
-          {items.map((item) => (
+          {safeItems.map((item) => (
             <li key={item.id} className="py-3 flex justify-between">
               <span>{item.name} × {item.quantity}</span>
               <span>GH₵{(item.price * item.quantity).toFixed(2)}</span>
