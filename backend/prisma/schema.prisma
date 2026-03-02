@@ -1,0 +1,251 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                     String   @id @default(cuid())
+  name                   String
+  slug                   String   @unique
+  description            String
+  category               String
+  subcategories          String[]
+  colors                 String[]
+  price                  Float
+  discount               Float
+  ratingFromManufacturer Float?
+  customerRating         Float?
+  images                 String[]
+  stock                  Int      @default(0)
+  sku                    String   @unique @default(cuid())
+  createdAt              DateTime @default(now())
+  reviews                Review[]
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  name        String
+  text        String
+  rating      Int
+  createdAt   DateTime @default(now())
+  product     Product  @relation(fields: [productSlug], references: [slug])
+  productSlug String
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String    @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  role          String    @default("user")
+  accounts      Account[]
+  sessions      Session[]
+
+  banned     Boolean?
+  banReason  String?
+  banExpires DateTime?
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy String?
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+model BusinessSettings {
+  id                String   @id @default(cuid())
+  name              String
+  logoUrl           String?
+  phone             String
+  address           String
+  city              String
+  state             String
+  country           String
+  currency          String   @default("GHS")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("business_settings")
+} 
+
+model Order {
+  id           String    @id @default(cuid())
+  customerName String
+  email        String
+  phone        String
+  address      String
+  status       String    @default("pending")
+  totalAmount  Float
+  items        Json      // store items as JSON array
+  createdAt    DateTime  @default(now())
+}
+
+model Insight {
+  id         String   @id @default(cuid())
+  summary    String
+  confidence Float
+  patterns   String[] // Array of detected patterns
+  timeWindow String
+  eventCount Int
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("insights")
+}
+
+// Production-Grade Resilience Tables
+
+// Event logging for batch processing
+model Event {
+  id         String   @id @default(cuid())
+  batch_id   String   @db.VarChar(255)
+  event_type String   @db.VarChar(100)
+  user_id    String?  @db.VarChar(255)
+  data       Json
+  timestamp  DateTime @default(now())
+  created_at DateTime @default(now())
+
+  @@index([batch_id])
+  @@index([timestamp])
+  @@map("events")
+}
+
+// Batch aggregation state machine
+model Batch {
+  id         String   @id @default(cuid())
+  batch_id   String   @unique @db.VarChar(255)
+  status     String   @default("OPEN") // OPEN, SEALED, ANALYZED, ARCHIVED
+  event_count Int     @default(0)
+  sealed_at  DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relation to analysis jobs
+  analysis_jobs AnalysisJob[]
+
+  @@index([status])
+  @@index([created_at])
+  @@map("batches")
+}
+
+// Analysis job queue with locking
+model AnalysisJob {
+  id              String   @id @default(cuid())
+  job_id          String   @unique @db.VarChar(255)
+  batch_id        String   @db.VarChar(255)
+  status          String   @default("PENDING") // PENDING, RUNNING, SUCCESS, FAILED
+  attempt_count   Int      @default(0)
+  max_attempts    Int      @default(5)
+  lock_expires_at DateTime?
+  trigger_type    String   @default("SCHEDULED") // SCHEDULED, MANUAL
+  last_error      String?
+  error_context   Json?
+  analysis_time_ms Int?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relation to batch
+  batch Batch @relation(fields: [batch_id], references: [batch_id])
+
+  // Ensure only one PENDING job per batch (handled in application logic)
+  @@index([status])
+  @@index([lock_expires_at])
+  @@index([updated_at])
+  @@index([batch_id])
+  @@map("analysis_jobs")
+}
+
+// Dead letter queue for failed jobs
+model DeadLetterJob {
+  id             String   @id @default(cuid())
+  dlq_id         String   @unique @db.VarChar(255)
+  job_id         String   @db.VarChar(255)
+  batch_id       String   @db.VarChar(255)
+  attempt_count  Int
+  last_error     String
+  error_context  Json
+  failed_at      DateTime @default(now())
+
+  @@index([failed_at])
+  @@index([batch_id])
+  @@map("dead_letter_jobs")
+}
+
+// Optional Kafka outbox for event streaming
+model KafkaOutbox {
+  id           String   @id @default(cuid())
+  outbox_id    String   @unique @db.VarChar(255)
+  aggregate_id String   @db.VarChar(255)
+  event_type   String   @db.VarChar(100)
+  payload      Json
+  published    Boolean  @default(false)
+  created_at   DateTime @default(now())
+
+  @@index([published])
+  @@index([created_at])
+  @@map("kafka_outbox")
+}
+
+// Archived batches (30+ days old, for cold storage)
+model ArchivedBatch {
+  id         String   @id @default(cuid())
+  batch_id   String   @unique @db.VarChar(255)
+  status     String   @default("ARCHIVED")
+  event_count Int
+  sealed_at  DateTime?
+  archived_at DateTime @default(now())
+  original_created_at DateTime
+
+  @@index([archived_at])
+  @@index([batch_id])
+  @@map("batches_archive")
+}
