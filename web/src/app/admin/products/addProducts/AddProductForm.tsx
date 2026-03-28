@@ -63,6 +63,7 @@ export function AddProductForm() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           ...data,
           images: uploadedImageUrls,

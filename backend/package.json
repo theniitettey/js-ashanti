@@ -4,9 +4,9 @@
   "description": "Backend for JS Ashanti",
   "main": "src/index.ts",
   "scripts": {
-    "start": "npx prisma generate && node dist/index.js",
-    "dev": "npx prisma generate && nodemon src/index.ts",
-    "worker": "npx prisma generate && ts-node src/index.ts",
+    "start": "npx prisma db push && node dist/index.js",
+    "dev": "npx prisma db push && nodemon src/index.ts",
+    "worker": "npx prisma db push && ts-node src/index.ts",
     "build": "npx prisma generate && tsc"
   },
   "keywords": [],
