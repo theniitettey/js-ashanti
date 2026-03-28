@@ -69,6 +69,6 @@ export const auth = betterAuth({
                 attributes: {}
             },
         },
-        useSecureCookies: true
+        useSecureCookies: false
     }
 });
