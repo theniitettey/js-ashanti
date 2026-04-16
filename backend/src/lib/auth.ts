@@ -14,6 +14,10 @@ export const auth = betterAuth({
       process.env.FRONTEND_URL || "http://localhost:3000",
       "http://localhost:8081",
       "http://localhost:8082",
+      "http://192.168.0.162:8081",
+      "exp://192.168.0.162:8081",
+      "http://100.100.104.210:8081",
+      "exp://100.100.104.210:8081",
     ].filter(Boolean) as string[],
     emailVerification: {
         sendVerificationEmail: async ({ url, user }) => {
@@ -73,6 +77,6 @@ export const auth = betterAuth({
                 attributes: {}
             },
         },
-        useSecureCookies: true
+        useSecureCookies: false
     }
 });

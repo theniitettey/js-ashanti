@@ -69,11 +69,12 @@ export default function LoginScreen() {
         return;
       }
 
-      // Bearer token is in response header (better-auth bearer plugin)
+      // Bearer token is returned in the JSON response payload (better-auth bearer plugin)
       const token =
-        response.headers.get("set-auth-token") ||
         data.token ||
-        data.session?.token;
+        data.session?.token ||
+        response.headers.get("set-auth-token");
+        
       if (!token) {
         setError("Login succeeded but no session token received. Try again.");
         setLoading(false);

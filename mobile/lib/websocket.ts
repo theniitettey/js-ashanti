@@ -2,7 +2,7 @@ import { API_ENDPOINTS } from "./api";
 
 // Get the base URL from environment
 const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
+  process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:4001";
 
 export interface WebSocketMessage {
   type: "metrics_update" | "alert" | "ai_insight" | "inventory_change";

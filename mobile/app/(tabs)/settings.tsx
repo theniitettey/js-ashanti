@@ -7,15 +7,13 @@ import {
   StyleSheet,
 } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
+import { AppColors, Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import Typography from "@/constants/typography";
 import { useState } from "react";
 import { SFSymbol } from "expo-symbols";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_ENDPOINTS, apiRequestWithAuth } from "@/lib/api";
 
 interface SettingsItemProps {
   icon: SFSymbol;
@@ -61,7 +59,7 @@ const SettingsItem = ({
       </View>
       <View style={styles.settingsItemRight}>
         {subtitle && (
-          <Text style={[styles.settingsItemSubtitle, { color: theme.icon }]}>
+          <Text style={[styles.settingsItemSubtitle, { color: theme.textSecondary }]}>
             {subtitle}
           </Text>
         )}
@@ -73,7 +71,7 @@ const SettingsItem = ({
             thumbColor="#ffffff"
           />
         ) : hasArrow ? (
-          <IconSymbol name="chevron.right" size={20} color={theme.icon} />
+          <IconSymbol name="chevron.right" size={20} color={theme.textSecondary} />
         ) : null}
       </View>
     </TouchableOpacity>
@@ -89,7 +87,7 @@ const SectionHeader = ({ title }: SectionHeaderProps) => {
   const theme = Colors[colorScheme ?? "light"];
 
   return (
-    <Text style={[styles.sectionHeader, { color: theme.icon }]}>{title}</Text>
+    <Text style={[styles.sectionHeader, { color: theme.textSecondary }]}>{title}</Text>
   );
 };
 
@@ -337,7 +335,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#222222",
+    borderBottomColor: AppColors.border,
   },
   settingsItemLeft: {
     flexDirection: "row",

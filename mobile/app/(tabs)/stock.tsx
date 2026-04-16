@@ -7,8 +7,6 @@ import {
   StyleSheet,
 } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
-import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import Typography from "@/constants/typography";
 import { useState, useEffect } from "react";
 import { apiRequestWithAuth, API_ENDPOINTS } from "@/lib/api";
@@ -304,8 +302,6 @@ const ProductCard = ({ product }: { product: Product }) => {
 };
 
 export default function StockScreen() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -413,7 +409,7 @@ export default function StockScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -557,6 +553,7 @@ export default function StockScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: AppColors.background,
   },
   header: {
     flexDirection: "row",
@@ -582,11 +579,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: Typography.xl,
     fontWeight: "700",
-    color: "#1C1917",
+    color: AppColors.text,
   },
   headerSubtitle: {
     fontSize: Typography.sm,
-    color: "#78716C",
+    color: AppColors.textSecondary,
     marginTop: 2,
   },
   headerRight: {
@@ -645,7 +642,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: Typography.md,
-    color: "#1C1917",
+    color: AppColors.text,
   },
   filterButton: {
     width: 48,
@@ -667,7 +664,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: Typography.lg,
     fontWeight: "700",
-    color: "#1C1917",
+    color: AppColors.text,
     marginBottom: 16,
   },
   metricsGrid: {
@@ -693,18 +690,18 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontSize: Typography.sm,
-    color: "#9CA3AF",
+    color: AppColors.textSecondary,
     marginBottom: 4,
   },
   metricValue: {
     fontSize: Typography.xxl,
     fontWeight: "700",
-    color: "#FFFFFF",
+    color: AppColors.text,
     marginBottom: 12,
   },
   progressBarContainer: {
     height: 4,
-    backgroundColor: "#374151",
+    backgroundColor: AppColors.border,
     borderRadius: 2,
     overflow: "hidden",
   },
@@ -725,7 +722,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: "#374151",
+    borderColor: AppColors.border,
   },
   categoryPillActive: {
     backgroundColor: "#EA580C",
@@ -734,7 +731,7 @@ const styles = StyleSheet.create({
   categoryPillText: {
     fontSize: Typography.sm,
     fontWeight: "500",
-    color: "#78716C",
+    color: AppColors.textSecondary,
   },
   categoryPillTextActive: {
     color: "#FFFFFF",
@@ -747,7 +744,7 @@ const styles = StyleSheet.create({
   },
   itemsCount: {
     fontSize: Typography.sm,
-    color: "#9CA3AF",
+    color: AppColors.textSecondary,
   },
   productsContainer: {
     gap: 12,
@@ -793,17 +790,17 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: Typography.md,
     fontWeight: "600",
-    color: "#1C1917",
+    color: AppColors.text,
     marginBottom: 4,
   },
   productSKU: {
     fontSize: Typography.xs,
-    color: "#78716C",
+    color: AppColors.textSecondary,
     marginBottom: 2,
   },
   productCategory: {
     fontSize: Typography.xs,
-    color: "#78716C",
+    color: AppColors.textSecondary,
   },
   productRight: {
     alignItems: "flex-end",
@@ -821,7 +818,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: Typography.lg,
     fontWeight: "700",
-    color: "#1C1917",
+    color: AppColors.text,
   },
   productFooter: {
     marginBottom: 8,
@@ -831,7 +828,7 @@ const styles = StyleSheet.create({
   },
   stockLabel: {
     fontSize: Typography.xs,
-    color: "#78716C",
+    color: AppColors.textSecondary,
   },
   stockValue: {
     fontSize: Typography.sm,
@@ -852,7 +849,7 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     fontSize: Typography.xs,
-    color: "#78716C",
+    color: AppColors.textSecondary,
     fontWeight: "500",
   },
   restockButton: {

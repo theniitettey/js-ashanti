@@ -1,4 +1,4 @@
-import { Colors } from "@/constants/theme";
+import { AppColors, Colors } from "@/constants/theme";
 import Typography from "@/constants/typography";
 import {
   View,
@@ -45,7 +45,7 @@ const ReportItemCard = ({
         width: "48%",
         gap: 16,
         borderWidth: 1,
-        borderColor: "#222222",
+        borderColor: AppColors.border,
       }}
     >
       <IconSymbol
@@ -427,7 +427,7 @@ const ConversionFunnel = ({ conversionData }: ConversionFunnelProps) => {
         backgroundColor: theme.cardBg,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#222222",
+        borderColor: AppColors.border,
         overflow: "hidden",
       }}
     >
@@ -527,7 +527,7 @@ const CustomerAnalytics = ({ analyticsData }: CustomerAnalyticsProps) => {
         backgroundColor: theme.cardBg,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#222222",
+        borderColor: AppColors.border,
         padding: 16,
         gap: 16,
       }}
@@ -766,7 +766,7 @@ const ScheduledReports = ({ reportsData }: ScheduleReportProps) => {
         backgroundColor: theme.cardBg,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: "#222222",
+        borderColor: AppColors.border,
         padding: 16,
         gap: 16,
       }}
@@ -867,7 +867,7 @@ const ReportsHeader = ({
   return (
     <View
       style={{
-        backgroundColor: "#000000",
+        backgroundColor: theme.background,
         paddingHorizontal: 16,
         paddingTop: 16,
         paddingBottom: 12,
@@ -1015,7 +1015,7 @@ export default function Reports() {
           left: 0,
           right: 0,
           zIndex: 1000,
-          backgroundColor: "#000000",
+          backgroundColor: theme.background,
         }}
       >
         <ReportsHeader
@@ -1035,7 +1035,7 @@ export default function Reports() {
         <Text
           style={{
             fontSize: Typography.lg,
-            fontWeight: "semibold",
+            fontWeight: "600",
             color: theme.text,
           }}
         >
@@ -1050,7 +1050,7 @@ export default function Reports() {
             borderRadius: 8,
             padding: 16,
             borderWidth: 1,
-            borderColor: "#",
+            borderColor: AppColors.border,
             justifyContent: "space-between",
           }}
         >
@@ -1180,7 +1180,7 @@ export default function Reports() {
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: "#1e293b",
+                backgroundColor: theme.cardBg,
                 padding: 12,
                 borderRadius: 6,
                 alignItems: "center",
@@ -1197,7 +1197,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1305,7 +1305,7 @@ export default function Reports() {
             <Text
               style={{
                 fontSize: Typography.lg,
-                fontWeight: "semibold",
+                fontWeight: "600",
                 color: theme.text,
                 marginTop: 24,
                 marginBottom: 12,
@@ -1371,7 +1371,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1385,7 +1385,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1399,7 +1399,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1413,7 +1413,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1446,7 +1446,7 @@ export default function Reports() {
           <Text
             style={{
               fontSize: Typography.lg,
-              fontWeight: "semibold",
+              fontWeight: "600",
               color: theme.text,
               marginTop: 24,
               marginBottom: 12,
@@ -1480,7 +1480,7 @@ export default function Reports() {
         >
           <View
             style={{
-              backgroundColor: "#6366f1",
+              backgroundColor: AppColors.primary,
               padding: 8,
               borderRadius: 16,
               flexDirection: "row",
@@ -1490,8 +1490,8 @@ export default function Reports() {
               justifyContent: "center",
             }}
           >
-            <IconSymbol size={16} name="star.slash.fill" color={theme.text} />
-            <Text style={{ color: theme.text }}>AI Insights</Text>
+            <IconSymbol size={16} name="star.slash.fill" color={AppColors.white} />
+            <Text style={{ color: AppColors.white }}>AI Insights</Text>
           </View>
           {AI_INSIGHTS.map((insight, index) => (
             <AIInsightsCard key={index} text={insight} />
@@ -1506,11 +1506,11 @@ export default function Reports() {
               gap: 8,
               padding: 12,
               borderRadius: 8,
-              backgroundColor: "#1e293b",
+              backgroundColor: AppColors.primary,
             }}
           >
-            <IconSymbol size={20} name="bubble.left.fill" color={theme.text} />
-            <Text style={{ color: theme.text }}>Get More Insights</Text>
+            <IconSymbol size={20} name="bubble.left.fill" color={AppColors.white} />
+            <Text style={{ color: AppColors.white }}>Get More Insights</Text>
           </TouchableOpacity>
         </View>
 
@@ -1532,7 +1532,7 @@ export default function Reports() {
               padding: 16,
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: "#222",
+              borderColor: AppColors.border,
             }}
           >
             <View style={{ gap: 8 }}>
@@ -1560,15 +1560,15 @@ export default function Reports() {
                 borderRadius: 8,
                 borderWidth: 1,
                 borderColor: "#263244",
-                backgroundColor: "#0F1724",
+                backgroundColor: AppColors.primary,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 8,
               }}
             >
-              <IconSymbol name="sparkles" size={18} color={theme.text} />
-              <Text style={{ color: theme.text }}>Get More Insights</Text>
+              <IconSymbol name="sparkles" size={18} color={AppColors.white} />
+              <Text style={{ color: AppColors.white }}>Get More Insights</Text>
             </TouchableOpacity>
           </View>
         </View>

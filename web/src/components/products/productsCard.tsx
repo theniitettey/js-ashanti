@@ -101,15 +101,17 @@ export const ProductsCardDetails = ({
     <div className="flex flex-col rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border overflow-hidden h-full">
       {/* Image with badge */}
       <div className="relative">
-        <Image
-          src={ImgSrc || "/fallback-image.webp"}
-          alt={displayName}
-          width={600}
-          height={400}
-          onError={() => setImgSrc("/fallback-image.webp")}
-          className="w-full h-32 lg:h-52 object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
-          loading="lazy"
-        />
+        <Link href={`/products/${slug}`}>
+          <Image
+            src={ImgSrc || "/fallback-image.webp"}
+            alt={displayName}
+            width={600}
+            height={400}
+            onError={() => setImgSrc("/fallback-image.webp")}
+            className="w-full h-32 lg:h-52 object-cover hover:scale-110 transition-transform duration-300 cursor-pointer"
+            loading="lazy"
+          />
+        </Link>
         {discount > 0 && (
           <span
             className={`absolute top-2 right-2 text-xs font-semibold text-white px-2 py-1 rounded-2xl animate-pulse duration-300 ${badgeColor}`}

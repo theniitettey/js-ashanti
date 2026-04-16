@@ -16,13 +16,22 @@ export class MobileController {
         where: { stock: 0 },
       });
 
-      // 2. Revenue (Mock logic if Order table empty, otherwise aggregation)
-      // Assuming Order model exists, otherwise 0
-      const totalRevenueAgg = await prisma.order.aggregate({
-        _sum: { totalAmount: true },
-        where: { status: { in: ["PAID", "FULFILLED"] } },
-      });
-      const totalRevenue = totalRevenueAgg._sum?.totalAmount ?? 0;
+      // 2. Revenue (best effort)
+      // Some local databases may have schema drift around OrderStatus enum.
+      // In that case, do not fail the whole mobile dashboard.
+      let totalRevenue = 0;
+      try {
+        const totalRevenueAgg = await prisma.order.aggregate({
+          _sum: { totalAmount: true },
+          where: { status: { in: ["PAID", "FULFILLED"] } },
+        });
+        totalRevenue = totalRevenueAgg._sum?.totalAmount ?? 0;
+      } catch (orderError) {
+        console.warn(
+          "[Mobile] Revenue aggregation unavailable, falling back to 0:",
+          orderError,
+        );
+      }
 
       // 3. Visitor Metrics (from Events)
       // Active visitors: Unique users in last 5 minutes

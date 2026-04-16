@@ -178,10 +178,32 @@ async function processJob(job: ClaimedJob): Promise<void> {
     }
 
     if (batch.status !== "SEALED") {
-      console.warn(
-        `[Worker] Batch ${job.batch_id} is not SEALED (status: ${batch.status}), skipping`
-      );
-      await markJobFailed(job, "Batch not sealed", "FATAL");
+      // OPEN batches may still be aggregating events; retry later.
+      if (batch.status === "OPEN") {
+        await markJobFailed(job, "Batch not sealed yet", "TRANSIENT");
+        return;
+      }
+
+      // If already analyzed/archived, this job is stale and should not go to DLQ.
+      if (batch.status === "ANALYZED" || batch.status === "ARCHIVED") {
+        const analysisTimeMs = Date.now() - startTime;
+        await prisma.analysisJob.update({
+          where: { id: job.id },
+          data: {
+            status: "SUCCESS",
+            analysis_time_ms: analysisTimeMs,
+            last_error: null,
+            error_context: null,
+            updated_at: new Date(),
+          },
+        });
+        console.warn(
+          `[Worker] Job ${job.job_id} skipped because batch ${job.batch_id} is already ${batch.status}`
+        );
+        return;
+      }
+
+      await markJobFailed(job, `Batch in invalid state: ${batch.status}`, "FATAL");
       return;
     }
 

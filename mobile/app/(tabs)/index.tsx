@@ -10,10 +10,8 @@ import { Image } from "expo-image";
 import Divider from "@/components/ui/divider";
 import { SFSymbol } from "expo-symbols";
 import { useState, useEffect, useRef } from "react";
-import { API_ENDPOINTS, apiRequest, apiRequestWithAuth } from "@/lib/api";
+import { API_ENDPOINTS, apiRequestWithAuth } from "@/lib/api";
 import { aiInsightsService, AIInsight } from "@/lib/ai-insights";
-import { wsManager } from "@/lib/websocket";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppColors } from "@/constants/theme";
 
@@ -190,7 +188,7 @@ const InventoryProductCard = ({
           <Text style={{ fontSize: 24, color: "#666666" }}>📦</Text>
         </View>
         <View>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: AppColors.white }}>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: AppColors.text }}>
             {name}
           </Text>
           <Text style={{ fontSize: 12, color: AppColors.textSecondary, marginTop: 2 }}>
@@ -217,7 +215,7 @@ const InventoryProductCard = ({
           style={{
             fontSize: 16,
             fontWeight: "700",
-            color: AppColors.white,
+            color: AppColors.text,
             minWidth: 30,
             textAlign: "right",
           }}
@@ -248,6 +246,7 @@ export default function HomeScreen() {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [aiInsights, setAIInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const metricsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
     null,
@@ -260,10 +259,10 @@ export default function HomeScreen() {
     fetchDashboardData();
     fetchAIInsights();
 
-    // Set up polling for real-time metrics updates every 2 seconds
+    // Poll at a reasonable cadence to reduce UI jank and backend load.
     metricsIntervalRef.current = setInterval(() => {
       fetchDashboardData();
-    }, 2000);
+    }, 15000);
 
     // Check connection status based on successful API fetches
     const connectionCheckInterval = setInterval(() => {
@@ -282,15 +281,19 @@ export default function HomeScreen() {
 
   const fetchDashboardData = async () => {
     try {
-      setLoading(true);
       const data = await apiRequestWithAuth(
         API_ENDPOINTS.MOBILE.ANALYTICS.DASHBOARD,
       );
       setDashboardData(data);
+      setDashboardError(null);
       // Update last successful fetch timestamp
       lastSuccessfulFetch.current = Date.now();
     } catch (err: any) {
       console.error("Failed to fetch dashboard:", err);
+      const message =
+        err?.message ||
+        "Unable to load dashboard right now. Please check backend connection.";
+      setDashboardError(message);
       // Set default data on error
       setDashboardData({
         metrics: {
@@ -397,6 +400,36 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingTop: 80, paddingBottom: 100 }}
       >
         <View style={{ paddingHorizontal: 16, gap: 20 }}>
+          {dashboardError ? (
+            <View
+              style={{
+                backgroundColor: "#2D1616",
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: AppColors.error,
+                padding: 12,
+              }}
+            >
+              <Text style={{ color: AppColors.error, fontSize: 13, marginBottom: 8 }}>
+                {dashboardError}
+              </Text>
+              <TouchableOpacity
+                onPress={fetchDashboardData}
+                style={{
+                  alignSelf: "flex-start",
+                  backgroundColor: AppColors.primary,
+                  borderRadius: 8,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                }}
+              >
+                <Text style={{ color: AppColors.white, fontWeight: "600", fontSize: 12 }}>
+                  Retry
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
           {/* Live Traffic Section */}
           <View>
             <View
@@ -408,9 +441,9 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
+                style={{ fontSize: 16, fontWeight: "700", color: AppColors.text }}
               >
-                Live Traffic
+                Live Store Activity
               </Text>
               <View
                 style={{
@@ -423,7 +456,7 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     fontSize: 12,
-                    color: wsConnected ? "#00FF00" : "#FF0000",
+                    color: wsConnected ? AppColors.success : AppColors.error,
                     fontWeight: "600",
                   }}
                 >
@@ -455,7 +488,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 32,
                       fontWeight: "700",
-                      color: AppColors.white,
+                      color: AppColors.text,
                     }}
                   >
                     {loading
@@ -509,7 +542,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 20,
                       fontWeight: "700",
-                      color: AppColors.white,
+                      color: AppColors.text,
                     }}
                   >
                     {loading
@@ -528,7 +561,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 20,
                       fontWeight: "700",
-                      color: AppColors.white,
+                      color: AppColors.text,
                     }}
                   >
                     {loading
@@ -551,7 +584,7 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
+                style={{ fontSize: 16, fontWeight: "700", color: AppColors.text }}
               >
                 Sales Overview
               </Text>
@@ -563,7 +596,7 @@ export default function HomeScreen() {
                   borderRadius: 8,
                 }}
               >
-                <Text style={{ fontSize: 12, color: AppColors.white }}>Today</Text>
+                <Text style={{ fontSize: 12, color: AppColors.text }}>Today</Text>
               </TouchableOpacity>
             </View>
 
@@ -633,7 +666,7 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     fontSize: 13,
-                    color: "#DDDDDD",
+                    color: AppColors.text,
                     flex: 1,
                     lineHeight: 18,
                   }}
@@ -655,7 +688,7 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     fontSize: 13,
-                    color: "#DDDDDD",
+                    color: AppColors.text,
                     flex: 1,
                     lineHeight: 18,
                   }}
@@ -673,13 +706,15 @@ export default function HomeScreen() {
                 justifyContent: "center",
                 gap: 8,
                 backgroundColor: AppColors.surfaceElevated,
+                borderWidth: 1,
+                borderColor: AppColors.border,
                 paddingVertical: 12,
                 borderRadius: 10,
               }}
             >
-              <IconSymbol size={18} name="bubble.left.fill" color={AppColors.white} />
+              <IconSymbol size={18} name="bubble.left.fill" color={AppColors.text} />
               <Text
-                style={{ fontSize: 14, color: AppColors.white, fontWeight: "600" }}
+                style={{ fontSize: 14, color: AppColors.text, fontWeight: "600" }}
               >
                 Ask AI Assistant
               </Text>
@@ -697,7 +732,7 @@ export default function HomeScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 16, fontWeight: "600", color: AppColors.white }}
+                style={{ fontSize: 16, fontWeight: "700", color: AppColors.text }}
               >
                 Inventory Status
               </Text>
@@ -743,8 +778,8 @@ export default function HomeScreen() {
             <Text
               style={{
                 fontSize: 16,
-                fontWeight: "600",
-                color: AppColors.white,
+                fontWeight: "700",
+                color: AppColors.text,
                 marginBottom: 12,
               }}
             >
@@ -793,8 +828,8 @@ export default function HomeScreen() {
                 <Text
                   style={{
                     fontSize: 16,
-                    fontWeight: "600",
-                    color: AppColors.white,
+                    fontWeight: "700",
+                    color: AppColors.text,
                   }}
                 >
                   AI Insights
@@ -804,7 +839,7 @@ export default function HomeScreen() {
             </View>
             <View style={{ gap: 12 }}>
               {aiInsights.length > 0 ? (
-                aiInsights.map((insight, idx) => (
+                aiInsights.map((insight) => (
                   <View
                     key={insight.id}
                     style={{
@@ -834,7 +869,7 @@ export default function HomeScreen() {
                         style={{
                           fontSize: 13,
                           fontWeight: "600",
-                          color: AppColors.white,
+                          color: AppColors.text,
                           flex: 1,
                         }}
                       >
@@ -872,7 +907,7 @@ export default function HomeScreen() {
                     <Text
                       style={{
                         fontSize: 12,
-                        color: "#AAAAAA",
+                        color: AppColors.textSecondary,
                         marginBottom: 8,
                       }}
                     >
@@ -888,7 +923,7 @@ export default function HomeScreen() {
                       <Text
                         style={{
                           fontSize: 11,
-                          color: "#666666",
+                          color: AppColors.textSecondary,
                         }}
                       >
                         {new Date(insight.timestamp).toLocaleTimeString()}
@@ -927,7 +962,7 @@ export default function HomeScreen() {
                     minHeight: 80,
                   }}
                 >
-                  <Text style={{ fontSize: 13, color: "#666666" }}>
+                  <Text style={{ fontSize: 13, color: AppColors.textSecondary }}>
                     Loading insights...
                   </Text>
                 </View>

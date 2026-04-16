@@ -10,14 +10,14 @@ import { useEffect } from "react";
 import { Text } from "react-native";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
-
-// Crisp text: disable font scaling so text aligns to pixel grid (reduces blurriness)
-if (Text.defaultProps == null) Text.defaultProps = {};
-Text.defaultProps.allowFontScaling = false;
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { AppColors, Colors } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
+
+// Crisp text: disable font scaling so text aligns to pixel grid (reduces blurriness)
+if ((Text as any).defaultProps == null) (Text as any).defaultProps = {};
+(Text as any).defaultProps.allowFontScaling = false;
 
 export const unstable_settings = {
   anchor: "(tabs)",

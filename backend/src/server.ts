@@ -51,6 +51,14 @@ app.use(express.json());
 // Initialize WebSocket
 initializeWebSocket(httpServer);
 
+// Inject Origin header for mobile clients where React Native fetch strips it.
+app.use("/api/auth/*", (req, res, next) => {
+  if (!req.headers.origin && req.headers["x-expo-origin"]) {
+    req.headers.origin = req.headers["x-expo-origin"] as string;
+  }
+  next();
+});
+
 // Mount Better-Auth handler
 app.all("/api/auth/*", toNodeHandler(auth));
 
