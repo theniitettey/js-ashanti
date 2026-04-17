@@ -1,31 +1,67 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from "react-native";
-
-const tintColorLight = "#49515f";
-const tintColorDark = "#49515f";
 
 export const Colors = {
   light: {
-    text: "#11181C",
-    background: "#fff",
-    tint: tintColorLight,
-    icon: "#6366f1",
-    tabIconDefault: "#020408",
-    cardBg: "#0b0f17",
-    tabIconSelected: "#6366f1",
+    background: "#ffffff",
+    foreground: "#1f1f22",
+    text: "#1f1f22",
+    card: "#ffffff",
+    cardForeground: "#1f1f22",
+    popover: "#ffffff",
+    popoverForeground: "#1f1f22",
+    primary: "#252525",
+    primaryForeground: "#fafafa",
+    secondary: "#f4f4f5",
+    secondaryForeground: "#252525",
+    muted: "#f4f4f5",
+    mutedForeground: "#71717a",
+    accent: "#f4f4f5",
+    accentForeground: "#252525",
+    destructive: "#ef4444",
+    destructiveForeground: "#fafafa",
+    border: "#e4e4e7",
+    input: "#e4e4e7",
+    ring: "#a1a1aa",
+    success: "#10B981",
+    warning: "#F59E0B",
+    
+    // backwards compatibility for Expo default templates
+    tint: "#252525",
+    icon: "#71717a",
+    tabIconDefault: "#71717a",
+    tabIconSelected: "#252525",
+    cardBg: "#ffffff",
   },
   dark: {
-    text: "#ECEDEE",
-    background: "#151718",
-    tint: tintColorDark,
-    icon: "#9BA1A6",
-    cardBg: "#0b0f17",
-    tabIconDefault: "#020408",
-    tabIconSelected: "#6366f1",
+    background: "#09090b",
+    foreground: "#ffffff",
+    text: "#ffffff",
+    card: "#18181b",
+    cardForeground: "#ffffff",
+    popover: "#18181b",
+    popoverForeground: "#ffffff",
+    primary: "#fafafa",
+    primaryForeground: "#1f1f22",
+    secondary: "#27272a",
+    secondaryForeground: "#ffffff",
+    muted: "#27272a",
+    mutedForeground: "#a1a1aa",
+    accent: "#27272a",
+    accentForeground: "#ffffff",
+    destructive: "#ef4444",
+    destructiveForeground: "#ffffff",
+    border: "#27272a",
+    input: "#27272a",
+    ring: "#52525b",
+    success: "#10B981",
+    warning: "#F59E0B",
+    
+    // backwards compatibility for Expo default templates
+    tint: "#fafafa",
+    icon: "#a1a1aa",
+    tabIconDefault: "#a1a1aa",
+    tabIconSelected: "#fafafa",
+    cardBg: "#18181b",
   },
 };
 
