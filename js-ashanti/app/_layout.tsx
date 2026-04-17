@@ -13,6 +13,9 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -43,12 +46,12 @@ function RootLayoutNav() {
       <View
         style={{
           flex: 1,
-          backgroundColor: "#000000",
+          backgroundColor: Colors[colorScheme ?? "light"].background,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <ActivityIndicator size="large" color="#6B5FED" />
+        <ActivityIndicator size="large" color={Colors[colorScheme ?? "light"].primary} />
       </View>
     );
   }
@@ -58,10 +61,7 @@ function RootLayoutNav() {
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor:
-            colorScheme === "dark"
-              ? "#000"
-              : Colors[colorScheme ?? "light"].background,
+          backgroundColor: Colors[colorScheme ?? "light"].background,
         }}
         edges={["top"]}
       >
@@ -81,8 +81,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
