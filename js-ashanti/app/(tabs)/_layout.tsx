@@ -14,9 +14,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tabIconSelected,
+        tabBarActiveTintColor: theme.primary,
+        tabBarInactiveTintColor: theme.mutedForeground,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarStyle: {
+          backgroundColor: theme.background,
+          borderTopColor: theme.border,
+        },
       }}
     >
       <Tabs.Screen
@@ -35,17 +40,17 @@ export default function TabLayout() {
           headerTitle: () => (
             <View>
               <Text
-                style={{ fontSize: 18, fontWeight: "600", color: theme.text }}
+                style={{ fontSize: 18, fontWeight: "600", color: theme.foreground }}
               >
                 Reports
               </Text>
-              <Text style={{ fontSize: 12, color: theme.tint }}>
+              <Text style={{ fontSize: 12, color: theme.mutedForeground }}>
                 Analytics & Insights
               </Text>
             </View>
           ),
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),
         }}
       />
@@ -64,8 +69,7 @@ export default function TabLayout() {
                 style={[
                   styles.coloredBg,
                   {
-                    backgroundColor:
-                      Colors[colorScheme ?? "light"].tabIconSelected,
+                    backgroundColor: theme.background,
                   },
                 ]}
               >
@@ -73,14 +77,14 @@ export default function TabLayout() {
                   style={[
                     styles.whiteCircle,
                     {
-                      backgroundColor: Colors["light"].background,
+                      backgroundColor: theme.primary,
                     },
                   ]}
                 >
                   <IconSymbol
                     size={20}
                     name="plus"
-                    color={Colors[colorScheme ?? "light"].tabIconSelected}
+                    color={theme.primaryForeground}
                   />
                 </View>
               </View>
@@ -118,17 +122,14 @@ const styles = StyleSheet.create({
     top: -18,
   },
   whiteCircle: {
-    backgroundColor: "#fff",
     borderRadius: 999,
     padding: 8,
     justifyContent: "center",
     alignItems: "center",
-    // iOS shadow
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 4,
-    // Android elevation
     elevation: 6,
   },
   coloredBg: {
@@ -138,11 +139,11 @@ const styles = StyleSheet.create({
     minHeight: 76,
     justifyContent: "center",
     alignItems: "center",
-    // subtle shadow for the colored bg
+    // container shadow instead
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
-    elevation: 6,
+    elevation: 2,
   },
 });
