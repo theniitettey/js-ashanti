@@ -8,37 +8,30 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
+  useColorScheme,
 } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Typography from "@/constants/typography";
-import { API_ENDPOINTS, apiRequestWithAuth } from "@/lib/api";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
+import { Colors } from "@/constants/theme";
+import { useCreateProduct } from "@/hooks/use-products";
 
-const palette = {
-  background: "#000000",
-  card: "#1A1F2E",
-  navy: "#0F141E",
-  primary: "#6B5FED",
-  textPrimary: "#FFFFFF",
-  textSecondary: "#9CA3AF",
-  inputBorder: "#1F2937",
-  danger: "#EF4444",
-  warning: "#F59E0B",
-  success: "#10B981",
-};
-
-const Label = ({ label, required }: { label: string; required?: boolean }) => (
+const Label = ({ label, required, theme }: { label: string; required?: boolean; theme: any }) => (
   <View style={styles.labelRow}>
-    <Text style={styles.label}>{label}</Text>
-    {required ? <Text style={styles.required}>*</Text> : null}
+    <Text style={[styles.label, { color: theme.foreground }]}>{label}</Text>
+    {required ? <Text style={[styles.required, { color: theme.destructive }]}>*</Text> : null}
   </View>
 );
 
 export default function AddScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
+  const colorScheme = useColorScheme() ?? "dark";
+  const theme = Colors[colorScheme];
+
+  // TanStack mutation — handles loading state and cache invalidation automatically
+  const { createProduct, isPending } = useCreateProduct();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
@@ -129,83 +122,62 @@ export default function AddScreen() {
   };
 
   const handleSubmit = async () => {
-    if (
-      !formData.name ||
-      !formData.price ||
-      !formData.stock ||
-      !formData.category
-    ) {
+    if (!formData.name || !formData.price || !formData.stock || !formData.category) {
       Alert.alert("Validation Error", "Please fill in all required fields");
       return;
     }
 
     try {
-      setLoading(true);
-      await apiRequestWithAuth(API_ENDPOINTS.MOBILE.PRODUCTS.CREATE, {
-        method: "POST",
-        body: JSON.stringify({
-          name: formData.name,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
-          category: formData.category,
-          sku: formData.sku,
-          subcategories: formData.subcategories.split(",").map((s) => s.trim()).filter(Boolean),
-          colors: formData.colors.split(",").map((c) => c.trim()).filter(Boolean),
-        }),
+      await createProduct({
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock),
+        category: formData.category,
+        sku: formData.sku,
+        subcategories: formData.subcategories.split(",").map((s) => s.trim()).filter(Boolean),
+        colors: formData.colors.split(",").map((c) => c.trim()).filter(Boolean),
       });
 
       Alert.alert("Success", "Product added successfully", [
-        {
-          text: "OK",
-          onPress: () => {
-            router.push("/(tabs)/stock");
-          },
-        },
+        { text: "OK", onPress: () => router.push("/(tabs)/stock") },
       ]);
     } catch (error: any) {
-      console.error("Error adding product:", error);
-      if (error.message.includes("No authentication token")) {
+      if (error.message?.includes("No authentication token")) {
         Alert.alert("Login Required", "Please log in to add products.", [
-          {
-            text: "Go to Login",
-            onPress: () => router.push("/login"),
-          },
-          {
-            text: "Cancel",
-          },
+          { text: "Go to Login", onPress: () => router.push("/login") },
+          { text: "Cancel" },
         ]);
       } else {
         Alert.alert("Error", error.message || "Failed to add product");
       }
-    } finally {
-      setLoading(false);
     }
   };
+
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <TouchableOpacity
-          style={styles.headerIconButton}
+          style={[styles.headerIconButton, { backgroundColor: theme.muted }]}
           onPress={() => router.back()}
         >
           <IconSymbol
             name="chevron.left"
-            size={22}
-            color={palette.textPrimary}
+            size={20}
+            color={theme.foreground}
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add Product</Text>
+        <Text style={[styles.headerTitle, { color: theme.foreground }]}>Add Product</Text>
         <TouchableOpacity
-          style={styles.headerSaveButton}
+          style={[styles.headerSaveButton, { backgroundColor: theme.primary }]}
           onPress={handleSubmit}
-          disabled={loading}
+          disabled={isPending}
         >
           <IconSymbol
-            name={loading ? "hourglass" : "checkmark"}
-            size={20}
-            color={palette.textPrimary}
+            name={isPending ? "hourglass" : "checkmark"}
+            size={18}
+            color={theme.primaryForeground}
           />
         </TouchableOpacity>
       </View>
@@ -216,7 +188,7 @@ export default function AddScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Image Upload */}
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.imagePlaceholderWrapper}>
             {selectedImage ? (
               <Image
@@ -224,158 +196,145 @@ export default function AddScreen() {
                 style={styles.selectedImage}
               />
             ) : (
-              <View style={styles.imagePlaceholderBox}>
+               <View style={[styles.imagePlaceholderBox, { backgroundColor: theme.muted, borderColor: theme.border }]}>
                 <IconSymbol
-                  name="photo.on.rectangle.angled"
+                  name="photo"
                   size={40}
-                  color="#6B7280"
+                  color={theme.mutedForeground}
                 />
-                <View style={styles.plusBadge}>
-                  <IconSymbol
-                    name="plus"
-                    size={14}
-                    color={palette.textPrimary}
-                  />
-                </View>
               </View>
             )}
           </View>
           <View style={styles.uploadButtonsRow}>
             <TouchableOpacity
-              style={styles.secondaryButton}
+              style={[styles.secondaryButton, { backgroundColor: theme.secondary }]}
               onPress={pickImageFromCamera}
             >
-              <IconSymbol name="camera" size={16} color={palette.textPrimary} />
-              <Text style={styles.secondaryButtonText}>Camera</Text>
+              <IconSymbol name="camera" size={16} color={theme.secondaryForeground} />
+              <Text style={[styles.secondaryButtonText, { color: theme.secondaryForeground }]}>Camera</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.secondaryButton}
+              style={[styles.secondaryButton, { backgroundColor: theme.secondary }]}
               onPress={pickImageFromGallery}
             >
-              <IconSymbol name="photo" size={16} color={palette.textPrimary} />
-              <Text style={styles.secondaryButtonText}>Gallery</Text>
+              <IconSymbol name="photo.on.rectangle" size={16} color={theme.secondaryForeground} />
+              <Text style={[styles.secondaryButtonText, { color: theme.secondaryForeground }]}>Gallery</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.helperText}>Recommended size: 800x800px</Text>
+          <Text style={[styles.helperText, { color: theme.mutedForeground }]}>Dimensions: 800x800px recommended</Text>
         </View>
 
-        {/* Form */}
+        {/* Form Elements */}
+        {/* Name */}
         <View style={styles.formGroup}>
-          <Label label="Product Name" required />
+          <Label label="Product Name" required theme={theme} />
           <TextInput
-            placeholder="Enter product name"
-            placeholderTextColor={palette.textSecondary}
-            style={styles.input}
+            placeholder="Enter brand and product name"
+            placeholderTextColor={theme.mutedForeground}
+            style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
             value={formData.name}
             onChangeText={(text) => handleInputChange("name", text)}
           />
         </View>
 
-        <View style={styles.formGroup}>
-          <Label label="SKU / Product Code" required />
-          <TextInput
-            placeholder="e.g., PRD-12345"
-            placeholderTextColor={palette.textSecondary}
-            style={styles.input}
-            value={formData.sku}
-            onChangeText={(text) => handleInputChange("sku", text)}
-          />
+        {/* SKU & Category Row */}
+        <View style={[styles.row, { gap: 12 }]}>
+            <View style={[styles.formGroup, { flex: 1 }]}>
+                <Label label="SKU" required theme={theme} />
+                <TextInput
+                    placeholder="PRD-123"
+                    placeholderTextColor={theme.mutedForeground}
+                    style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
+                    value={formData.sku}
+                    onChangeText={(text) => handleInputChange("sku", text)}
+                />
+            </View>
+            <View style={[styles.formGroup, { flex: 1.5 }]}>
+                <Label label="Category" required theme={theme} />
+                <TouchableOpacity
+                    style={[styles.input, styles.dropdown, { backgroundColor: theme.card, borderColor: theme.border }]}
+                    onPress={() => setCategoryModalVisible(true)}
+                >
+                    <Text style={[styles.inputPlaceholder, { color: formData.category ? theme.foreground : theme.mutedForeground }]}>
+                    {formData.category || "Select..."}
+                    </Text>
+                    <IconSymbol
+                    name="chevron.down"
+                    size={16}
+                    color={theme.mutedForeground}
+                    />
+                </TouchableOpacity>
+            </View>
         </View>
 
-        <View style={styles.formGroup}>
-          <Label label="Subcategories (comma separated)" />
-          <TextInput
-            placeholder="e.g. Smartphones, Tablets"
-            placeholderTextColor={palette.textSecondary}
-            style={styles.input}
-            value={formData.subcategories}
-            onChangeText={(text) => handleInputChange("subcategories", text)}
-          />
+
+        {/* Metadata Row */}
+        <View style={[styles.row, { gap: 12 }]}>
+            <View style={[styles.formGroup, { flex: 1 }]}>
+                <Label label="Subcategories" theme={theme} />
+                <TextInput
+                    placeholder="E.g. iOS"
+                    placeholderTextColor={theme.mutedForeground}
+                    style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
+                    value={formData.subcategories}
+                    onChangeText={(text) => handleInputChange("subcategories", text)}
+                />
+            </View>
+            <View style={[styles.formGroup, { flex: 1 }]}>
+                <Label label="Colors" theme={theme} />
+                <TextInput
+                    placeholder="Red, Blue"
+                    placeholderTextColor={theme.mutedForeground}
+                    style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
+                    value={formData.colors}
+                    onChangeText={(text) => handleInputChange("colors", text)}
+                />
+            </View>
         </View>
 
-        <View style={styles.formGroup}>
-          <Label label="Colors (comma separated)" />
-          <TextInput
-            placeholder="e.g. Red, Blue, Black"
-            placeholderTextColor={palette.textSecondary}
-            style={styles.input}
-            value={formData.colors}
-            onChangeText={(text) => handleInputChange("colors", text)}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Label label="Category" required />
-          <TouchableOpacity
-            style={[styles.input, styles.dropdown]}
-            onPress={() => setCategoryModalVisible(true)}
-          >
-            <Text style={styles.inputPlaceholder}>
-              {formData.category || "Select category"}
-            </Text>
-            <IconSymbol
-              name="chevron.down"
-              size={16}
-              color={palette.textSecondary}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={[styles.formGroup, styles.row, { gap: 12 }]}>
-          <View style={{ flex: 1 }}>
-            <Label label="Price" required />
-            <View style={styles.inputWithIcon}>
-              <IconSymbol
-                name="dollarsign"
-                size={16}
-                color={palette.textSecondary}
-              />
+        {/* Pricing Row */}
+        <View style={[styles.row, { gap: 12 }]}>
+          <View style={{ flex: 1, marginBottom: 16 }}>
+            <Label label="Price" required theme={theme} />
+            <View style={[styles.inputWithIcon, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <Text style={{ color: theme.mutedForeground, paddingRight: 4 }}>$</Text>
               <TextInput
                 value={formData.price}
                 onChangeText={(text) => handleInputChange("price", text)}
-                placeholderTextColor={palette.textSecondary}
-                style={styles.inputBare}
+                placeholderTextColor={theme.mutedForeground}
+                style={[styles.inputBare, { color: theme.foreground }]}
                 keyboardType="decimal-pad"
                 placeholder="0.00"
               />
             </View>
           </View>
-          <View style={{ flex: 1 }}>
-            <Label label="Cost Price" required />
-            <View style={styles.inputWithIcon}>
-              <IconSymbol
-                name="dollarsign"
+          <View style={{ flex: 1, marginBottom: 16 }}>
+            <Label label="Stock Qty" required theme={theme} />
+            <View style={[styles.inputWithIcon, { backgroundColor: theme.card, borderColor: theme.border }]}>
+             <IconSymbol
+                name="number"
                 size={16}
-                color={palette.textSecondary}
+                color={theme.mutedForeground}
               />
               <TextInput
-                defaultValue="0.00"
-                placeholderTextColor={palette.textSecondary}
-                style={styles.inputBare}
-                keyboardType="decimal-pad"
+                placeholder="0"
+                placeholderTextColor={theme.mutedForeground}
+                 style={[styles.inputBare, { color: theme.foreground }]}
+                keyboardType="number-pad"
+                value={formData.stock}
+                onChangeText={(text) => handleInputChange("stock", text)}
               />
             </View>
           </View>
         </View>
 
+        {/* Description */}
         <View style={styles.formGroup}>
-          <Label label="Quantity / Stock Level" required />
+          <Label label="Description" theme={theme} />
           <TextInput
-            placeholder="Enter quantity"
-            placeholderTextColor={palette.textSecondary}
-            style={styles.input}
-            keyboardType="number-pad"
-            value={formData.stock}
-            onChangeText={(text) => handleInputChange("stock", text)}
-          />
-        </View>
-
-        <View style={styles.formGroup}>
-          <Label label="Description" />
-          <TextInput
-            placeholder="Enter product description..."
-            placeholderTextColor={palette.textSecondary}
-            style={[styles.input, styles.textArea]}
+            placeholder="Write a clear description..."
+            placeholderTextColor={theme.mutedForeground}
+            style={[styles.input, styles.textArea, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
             multiline
             numberOfLines={4}
             value={formData.description}
@@ -384,42 +343,38 @@ export default function AddScreen() {
         </View>
 
         {/* Info Banner */}
-        <View style={styles.infoBanner}>
-          <View style={styles.infoIcon}>
-            <IconSymbol name="info" size={16} color={palette.textPrimary} />
+        <View style={[styles.infoBanner, { backgroundColor: theme.muted, borderColor: theme.border }]}>
+          <View style={[styles.infoIcon, { backgroundColor: theme.primary }]}>
+            <IconSymbol name="info" size={14} color={theme.primaryForeground} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.infoTitle}>Required Fields</Text>
-            <Text style={styles.infoText}>
-              All fields marked with * are mandatory to add a product to
-              inventory.
+            <Text style={[styles.infoText, { color: theme.foreground }]}>
+              Ensure all <Text style={{ color: theme.destructive, fontWeight: '700' }}>*</Text> fields are accurate before uploading to the live inventory.
             </Text>
           </View>
         </View>
 
-        {/* Actions */}
-        <View style={[styles.row, { gap: 12, marginTop: 12 }]}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.cancelButton]}
-            onPress={() => router.back()}
-          >
-            <IconSymbol name="circle" size={16} color={palette.textPrimary} />
-            <Text style={styles.cancelText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.primaryButton]}
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            <IconSymbol name="plus" size={16} color={palette.textPrimary} />
-            <Text style={styles.primaryText}>
-              {loading ? "Adding..." : "Add Product"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ height: 140 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Better Footer Actions aligned with shadcn */}
+      <View style={[styles.footerActions, { backgroundColor: theme.background, borderTopColor: theme.border }]}>
+        <TouchableOpacity
+            style={[styles.actionButton, styles.cancelButton, { borderColor: theme.border, backgroundColor: theme.card }]}
+            onPress={() => router.back()}
+        >
+            <Text style={[styles.cancelText, { color: theme.foreground }]}>Discard</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            style={[styles.actionButton, styles.primaryButton, { backgroundColor: theme.primary }]}
+            onPress={handleSubmit}
+            disabled={isPending}
+        >
+            <Text style={[styles.primaryText, { color: theme.primaryForeground }]}>
+            {isPending ? "Saving..." : "Save Product"}
+            </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Category Modal */}
       <Modal
@@ -429,14 +384,14 @@ export default function AddScreen() {
         onRequestClose={() => setCategoryModalVisible(false)}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Category</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.foreground }]}>Select Category</Text>
               <TouchableOpacity onPress={() => setCategoryModalVisible(false)}>
                 <IconSymbol
                   name="xmark"
-                  size={24}
-                  color={palette.textPrimary}
+                  size={22}
+                  color={theme.mutedForeground}
                 />
               </TouchableOpacity>
             </View>
@@ -447,15 +402,14 @@ export default function AddScreen() {
                   key={cat}
                   style={[
                     styles.categoryItem,
-                    formData.category === cat && styles.categoryItemActive,
+                    formData.category === cat ? { backgroundColor: theme.secondary, borderColor: theme.primary } : { borderColor: 'transparent' },
                   ]}
                   onPress={() => handleSelectCategory(cat)}
                 >
                   <Text
                     style={[
                       styles.categoryItemText,
-                      formData.category === cat &&
-                        styles.categoryItemTextActive,
+                      { color: formData.category === cat ? theme.foreground : theme.mutedForeground, fontWeight: formData.category === cat ? "600" : "400" },
                     ]}
                   >
                     {cat}
@@ -463,38 +417,36 @@ export default function AddScreen() {
                   {formData.category === cat && (
                     <IconSymbol
                       name="checkmark"
-                      size={20}
-                      color={palette.primary}
+                      size={18}
+                      color={theme.foreground}
                     />
                   )}
                 </TouchableOpacity>
               ))}
 
               {/* Custom Category Section */}
-              <View style={styles.customCategorySection}>
-                <Text style={styles.customCategoryLabel}>
-                  Or create your own
-                </Text>
+              <View style={[styles.customCategorySection, { borderTopColor: theme.border }]}>
+                 <Label label="Add a custom category" theme={theme} />
                 <View style={styles.customCategoryInput}>
                   <TextInput
-                    placeholder="Enter custom category"
-                    placeholderTextColor={palette.textSecondary}
-                    style={styles.customInputField}
+                    placeholder="Custom name"
+                    placeholderTextColor={theme.mutedForeground}
+                    style={[styles.customInputField, { backgroundColor: theme.card, borderColor: theme.border, color: theme.foreground }]}
                     value={customCategory}
                     onChangeText={setCustomCategory}
                   />
                 </View>
                 <TouchableOpacity
-                  style={styles.addCustomButton}
+                  style={[styles.addCustomButton, { backgroundColor: theme.secondary }]}
                   onPress={handleAddCustomCategory}
                   disabled={!customCategory.trim()}
                 >
                   <IconSymbol
                     name="plus"
                     size={16}
-                    color={palette.textPrimary}
+                    color={theme.secondaryForeground}
                   />
-                  <Text style={styles.addCustomButtonText}>Add Custom</Text>
+                  <Text style={[styles.addCustomButtonText, { color: theme.secondaryForeground }]}>Add Category</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -508,7 +460,6 @@ export default function AddScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: palette.background,
   },
   header: {
     flexDirection: "row",
@@ -517,25 +468,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 16,
+    borderBottomWidth: 1,
   },
   headerIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: palette.navy,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
   headerTitle: {
-    fontSize: Typography.lg,
-    fontWeight: "700",
-    color: palette.textPrimary,
+    fontSize: Typography.md,
+    fontWeight: "600",
   },
   headerSaveButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: palette.primary,
+    width: 36,
+    height: 36,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -544,46 +493,33 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 24,
   },
   card: {
-    backgroundColor: palette.card,
-    borderRadius: 16,
+    borderRadius: 12,
+    borderWidth: 1,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
+    alignItems: "center",
   },
   imagePlaceholderWrapper: {
     alignItems: "center",
     marginBottom: 16,
   },
   imagePlaceholderBox: {
-    width: 180,
-    height: 180,
-    borderRadius: 16,
-    backgroundColor: "#111827",
+    width: 140,
+    height: 140,
+    borderRadius: 12,
+    borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    position: "relative",
+    borderStyle: "dashed",
   },
   selectedImage: {
-    width: 180,
-    height: 180,
-    borderRadius: 16,
-  },
-  plusBadge: {
-    position: "absolute",
-    bottom: 10,
-    right: 10,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: palette.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: palette.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    width: 140,
+    height: 140,
+    borderRadius: 12,
   },
   uploadButtonsRow: {
     flexDirection: "row",
@@ -594,49 +530,41 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: palette.navy,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 10,
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   secondaryButtonText: {
-    color: palette.textPrimary,
-    fontSize: Typography.sm,
-    fontWeight: "600",
+    fontSize: Typography.xs,
+    fontWeight: "500",
   },
   helperText: {
     textAlign: "center",
-    color: palette.textSecondary,
     fontSize: Typography.xs,
   },
   formGroup: {
-    marginBottom: 14,
+    marginBottom: 16,
   },
   labelRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 6,
     gap: 4,
   },
   label: {
-    color: palette.textPrimary,
     fontSize: Typography.sm,
-    fontWeight: "600",
+    fontWeight: "500",
   },
   required: {
-    color: palette.danger,
     fontSize: Typography.sm,
     fontWeight: "700",
   },
   input: {
-    backgroundColor: palette.card,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: palette.inputBorder,
     paddingHorizontal: 14,
-    paddingVertical: 14,
-    color: palette.textPrimary,
+    paddingVertical: 12,
     fontSize: Typography.md,
   },
   dropdown: {
@@ -645,7 +573,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   inputPlaceholder: {
-    color: palette.textSecondary,
     fontSize: Typography.md,
   },
   row: {
@@ -654,48 +581,49 @@ const styles = StyleSheet.create({
   inputWithIcon: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.card,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: palette.inputBorder,
     paddingHorizontal: 12,
     paddingVertical: 12,
     gap: 8,
   },
   inputBare: {
     flex: 1,
-    color: palette.textPrimary,
     fontSize: Typography.md,
   },
   textArea: {
-    height: 120,
+    height: 100,
+    textAlignVertical: "top",
   },
   infoBanner: {
     flexDirection: "row",
     gap: 12,
-    alignItems: "flex-start",
-    backgroundColor: palette.card,
-    borderRadius: 12,
+    alignItems: "center",
+    borderRadius: 8,
+    borderWidth: 1,
     padding: 12,
     marginTop: 4,
   },
   infoIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: palette.primary,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
   },
-  infoTitle: {
-    color: palette.textPrimary,
-    fontSize: Typography.sm,
-    fontWeight: "700",
-    marginBottom: 4,
-  },
   infoText: {
-    color: palette.textSecondary,
-    fontSize: Typography.xs,
+    fontSize: Typography.sm,
+  },
+  footerActions: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
   },
   actionButton: {
     flex: 1,
@@ -704,77 +632,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingVertical: 14,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   cancelButton: {
-    backgroundColor: palette.navy,
     borderWidth: 1,
-    borderColor: palette.inputBorder,
   },
   cancelText: {
-    color: palette.textPrimary,
     fontSize: Typography.sm,
-    fontWeight: "700",
-  },
-  primaryButton: {
-    backgroundColor: palette.primary,
-  },
-  primaryText: {
-    color: palette.textPrimary,
-    fontSize: Typography.sm,
-    fontWeight: "700",
-  },
-  bottomNav: {
-    position: "absolute",
-    bottom: 12,
-    left: 16,
-    right: 16,
-    backgroundColor: "#0B0F17",
-    borderRadius: 18,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 12,
-  },
-  navItem: {
-    alignItems: "center",
-    gap: 4,
-    flex: 1,
-  },
-  navLabel: {
-    color: palette.textSecondary,
-    fontSize: Typography.xs,
     fontWeight: "600",
   },
-  centerFab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: palette.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: -32,
-    shadowColor: palette.primary,
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+  primaryButton: {},
+  primaryText: {
+    fontSize: Typography.sm,
+    fontWeight: "600",
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: palette.background,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 20,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingTop: 16,
     maxHeight: "80%",
   },
   modalHeader: {
@@ -784,12 +664,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: palette.inputBorder,
   },
   modalTitle: {
-    fontSize: Typography.lg,
-    fontWeight: "700",
-    color: palette.textPrimary,
+    fontSize: Typography.md,
+    fontWeight: "600",
   },
   categoriesList: {
     paddingHorizontal: 16,
@@ -801,48 +679,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 14,
     paddingVertical: 14,
-    backgroundColor: palette.card,
-    borderRadius: 12,
+    borderRadius: 8,
     marginBottom: 8,
-    borderWidth: 2,
-    borderColor: "transparent",
-  },
-  categoryItemActive: {
-    backgroundColor: palette.navy,
-    borderColor: palette.primary,
+    borderWidth: 1,
   },
   categoryItemText: {
-    fontSize: Typography.md,
-    color: palette.textSecondary,
-    fontWeight: "500",
-  },
-  categoryItemTextActive: {
-    color: palette.primary,
-    fontWeight: "700",
+    fontSize: Typography.sm,
   },
   customCategorySection: {
-    marginTop: 20,
+    marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: palette.inputBorder,
-  },
-  customCategoryLabel: {
-    fontSize: Typography.sm,
-    fontWeight: "600",
-    color: palette.textSecondary,
-    marginBottom: 12,
   },
   customCategoryInput: {
     marginBottom: 12,
   },
   customInputField: {
-    backgroundColor: palette.card,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: palette.inputBorder,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: palette.textPrimary,
     fontSize: Typography.md,
   },
   addCustomButton: {
@@ -852,13 +708,11 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: palette.primary,
-    borderRadius: 12,
-    marginBottom: 20,
+    borderRadius: 8,
+    marginBottom: 40,
   },
   addCustomButtonText: {
     fontSize: Typography.sm,
-    fontWeight: "700",
-    color: palette.textPrimary,
+    fontWeight: "600",
   },
 });
