@@ -5,329 +5,152 @@ import {
   TouchableOpacity,
   Switch,
   StyleSheet,
+  useColorScheme,
 } from "react-native";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
-import { useColorScheme } from "@/hooks/use-color-scheme";
 import Typography from "@/constants/typography";
 import { useState } from "react";
 import { SFSymbol } from "expo-symbols";
+import { SettingsItem, SettingsSectionHeader as SectionHeader } from "@/components/ui/settings-item";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_ENDPOINTS, apiRequestWithAuth } from "@/lib/api";
-
-interface SettingsItemProps {
-  icon: SFSymbol;
-  iconColor: string;
-  iconBgColor: string;
-  title: string;
-  subtitle?: string;
-  hasArrow?: boolean;
-  hasToggle?: boolean;
-  toggleValue?: boolean;
-  onToggleChange?: (value: boolean) => void;
-  onPress?: () => void;
-}
-
-const SettingsItem = ({
-  icon,
-  iconColor,
-  iconBgColor,
-  title,
-  subtitle,
-  hasArrow = true,
-  hasToggle = false,
-  toggleValue = false,
-  onToggleChange,
-  onPress,
-}: SettingsItemProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={hasToggle}
-      style={styles.settingsItem}
-    >
-      <View style={styles.settingsItemLeft}>
-        <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-          <IconSymbol name={icon} size={20} color={iconColor} />
-        </View>
-        <Text style={[styles.settingsItemTitle, { color: theme.text }]}>
-          {title}
-        </Text>
-      </View>
-      <View style={styles.settingsItemRight}>
-        {subtitle && (
-          <Text style={[styles.settingsItemSubtitle, { color: theme.icon }]}>
-            {subtitle}
-          </Text>
-        )}
-        {hasToggle ? (
-          <Switch
-            value={toggleValue}
-            onValueChange={onToggleChange}
-            trackColor={{ false: "#3e3e3e", true: "#34C759" }}
-            thumbColor="#ffffff"
-          />
-        ) : hasArrow ? (
-          <IconSymbol name="chevron.right" size={20} color={theme.icon} />
-        ) : null}
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-interface SectionHeaderProps {
-  title: string;
-}
-
-const SectionHeader = ({ title }: SectionHeaderProps) => {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
-
-  return (
-    <Text style={[styles.sectionHeader, { color: theme.icon }]}>{title}</Text>
-  );
-};
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? "light"];
+  const colorScheme = useColorScheme() ?? "dark";
+  const theme = Colors[colorScheme];
   const { logout } = useAuth();
   const router = useRouter();
-  const [darkMode, setDarkMode] = useState(true);
+  
+  const [darkMode, setDarkMode] = useState(colorScheme === "dark");
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [smsAlerts, setSmsAlerts] = useState(false);
 
   const handleLogout = async () => {
     try {
-      // Mobile app uses local token storage, so we just clear it locally
-      // No need to call the backend logout endpoint since better-auth
-      // expects sessions, not bearer tokens
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Clear local storage and auth state
       await logout();
       router.replace("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
     }
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: theme.background }]}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* ACCOUNT Section */}
-      <SectionHeader title="ACCOUNT" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="person.circle.fill"
-          iconColor="#A855F7"
-          iconBgColor="#2D1B4E"
-          title="Profile Settings"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="key.fill"
-          iconColor="#EF4444"
-          iconBgColor="#4A1D1D"
-          title="Change Password"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="envelope.fill"
-          iconColor="#10B981"
-          iconBgColor="#1A3D2F"
-          title="Email Notifications"
-          onPress={() => {}}
-        />
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
+      <View style={[styles.header, { borderBottomColor: theme.border }]}>
+        <Text style={[styles.headerTitle, { color: theme.foreground }]}>Settings</Text>
       </View>
 
-      {/* PREFERENCES Section */}
-      <SectionHeader title="PREFERENCES" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="paintpalette.fill"
-          iconColor="#A855F7"
-          iconBgColor="#2D1B4E"
-          title="Theme Selection"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="moon.fill"
-          iconColor="#9CA3AF"
-          iconBgColor="#374151"
-          title="Dark Mode"
-          hasToggle
-          toggleValue={darkMode}
-          onToggleChange={setDarkMode}
-          hasArrow={false}
-        />
-        <SettingsItem
-          icon="globe"
-          iconColor="#3B82F6"
-          iconBgColor="#1E3A5F"
-          title="Language"
-          subtitle="English"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="dollarsign.circle.fill"
-          iconColor="#F59E0B"
-          iconBgColor="#4A3410"
-          title="Currency"
-          subtitle="USD ($)"
-          onPress={() => {}}
-        />
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        
+        {/* ACCOUNT Section */}
+        <SectionHeader title="ACCOUNT" />
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <SettingsItem
+            icon="person.fill" iconColor={theme.primary} iconBgColor={theme.primary + "20"}
+            title="Profile Settings"
+          />
+          <SettingsItem
+            icon="key.fill" iconColor={theme.destructive} iconBgColor={theme.destructive + "20"}
+            title="Change Password"
+          />
+          <SettingsItem
+            icon="envelope.fill" iconColor={theme.success} iconBgColor={theme.success + "20"}
+            title="Email Notifications" isLast
+          />
+        </View>
 
-      {/* BUSINESS Section */}
-      <SectionHeader title="BUSINESS" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="storefront.fill"
-          iconColor="#A855F7"
-          iconBgColor="#2D1B4E"
-          title="Store Information"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="creditcard.fill"
-          iconColor="#10B981"
-          iconBgColor="#1A3D2F"
-          title="Payment Methods"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="shippingbox.fill"
-          iconColor="#06B6D4"
-          iconBgColor="#1A3D47"
-          title="Shipping Options"
-          onPress={() => {}}
-        />
-      </View>
+        {/* PREFERENCES Section */}
+        <SectionHeader title="PREFERENCES" />
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <SettingsItem
+            icon="moon.fill" iconColor={theme.foreground} iconBgColor={theme.muted}
+            title="Dark Mode" hasToggle toggleValue={darkMode} onToggleChange={setDarkMode} hasArrow={false}
+          />
+          <SettingsItem
+            icon="globe" iconColor={theme.primary} iconBgColor={theme.primary + "20"}
+            title="Language" subtitle="English"
+          />
+          <SettingsItem
+            icon="dollarsign.circle.fill" iconColor={theme.warning} iconBgColor={theme.warning + "20"}
+            title="Currency" subtitle="USD ($)" isLast
+          />
+        </View>
 
-      {/* SECURITY Section */}
-      <SectionHeader title="SECURITY" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="checkmark.shield.fill"
-          iconColor="#EF4444"
-          iconBgColor="#4A1D1D"
-          title="Two-Factor Authentication"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="clock.fill"
-          iconColor="#A855F7"
-          iconBgColor="#2D1B4E"
-          title="Login History"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="touchid"
-          iconColor="#3B82F6"
-          iconBgColor="#1E3A5F"
-          title="Privacy Settings"
-          onPress={() => {}}
-        />
-      </View>
+        {/* NOTIFICATIONS Section */}
+        <SectionHeader title="NOTIFICATIONS" />
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <SettingsItem
+            icon="bell.fill" iconColor={theme.primary} iconBgColor={theme.primary + "20"}
+            title="Push Notifications" hasToggle toggleValue={pushNotifications} onToggleChange={setPushNotifications} hasArrow={false}
+          />
+          <SettingsItem
+            icon="envelope.fill" iconColor={theme.success} iconBgColor={theme.success + "20"}
+            title="Email Alerts" hasToggle toggleValue={emailAlerts} onToggleChange={setEmailAlerts} hasArrow={false}
+          />
+          <SettingsItem
+            icon="message.fill" iconColor={theme.warning} iconBgColor={theme.warning + "20"}
+            title="SMS Alerts" hasToggle toggleValue={smsAlerts} onToggleChange={setSmsAlerts} hasArrow={false} isLast
+          />
+        </View>
 
-      {/* NOTIFICATIONS Section */}
-      <SectionHeader title="NOTIFICATIONS" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="bell.fill"
-          iconColor="#3B82F6"
-          iconBgColor="#1E3A5F"
-          title="Push Notifications"
-          hasToggle
-          toggleValue={pushNotifications}
-          onToggleChange={setPushNotifications}
-          hasArrow={false}
-        />
-        <SettingsItem
-          icon="envelope.fill"
-          iconColor="#10B981"
-          iconBgColor="#1A3D2F"
-          title="Email Alerts"
-          hasToggle
-          toggleValue={emailAlerts}
-          onToggleChange={setEmailAlerts}
-          hasArrow={false}
-        />
-        <SettingsItem
-          icon="message.fill"
-          iconColor="#F97316"
-          iconBgColor="#4A2910"
-          title="SMS Alerts"
-          hasToggle
-          toggleValue={smsAlerts}
-          onToggleChange={setSmsAlerts}
-          hasArrow={false}
-        />
-      </View>
+        {/* SUPPORT Section */}
+        <SectionHeader title="SUPPORT" />
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <SettingsItem
+            icon="lifepreserver.fill" iconColor={theme.primary} iconBgColor={theme.primary + "20"}
+            title="Help Center"
+          />
+          <SettingsItem
+            icon="headphones" iconColor={theme.warning} iconBgColor={theme.warning + "20"}
+            title="Contact Support"
+          />
+          <SettingsItem
+            icon="doc.text.fill" iconColor={theme.mutedForeground} iconBgColor={theme.muted}
+            title="Terms of Service" isLast
+          />
+        </View>
 
-      {/* SUPPORT Section */}
-      <SectionHeader title="SUPPORT" />
-      <View style={[styles.section, { backgroundColor: theme.cardBg }]}>
-        <SettingsItem
-          icon="lifepreserver.fill"
-          iconColor="#06B6D4"
-          iconBgColor="#1A3D47"
-          title="Help Center"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="headphones"
-          iconColor="#F97316"
-          iconBgColor="#4A2910"
-          title="Contact Support"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon="doc.text.fill"
-          iconColor="#6B7280"
-          iconBgColor="#374151"
-          title="Terms of Service"
-          onPress={() => {}}
-        />
-      </View>
+        {/* Logout Button */}
+        <TouchableOpacity style={[styles.logoutButton, { backgroundColor: theme.destructive + "15" }]} onPress={handleLogout}>
+          <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color={theme.destructive} />
+          <Text style={[styles.logoutButtonText, { color: theme.destructive }]}>Logout</Text>
+        </TouchableOpacity>
 
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <IconSymbol
-          name="rectangle.portrait.and.arrow.right"
-          size={20}
-          color="#FFFFFF"
-        />
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
-
-      <View style={{ height: 40 }} />
-    </ScrollView>
+        <View style={{ height: 100 }} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  scrollContent: {
     paddingHorizontal: 16,
+    paddingTop: 8,
   },
   sectionHeader: {
     fontSize: Typography.xs,
     fontWeight: "600",
     marginTop: 24,
-    marginBottom: 12,
-    marginLeft: 4,
+    marginBottom: 8,
+    marginLeft: 12,
+    letterSpacing: 1,
   },
   section: {
-    borderRadius: 12,
+    borderRadius: 16,
+    borderWidth: 1,
     overflow: "hidden",
   },
   settingsItem: {
@@ -337,46 +160,43 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#222222",
   },
   settingsItemLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 14,
     flex: 1,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   settingsItemTitle: {
-    fontSize: Typography.md,
+    fontSize: 16,
     fontWeight: "500",
   },
   settingsItemRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 12,
   },
   settingsItemSubtitle: {
-    fontSize: Typography.sm,
+    fontSize: 14,
   },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#EF4444",
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginTop: 32,
-    gap: 8,
+    gap: 10,
   },
   logoutButtonText: {
-    color: "#FFFFFF",
-    fontSize: Typography.md,
+    fontSize: 16,
     fontWeight: "600",
   },
 });
