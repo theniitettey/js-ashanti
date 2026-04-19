@@ -1,58 +1,67 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from "react-native";
-
-export const AppColors = {
-  primary: "#EA580C",
-  primaryLight: "#F97316",
-  primaryDark: "#C2410C",
-  white: "#FFFFFF",
-  background: "#FFFFFF",
-  surface: "#FAFAFA",
-  surfaceElevated: "#F5F5F5",
-  border: "#E5E5E5",
-  text: "#1C1917",
-  textSecondary: "#78716C",
-  textMuted: "#A8A29E",
-  success: "#16A34A",
-  warning: "#EAB308",
-  error: "#DC2626",
-  live: "#22C55E",
-  offline: "#EF4444",
-};
-
-const tintLight = AppColors.textSecondary;
-const tintDark = "#A8A29E";
 
 export const Colors = {
   light: {
-    text: AppColors.text,
-    background: AppColors.background,
-    tint: tintLight,
-    icon: AppColors.primary,
-    tabIconDefault: AppColors.textMuted,
-    cardBg: AppColors.surface,
-    tabIconSelected: AppColors.primary,
-    primary: AppColors.primary,
-    white: AppColors.white,
-    surface: AppColors.surface,
-    textSecondary: AppColors.textSecondary,
+    background: "#ffffff",
+    foreground: "#1f1f22",
+    text: "#1f1f22",
+    card: "#ffffff",
+    cardForeground: "#1f1f22",
+    popover: "#ffffff",
+    popoverForeground: "#1f1f22",
+    primary: "#252525",
+    primaryForeground: "#fafafa",
+    secondary: "#f4f4f5",
+    secondaryForeground: "#252525",
+    muted: "#f4f4f5",
+    mutedForeground: "#71717a",
+    accent: "#f4f4f5",
+    accentForeground: "#252525",
+    destructive: "#ef4444",
+    destructiveForeground: "#fafafa",
+    border: "#e4e4e7",
+    input: "#e4e4e7",
+    ring: "#a1a1aa",
+    success: "#10B981",
+    warning: "#F59E0B",
+    
+    // backwards compatibility for Expo default templates
+    tint: "#252525",
+    icon: "#71717a",
+    tabIconDefault: "#71717a",
+    tabIconSelected: "#252525",
+    cardBg: "#ffffff",
   },
   dark: {
-    text: "#FAFAFA",
-    background: "#1C1917",
-    tint: tintDark,
-    icon: AppColors.primaryLight,
-    tabIconDefault: "#A8A29E",
-    cardBg: "#292524",
-    tabIconSelected: AppColors.primaryLight,
-    primary: AppColors.primaryLight,
-    white: AppColors.white,
-    surface: "#292524",
-    textSecondary: "#A8A29E",
+    background: "#09090b",
+    foreground: "#ffffff",
+    text: "#ffffff",
+    card: "#18181b",
+    cardForeground: "#ffffff",
+    popover: "#18181b",
+    popoverForeground: "#ffffff",
+    primary: "#fafafa",
+    primaryForeground: "#1f1f22",
+    secondary: "#27272a",
+    secondaryForeground: "#ffffff",
+    muted: "#27272a",
+    mutedForeground: "#a1a1aa",
+    accent: "#27272a",
+    accentForeground: "#ffffff",
+    destructive: "#ef4444",
+    destructiveForeground: "#ffffff",
+    border: "#27272a",
+    input: "#27272a",
+    ring: "#52525b",
+    success: "#10B981",
+    warning: "#F59E0B",
+    
+    // backwards compatibility for Expo default templates
+    tint: "#fafafa",
+    icon: "#a1a1aa",
+    tabIconDefault: "#a1a1aa",
+    tabIconSelected: "#fafafa",
+    cardBg: "#18181b",
   },
 };
 

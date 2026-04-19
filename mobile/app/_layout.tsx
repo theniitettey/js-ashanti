@@ -7,17 +7,15 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 import { useEffect } from "react";
-import { Text } from "react-native";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { AppColors, Colors } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-// Crisp text: disable font scaling so text aligns to pixel grid (reduces blurriness)
-if ((Text as any).defaultProps == null) (Text as any).defaultProps = {};
-(Text as any).defaultProps.allowFontScaling = false;
+const queryClient = new QueryClient();
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -48,12 +46,12 @@ function RootLayoutNav() {
       <View
         style={{
           flex: 1,
-          backgroundColor: AppColors.background,
+          backgroundColor: Colors[colorScheme ?? "light"].background,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <ActivityIndicator size="large" color={AppColors.primary} />
+        <ActivityIndicator size="large" color={Colors[colorScheme ?? "light"].primary} />
       </View>
     );
   }
@@ -63,10 +61,7 @@ function RootLayoutNav() {
       <SafeAreaView
         style={{
           flex: 1,
-          backgroundColor:
-            colorScheme === "dark"
-              ? "#1C1917"
-              : Colors[colorScheme ?? "light"].background,
+          backgroundColor: Colors[colorScheme ?? "light"].background,
         }}
         edges={["top"]}
       >
@@ -77,7 +72,7 @@ function RootLayoutNav() {
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           </Stack>
-          <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+          <StatusBar style="auto" />
         </ThemeProvider>
       </SafeAreaView>
     </SafeAreaProvider>
@@ -86,8 +81,10 @@ function RootLayoutNav() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

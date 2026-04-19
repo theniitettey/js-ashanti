@@ -3,10 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Better Auth uses different cookie names in secure vs local dev mode.
-  const sessionCookie =
-    req.cookies.get("__Secure-auth-cookies.session_token")?.value ||
-    req.cookies.get("auth-cookies.session_token")?.value;
+  const sessionCookie = req.cookies.get("auth-cookies.session_token")?.value;
 
   const isOnProtectedRoute = pathname.startsWith("/admin");
   const isOnAuthRoute = pathname === "/login";

@@ -33,7 +33,7 @@ export function AddProductForm() {
     },
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);  
 
   const onSubmit = async (data: ProductFormData) => {
     setIsSubmitting(true);
@@ -44,18 +44,18 @@ export function AddProductForm() {
         formData.append("file", file);
         formData.append("upload_preset", "ml_default");
         formData.append("folder", "products");
-
+  
         const res = await fetch("https://api.cloudinary.com/v1_1/dbugzzv0v/image/upload", {
           method: "POST",
           body: formData,
         });
-
+  
         const cloudData = await res.json();
         return cloudData.secure_url;
       });
-
+  
       const uploadedImageUrls = await Promise.all(uploadPromises);
-
+  
       // Now send product data with uploaded image URLs
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
       const res = await fetch(`${backendUrl}/api/products`, {
@@ -63,35 +63,32 @@ export function AddProductForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Important: Send cookies with request
+        credentials: "include",
         body: JSON.stringify({
           ...data,
           images: uploadedImageUrls,
         }),
       });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to create product");
-      }
+  
+      if (!res.ok) throw new Error("Failed to create product");
 
       toast.success("Product created successfully!");
       form.reset();
       form.setValue("category", "");
       form.setValue("subcategories", []);
-
+     
 
       const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
       if (fileInput) fileInput.value = "";
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Something went wrong.");
+      toast.error("Something went wrong.");
       setIsSubmitting(false)
-    } finally {
+     } finally {
       setIsSubmitting(false);
-    }
+     }
   };
-
+  
 
   return (
     <Form {...form}>
@@ -157,9 +154,9 @@ export function AddProductForm() {
               <FormItem>
                 <FormLabel>Subcategories</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Smartphones, Tablets"
-                    value={field.value?.join(", ") ?? ""}
-                    onChange={(e) => field.onChange(e.target.value.split(",").map(s => s.trim()))} />
+                  <Input placeholder="e.g. Smartphones, Tablets" 
+                  value={field.value?.join(", ") ?? ""}
+                  onChange={(e) => field.onChange(e.target.value.split(",").map(s => s.trim()))}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -174,9 +171,9 @@ export function AddProductForm() {
             <FormItem>
               <FormLabel>Colors (comma separated)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. Red, Blue, Black"
-                  value={field.value?.join(", ") ?? ""}
-                  onChange={(e) => field.onChange(e.target.value.split(",").map(s => s.trim()))} />
+                <Input placeholder="e.g. Red, Blue, Black" 
+                value={field.value?.join(", ") ?? ""}
+                onChange={(e) => field.onChange(e.target.value.split(",").map(s => s.trim()))}/>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -199,13 +196,13 @@ export function AddProductForm() {
           />
 
           <FormField
-            control={form.control}
+            control={form.control} 
             name="discount"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Discount (%)</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} />
+                  <Input type="number" {...field}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -213,19 +210,19 @@ export function AddProductForm() {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="ratingFromManufacturer"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Manufacturer Rating</FormLabel>
-              <FormControl>
-                <Input type="number" step="0.1" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="ratingFromManufacturer"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Manufacturer Rating</FormLabel>
+                <FormControl>
+                  <Input type="number" step="0.1" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -264,12 +261,12 @@ export function AddProductForm() {
             <FormItem>
               <FormLabel>Images</FormLabel>
               <FormControl>
-                <Input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => form.setValue("images", Array.from(e.target.files || []))}
-                />
+              <Input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => form.setValue("images", Array.from(e.target.files || []))}
+              />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -278,7 +275,7 @@ export function AddProductForm() {
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>{
           isSubmitting && (<Loader2 className="animate-spin h-4 w-4 text-white" />)
-        }{isSubmitting ? "Uploading ... " : "Add Product"}</Button>
+          }{isSubmitting ? "Uploading ... " : "Add Product"}</Button>
       </form>
     </Form>
   );
