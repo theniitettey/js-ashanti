@@ -193,7 +193,7 @@ async function processJob(job: ClaimedJob): Promise<void> {
             status: "SUCCESS",
             analysis_time_ms: analysisTimeMs,
             last_error: null,
-            error_context: null,
+            error_context: undefined,
             updated_at: new Date(),
           },
         });
