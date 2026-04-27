@@ -45,6 +45,13 @@ export const API_ENDPOINTS = {
       METRICS: `${API_BASE_URL}/api/mobile/inventory/metrics`,
     },
   },
+  ORDERS: {
+    LIST: `${API_BASE_URL}/api/orders`,
+    FULFILL: (orderId: string) =>
+      `${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}/fulfill`,
+    CANCEL: (orderId: string) =>
+      `${API_BASE_URL}/api/orders/${encodeURIComponent(orderId)}/cancel`,
+  },
 };
 
 export const apiRequest = async (
@@ -154,22 +161,17 @@ export const apiRequestWithAuth = async (
   url: string,
   options: RequestInit = {},
 ): Promise<any> => {
-  try {
-    const token = await AsyncStorage.getItem("userToken");
+  const token = await AsyncStorage.getItem("userToken");
 
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
-
-    return apiRequest(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  } catch (error: any) {
-    console.error("Authenticated API Request Error:", error);
-    throw error;
+  if (!token) {
+    throw new ApiError("Not authenticated", { isTransient: true });
   }
+
+  return apiRequest(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };

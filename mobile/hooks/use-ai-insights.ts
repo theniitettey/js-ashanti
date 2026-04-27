@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { aiInsightsService, AIInsight } from "@/lib/ai-insights";
 import { queryKeys } from "@/lib/query-keys";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface AIInsightsData {
   insights: AIInsight[];
@@ -16,10 +17,11 @@ async function fetchAIInsights(): Promise<AIInsightsData> {
 }
 
 export function useAIInsights() {
+  const { isAuthenticated } = useAuth();
   const { data, isLoading } = useQuery<AIInsightsData>({
     queryKey: queryKeys.aiInsights.all(),
     queryFn: fetchAIInsights,
-    // AI insights don't change often — cache for 5 minutes
+    enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });

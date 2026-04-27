@@ -30,13 +30,13 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading) return;
 
-    const inAuthGroup = segments[0] === "(tabs)";
+    const onLoginScreen = segments[0] === "login";
 
-    if (!isAuthenticated && inAuthGroup) {
+    if (!isAuthenticated && !onLoginScreen) {
       // Redirect to login if not authenticated
       router.replace("/login");
-    } else if (isAuthenticated && !inAuthGroup) {
-      // Redirect to tabs if authenticated
+    } else if (isAuthenticated && onLoginScreen) {
+      // Once logged in, leave the login screen for the main app
       router.replace("/(tabs)");
     }
   }, [isAuthenticated, segments, isLoading]);
@@ -71,6 +71,14 @@ function RootLayoutNav() {
           <Stack>
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="orders"
+              options={{
+                headerShown: false,
+                presentation: "card",
+                animation: "slide_from_right",
+              }}
+            />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>

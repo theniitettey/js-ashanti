@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequestWithAuth, API_ENDPOINTS } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface DashboardMetrics {
   totalProducts: number;
@@ -38,14 +39,13 @@ async function fetchDashboard(): Promise<DashboardData> {
 }
 
 export function useDashboard() {
+  const { isAuthenticated } = useAuth();
   const { data, isLoading, refetch } = useQuery<DashboardData>({
     queryKey: queryKeys.dashboard.all(),
     queryFn: fetchDashboard,
-    // Poll every 2 seconds to replicate live-traffic behaviour
-    refetchInterval: 2000,
-    // Don't refetch just because the window was refocused mid-poll
+    enabled: isAuthenticated,
+    refetchInterval: isAuthenticated ? 2000 : false,
     refetchOnWindowFocus: false,
-    // Keep previous data visible while new data arrives
     placeholderData: FALLBACK,
   });
 

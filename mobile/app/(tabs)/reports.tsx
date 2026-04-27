@@ -15,26 +15,16 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MetricCard } from "@/components/ui/metric-card";
 import { useReports } from "@/hooks/use-reports";
+import { useAIInsights } from "@/hooks/use-ai-insights";
 
-const STATIC_SALES_DATA = [
+const FALLBACK_METRICS = [
   { icon: "dollarsign.circle.fill", title: "Total Revenue", amount: "$84,249", pct: "+12.5%" },
   { icon: "bag.fill", title: "Total Orders", amount: "2,847", pct: "+45.3%" },
   { icon: "person.fill", title: "New Customers", amount: "1,249", pct: "+44.1%" },
   { icon: "chart.bar.fill", title: "Conversion Rate", amount: "3.8%", pct: "-5.1%" },
 ];
 
-const TOP_PRODUCTS = [
-  { name: "Wireless Earbud", units: 847, rev: "$126,450" },
-  { name: "Smart Watch M1", units: 634, rev: "$19,020" },
-  { name: "Gaming Keyboard", units: 621, rev: "$18,630" },
-];
-
-const FUNNEL = [
-  { label: "Website Visits", val: 45820 },
-  { label: "Product Views", val: 28340 },
-  { label: "Add to Cart", val: 12470 },
-  { label: "Orders Completed", val: 2847 },
-];
+const FUNNEL_LABELS = ["Website Visits", "Product Views", "Add to Cart", "Orders Completed"];
 
 export default function ReportsScreen() {
   const colorScheme = useColorScheme() ?? "dark";
@@ -43,13 +33,38 @@ export default function ReportsScreen() {
   const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
 
-  // TanStack Query — date in queryKey means changing date auto-refetches
-  const { isLoading, refetch } = useReports(date);
+  const { data: reportsData, isLoading, refetch } = useReports(date);
+  const { insights: aiInsights } = useAIInsights();
 
   const onDateChange = (event: any, selectedDate?: Date) => {
     setShowPicker(false);
     if (selectedDate) setDate(selectedDate);
   };
+
+  const apiMetrics = reportsData?.metrics;
+  const displayMetrics = apiMetrics && Array.isArray(apiMetrics)
+    ? apiMetrics
+    : apiMetrics
+      ? [
+          { icon: "dollarsign.circle.fill", title: "Total Revenue", amount: apiMetrics.totalRevenue || "$0", pct: apiMetrics.revenueChange || "+0%" },
+          { icon: "bag.fill", title: "Total Orders", amount: String(apiMetrics.totalOrders || 0), pct: apiMetrics.ordersChange || "+0%" },
+          { icon: "person.fill", title: "New Customers", amount: String(apiMetrics.newCustomers || 0), pct: apiMetrics.customersChange || "+0%" },
+          { icon: "chart.bar.fill", title: "Conversion Rate", amount: apiMetrics.conversionRate || "0%", pct: apiMetrics.conversionChange || "+0%" },
+        ]
+      : FALLBACK_METRICS;
+
+  const topProducts = reportsData?.topProducts || [
+    { name: "Wireless Earbud", units: 847, rev: "$126,450" },
+    { name: "Smart Watch M1", units: 634, rev: "$19,020" },
+    { name: "Gaming Keyboard", units: 621, rev: "$18,630" },
+  ];
+
+  const funnel = reportsData?.funnel || [
+    { label: "Website Visits", val: 45820 },
+    { label: "Product Views", val: 28340 },
+    { label: "Add to Cart", val: 12470 },
+    { label: "Orders Completed", val: 2847 },
+  ];
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]} edges={["top"]}>
@@ -68,55 +83,40 @@ export default function ReportsScreen() {
           <TouchableOpacity style={[styles.headerIconButton, { backgroundColor: theme.muted }]} onPress={() => refetch()}>
             <IconSymbol name="arrow.clockwise" size={20} color={theme.foreground} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.headerIconButton, { backgroundColor: theme.muted }]}>
-            <IconSymbol name="arrow.down.doc.fill" size={20} color={theme.foreground} />
-          </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
+
         {/* Filters */}
         <View style={[styles.filterBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.filterRow}>
             <Text style={[styles.filterLabel, { color: theme.mutedForeground }]}>Date Range:</Text>
-            <TouchableOpacity 
-              style={[styles.filterBtn, { backgroundColor: theme.muted }]}
-              onPress={() => setShowPicker(true)}
-            >
+            <TouchableOpacity style={[styles.filterBtn, { backgroundColor: theme.muted }]} onPress={() => setShowPicker(true)}>
               <Text style={{ color: theme.foreground }}>{date.toLocaleDateString()}</Text>
               <IconSymbol name="calendar" size={14} color={theme.mutedForeground} />
             </TouchableOpacity>
           </View>
           {showPicker && (
-             <DateTimePicker
-               testID="dateTimePicker"
-               value={date}
-               mode="date"
-               is24Hour={true}
-               onChange={onDateChange}
-               display="default"
-             />
+            <DateTimePicker testID="dateTimePicker" value={date} mode="date" is24Hour onChange={onDateChange} display="default" />
           )}
-
-          <View style={styles.filterRow}>
-            <Text style={[styles.filterLabel, { color: theme.mutedForeground }]}>Report Type:</Text>
-            <TouchableOpacity style={[styles.filterBtn, { backgroundColor: theme.muted }]}>
-              <Text style={{ color: theme.foreground }}>Income Report</Text>
-              <IconSymbol name="chevron.down" size={14} color={theme.mutedForeground} />
-            </TouchableOpacity>
-          </View>
         </View>
 
-        {/* Metrics */}
+        {/* Key Metrics */}
         <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Key Metrics</Text>
-        <View style={styles.metricsGrid}>
-          {STATIC_SALES_DATA.map((item, i) => (
-            <MetricCard key={i} title={item.title} icon={item.icon} value={item.amount} trend={item.pct} />
-          ))}
-        </View>
+        {isLoading ? (
+          <View style={[styles.loadingBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <Text style={{ color: theme.mutedForeground }}>Loading metrics...</Text>
+          </View>
+        ) : (
+          <View style={styles.metricsGrid}>
+            {displayMetrics.map((item: any, i: number) => (
+              <MetricCard key={i} title={item.title} icon={item.icon} value={item.amount} trend={item.pct} />
+            ))}
+          </View>
+        )}
 
-        {/* Chart Area Placeholder */}
+        {/* Sales Performance */}
         <View style={styles.sectionHeaderRow}>
           <Text style={[styles.sectionTitle, { color: theme.foreground, marginBottom: 0 }]}>Sales Performance</Text>
           <View style={[styles.timeToggleWrap, { backgroundColor: theme.muted }]}>
@@ -130,14 +130,14 @@ export default function ReportsScreen() {
         </View>
         <View style={[styles.chartBox, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <IconSymbol name="chart.xyaxis.line" size={48} color={theme.mutedForeground} />
-          <Text style={{ color: theme.mutedForeground, marginTop: 8 }}>Chart UI rendering here</Text>
+          <Text style={{ color: theme.mutedForeground, marginTop: 8 }}>Chart visualization</Text>
         </View>
 
         {/* Top Products */}
         <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Top Products</Text>
         <View style={[styles.tableContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          {TOP_PRODUCTS.map((prod, i) => (
-            <View key={i} style={[styles.tableRow, { borderBottomColor: theme.border }, i === TOP_PRODUCTS.length - 1 && { borderBottomWidth: 0 }]}>
+          {topProducts.map((prod: any, i: number) => (
+            <View key={i} style={[styles.tableRow, { borderBottomColor: theme.border }, i === topProducts.length - 1 && { borderBottomWidth: 0 }]}>
               <View style={styles.prodInfoRow}>
                 <View style={[styles.prodImgPlaceholder, { backgroundColor: theme.muted }]} />
                 <Text style={[{ color: theme.foreground, fontWeight: "500" }]} numberOfLines={1}>{prod.name}</Text>
@@ -148,11 +148,12 @@ export default function ReportsScreen() {
           ))}
         </View>
 
-        {/* Funnel */}
+        {/* Conversion Funnel */}
         <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Conversion Funnel</Text>
         <View style={[styles.funnelContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-          {FUNNEL.map((step, i) => {
-            const pct = (step.val / FUNNEL[0].val) * 100;
+          {funnel.map((step: any, i: number) => {
+            const maxVal = funnel[0]?.val || 1;
+            const pct = (step.val / maxVal) * 100;
             return (
               <View key={i} style={styles.funnelStep}>
                 <View style={styles.funnelStepHeader}>
@@ -167,14 +168,22 @@ export default function ReportsScreen() {
           })}
         </View>
 
-        {/* AI Insights */}
+        {/* AI Insights — from API */}
         <View style={[styles.aiCard, { backgroundColor: theme.primary + "10", borderColor: theme.primary }]}>
           <View style={styles.aiHeader}>
             <IconSymbol name="sparkles" size={20} color={theme.primary} />
             <Text style={[styles.aiTitle, { color: theme.primary }]}>AI Insights & Recommendations</Text>
           </View>
-          <Text style={[styles.aiText, { color: theme.foreground }]}>• High cart abandonment observed on mobile (73%). Standardize checkout flows.</Text>
-          <Text style={[styles.aiText, { color: theme.foreground }]}>• Strong synergy between Gaming Keyboards and Mice - suggest creating a new bundle.</Text>
+          {aiInsights.length > 0 ? aiInsights.map((insight, i) => (
+            <Text key={insight.id || i} style={[styles.aiText, { color: theme.foreground }]}>
+              • {insight.description}
+            </Text>
+          )) : (
+            <>
+              <Text style={[styles.aiText, { color: theme.foreground }]}>• Analyzing your data for patterns...</Text>
+              <Text style={[styles.aiText, { color: theme.foreground }]}>• AI insights will appear here once enough data is collected.</Text>
+            </>
+          )}
         </View>
 
         <View style={{ height: 100 }} />
@@ -185,20 +194,13 @@ export default function ReportsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1,
-  },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1 },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headerIconContainer: {
-    width: 44, height: 44, borderRadius: 12, justifyContent: "center", alignItems: "center",
-  },
+  headerIconContainer: { width: 44, height: 44, borderRadius: 12, justifyContent: "center", alignItems: "center" },
   headerTitle: { fontSize: 20, fontWeight: "700" },
   headerSubtitle: { fontSize: 13, marginTop: 2 },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headerIconButton: {
-    width: 40, height: 40, borderRadius: 8, justifyContent: "center", alignItems: "center",
-  },
+  headerIconButton: { width: 40, height: 40, borderRadius: 8, justifyContent: "center", alignItems: "center" },
   scrollContent: { paddingHorizontal: 16, paddingTop: 20 },
   filterBox: { padding: 16, borderRadius: 12, borderWidth: 1, gap: 12, marginBottom: 24 },
   filterRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -209,12 +211,7 @@ const styles = StyleSheet.create({
   timeToggleWrap: { flexDirection: "row", borderRadius: 8, padding: 4 },
   timeToggleBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
   metricsGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 12, marginBottom: 24 },
-  metricCard: { width: "48%", padding: 16, borderRadius: 16, borderWidth: 1 },
-  metricIconWrap: { width: 36, height: 36, borderRadius: 8, justifyContent: "center", alignItems: "center", marginBottom: 12 },
-  metricTitle: { fontSize: 13, marginBottom: 4 },
-  metricAmount: { fontSize: 22, fontWeight: "700", marginBottom: 8 },
-  pctRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  pctText: { fontSize: 12, fontWeight: "600" },
+  loadingBox: { borderRadius: 12, borderWidth: 1, padding: 24, alignItems: "center", marginBottom: 24 },
   chartBox: { height: 200, borderRadius: 16, borderWidth: 1, justifyContent: "center", alignItems: "center", marginBottom: 24 },
   tableContainer: { borderRadius: 12, borderWidth: 1, marginBottom: 24, paddingHorizontal: 16 },
   tableRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 14, borderBottomWidth: 1 },

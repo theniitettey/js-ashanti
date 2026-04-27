@@ -41,14 +41,11 @@ class AIInsightsService {
       await this.cacheInsights(response);
 
       return response;
-    } catch (error) {
-      console.error("[AI Insights] Error fetching insights:", error);
-      console.error(
-        "[AI Insights] Error details:",
-        JSON.stringify(error, null, 2),
-      );
-
-      // Return fallback insights
+    } catch (error: any) {
+      const isAuthError = error?.message?.includes("Not authenticated");
+      if (!isAuthError) {
+        console.warn("[AI Insights] Fetch failed, using defaults:", error?.message);
+      }
       return this.getDefaultInsights();
     }
   }

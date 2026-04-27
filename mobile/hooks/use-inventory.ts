@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiRequestWithAuth, API_ENDPOINTS } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface InventoryMetric {
   id: string;
@@ -58,10 +59,12 @@ async function fetchInventory(): Promise<InventoryData> {
 }
 
 export function useInventoryMetrics() {
+  const { isAuthenticated } = useAuth();
   const { data, isLoading, refetch } = useQuery<InventoryData>({
     queryKey: queryKeys.inventory.all(),
     queryFn: fetchInventory,
-    staleTime: 30 * 1000, // 30s — inventory changes less often than live traffic
+    enabled: isAuthenticated,
+    staleTime: 30 * 1000,
     refetchOnWindowFocus: true,
     placeholderData: { metrics: [], products: [] },
   });
