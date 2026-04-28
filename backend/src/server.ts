@@ -15,6 +15,7 @@ import analysisRoutes from "./routes/analysis.routes";
 import mobileRoutes from "./routes/mobile.routes";
 import orderRoutes from "./routes/order.routes";
 import userRoutes from "./routes/user.routes";
+import paymentRoutes from "./routes/payment.routes";
 
 dotenv.config();
 
@@ -69,11 +70,21 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/business-settings', settingsRoutes);
 app.use('/api/mobile', mobileRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api', analysisRoutes); // Analytics/admin at /api root
 
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', message: 'Backend is running' });
+});
+
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error("[Server] Unhandled error:", err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: err.message || "Internal Server Error",
+    ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+  });
 });
 
 // Export app and httpServer for testing or unified entry point

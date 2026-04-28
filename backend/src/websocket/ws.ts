@@ -285,9 +285,33 @@ export const initializeWebSocket = (httpServer: HttpServer) => {
         });
 
         // Admin room management
-        socket.on("admin:join", () => {
-            socket.join("admin-room");
-            console.log(`[WebSocket] Admin joined: ${socket.id}`);
+        socket.on("admin:join", async (data: any) => {
+            try {
+                const { auth } = await import("../lib/auth");
+
+                // Build headers from socket handshake (includes cookies from withCredentials)
+                // Also support explicit bearer token for mobile clients
+                const headers = new Headers();
+                const cookieHeader = socket.handshake.headers.cookie;
+                if (cookieHeader) {
+                    headers.set("cookie", cookieHeader);
+                }
+                const token = data?.token;
+                if (token) {
+                    headers.set("authorization", `Bearer ${token}`);
+                }
+
+                const session = await auth.api.getSession({ headers });
+                if (!session?.user || (session.user as any).role !== "admin") {
+                    socket.emit("event:error", { code: "FORBIDDEN", error: "Admin access required" });
+                    return;
+                }
+                socket.join("admin-room");
+                console.log(`[WebSocket] Admin joined: ${socket.id} (${(session.user as any).email})`);
+            } catch (error) {
+                console.error("[WebSocket] Admin auth failed:", error);
+                socket.emit("event:error", { code: "AUTH_FAILED", error: "Authentication failed for admin room" });
+            }
         });
 
         socket.on("admin:leave", () => {

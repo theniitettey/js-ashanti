@@ -4,6 +4,17 @@ import { EmailService } from '../services/email.service';
 import { orderConfirmationTemplate } from '../mail/order-confirmation-template';
 import { trackSystemEvent } from '../websocket/ws';
 
+/** Must match `getTotalPrice()` in web/src/lib/store/cartStore.ts */
+function expectedCheckoutTotal(cartItems: unknown[]): number {
+    const rawSubtotal = cartItems.reduce((sum: number, item: any) => {
+        const price = Number(item?.price) || 0;
+        const qty = Number(item?.quantity) || 0;
+        return sum + price * qty;
+    }, 0);
+    const bulkDiscount = rawSubtotal > 300 ? 0.1 * rawSubtotal : 0;
+    return rawSubtotal - bulkDiscount;
+}
+
 export class OrderController {
     static async checkout(req: Request, res: Response) {
         try {
@@ -12,6 +23,20 @@ export class OrderController {
 
             if (!fullName || !email || !phone || !address || !cartItems || !total) {
                 return res.status(400).json({ error: "Missing required fields" });
+            }
+
+            if (!Array.isArray(cartItems) || cartItems.length === 0) {
+                return res.status(400).json({ error: "Cart must contain at least one item" });
+            }
+
+            const computedTotal = expectedCheckoutTotal(cartItems);
+
+            if (Math.abs(computedTotal - Number(total)) > 1) {
+                return res.status(400).json({
+                    error: "Price mismatch — total does not match cart items",
+                    expected: computedTotal,
+                    received: total,
+                });
             }
 
             const order = await prisma.order.create({
@@ -63,7 +88,109 @@ export class OrderController {
                 // We don't fail the request if email fails, but maybe log it
             }
 
-            return res.json({ success: true, orderId: order.id });
+            // Initiate payment simulation
+            const paymentRef = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+            try {
+                await prisma.payment.create({
+                    data: {
+                        paymentRef,
+                        orderId: order.id,
+                        amount: total,
+                        currency: "GHS",
+                        provider: "SIMULATION",
+                        status: "INITIATED",
+                        customerEmail: email,
+                        customerName: fullName,
+                        metadata: { itemCount: cartItems.length },
+                    },
+                });
+
+                await prisma.order.update({
+                    where: { id: order.id },
+                    data: { paymentRef, paymentProvider: "SIMULATION" },
+                });
+
+                await trackSystemEvent({
+                    eventType: "PAYMENT_INITIATED",
+                    userId: email,
+                    sessionId: "checkout",
+                    metadata: { paymentRef, orderId: order.id, amount: total },
+                });
+
+                // Simulate async payment processing (1.5-4s delay)
+                setTimeout(async () => {
+                    try {
+                        await prisma.payment.update({
+                            where: { paymentRef },
+                            data: { status: "PROCESSING" },
+                        });
+
+                        const roll = Math.random();
+                        const isSuccess = roll < 0.85;
+                        const delay = 1500 + Math.random() * 2500;
+
+                        setTimeout(async () => {
+                            try {
+                                if (isSuccess) {
+                                    await prisma.$transaction([
+                                        prisma.payment.update({
+                                            where: { paymentRef },
+                                            data: { status: "SUCCESS", processedAt: new Date() },
+                                        }),
+                                        prisma.order.update({
+                                            where: { id: order.id },
+                                            data: { status: "PAID", paidAt: new Date() },
+                                        }),
+                                    ]);
+
+                                    await trackSystemEvent({
+                                        eventType: "PAYMENT_SUCCESS",
+                                        userId: email,
+                                        sessionId: "payment",
+                                        metadata: { paymentRef, orderId: order.id, amount: total },
+                                    });
+
+                                    await trackSystemEvent({
+                                        eventType: "ORDER_CONFIRMED",
+                                        userId: email,
+                                        sessionId: "payment",
+                                        metadata: { orderId: order.id, paymentRef },
+                                    });
+                                } else {
+                                    const reasons = ["Insufficient funds", "Card declined", "Network timeout"];
+                                    const reason = reasons[Math.floor(Math.random() * reasons.length)];
+
+                                    await prisma.payment.update({
+                                        where: { paymentRef },
+                                        data: { status: "FAILED", failureReason: reason, processedAt: new Date() },
+                                    });
+
+                                    await trackSystemEvent({
+                                        eventType: "PAYMENT_FAILED",
+                                        userId: email,
+                                        sessionId: "payment",
+                                        metadata: { paymentRef, orderId: order.id, reason },
+                                    });
+                                }
+                            } catch (procErr) {
+                                console.error("[Payment] Processing error:", procErr);
+                            }
+                        }, delay);
+                    } catch (statusErr) {
+                        console.error("[Payment] Status update error:", statusErr);
+                    }
+                }, 500);
+            } catch (paymentErr) {
+                console.error("[Payment] Initiation error:", paymentErr);
+            }
+
+            return res.json({
+                success: true,
+                orderId: order.id,
+                paymentRef,
+                paymentStatus: "INITIATED",
+            });
         } catch (error) {
             console.error("Checkout failed:", error);
             return res.status(500).json({ error: "Failed to place order" });
@@ -88,6 +215,9 @@ export class OrderController {
                     totalAmount: true,
                     customerName: true,
                     email: true,
+                    paymentRef: true,
+                    paymentProvider: true,
+                    paidAt: true,
                     createdAt: true,
                 },
             });

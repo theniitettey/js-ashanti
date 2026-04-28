@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { products as mockProducts } from "@/data/data";
 
-export function SearcModal({ 
+export function SearchModal({ 
     isOpen, 
     onClose, 
     placeholder = "Search products..." }: 

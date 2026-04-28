@@ -5,7 +5,7 @@ import { getSession, requireAuth } from '../middleware/auth';
 const router = Router();
 
 router.post('/checkout', OrderController.checkout);
-router.get('/:orderId/status', OrderController.getOrderStatus);
+router.get('/:orderId/status', getSession, requireAuth, OrderController.getOrderStatus);
 
 router.get('/', getSession, requireAuth, OrderController.listOrders);
 router.post('/:orderId/fulfill', getSession, requireAuth, OrderController.fulfillOrder);

@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npx prisma db push && node dist/index.js",
-    "dev": "npx prisma db push && nodemon src/index.ts",
+    "dev": "npx prisma db push --accept-data-loss && nodemon src/index.ts",
     "worker": "npx prisma db push && ts-node src/index.ts",
     "build": "npx prisma generate && tsc"
   },

@@ -9,7 +9,7 @@ import { IoClose } from "react-icons/io5";
 import { ModeToggle } from "@/components/layout/toogleMode";
 import Link from "next/link";
 import { categories } from "@/data/data";
-import { SearcModal } from "@/components/products/SearchModal";
+import { SearchModal } from "@/components/products/SearchModal";
 import { CartIcon } from "@/components/cart/cartIcon"
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -137,7 +137,7 @@ export function Header() {
         </div>
         <MobileHeader />
       </header>
-      <SearcModal isOpen={openSearch} onClose={() => setOpenSearch(false)} />
+      <SearchModal isOpen={openSearch} onClose={() => setOpenSearch(false)} />
     </>
   );
 }

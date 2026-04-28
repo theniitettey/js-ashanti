@@ -60,7 +60,7 @@ export class MobileController {
           lowStock,
           outOfStock,
           totalRevenue,
-          currentVisitors: activeVisitors.length + Math.floor(Math.random() * 10), // Add some jitter for "live" feel
+          currentVisitors: activeVisitors.length,
           activeVisitors: activeVisitors.length,
           pageViewsPerMin,
         },
@@ -76,31 +76,56 @@ export class MobileController {
   // GET /api/mobile/analytics/reports
   static async getReports(req: Request, res: Response) {
     try {
-      // Return structured data for reports screen
-      // For now, returning mocked structure matching the frontend expectations
-      // In production, this would aggregate Order and Event data
+      const [
+        revenueAgg,
+        totalOrders,
+        totalCustomers,
+        pageViews,
+        productViews,
+        addToCartEvents,
+        checkoutEvents,
+        completedOrders,
+        topProducts,
+      ] = await Promise.all([
+        prisma.order.aggregate({
+          _sum: { totalAmount: true },
+          where: { status: { in: ["PAID", "FULFILLED"] } },
+        }),
+        prisma.order.count(),
+        prisma.user.count(),
+        prisma.event.count({ where: { event_type: "PAGE_VIEW" } }),
+        prisma.event.count({ where: { event_type: "PRODUCT_VIEW" } }),
+        prisma.event.count({ where: { event_type: "ADD_TO_CART" } }),
+        prisma.event.count({ where: { event_type: "CHECKOUT_START" } }),
+        prisma.order.count({ where: { status: { in: ["PAID", "FULFILLED"] } } }),
+        prisma.product.findMany({ orderBy: { stock: "desc" }, take: 5, select: { name: true, price: true, stock: true } }),
+      ]);
+
+      const totalRevenue = revenueAgg._sum?.totalAmount ?? 0;
+      const conversionRate = pageViews > 0 ? completedOrders / pageViews : 0;
+
       res.json({
-        sales: {
-          totalRevenue: 84249,
-          totalOrders: 2847,
-          newCustomers: 1249,
-          conversionRate: 0.038,
+        metrics: {
+          totalRevenue: `$${totalRevenue.toLocaleString()}`,
+          totalOrders: String(totalOrders),
+          newCustomers: String(totalCustomers),
+          conversionRate: `${(conversionRate * 100).toFixed(1)}%`,
+          revenueChange: "+0%",
+          ordersChange: "+0%",
+          customersChange: "+0%",
+          conversionChange: "+0%",
         },
-        salesPerformance: {
-          week: [
-            { label: "Mon", sales: 4000 },
-            { label: "Tue", sales: 3000 },
-            { label: "Wed", sales: 2000 },
-            { label: "Fri", sales: 1890 },
-            { label: "Sun", sales: 3490 },
-          ],
-        },
-        conversionFunnel: [
-          { dataType: "Website Visits", value: 45820 },
-          { dataType: "Product Views", value: 28340 },
-          { dataType: "Add to Cart", value: 12470 },
-          { dataType: "Checkout Started", value: 5840 },
-          { dataType: "Orders Completed", value: 2847 },
+        topProducts: topProducts.map((p: any) => ({
+          name: p.name,
+          units: p.stock,
+          rev: `$${(p.price * p.stock).toFixed(0)}`,
+        })),
+        funnel: [
+          { label: "Page Views", val: pageViews },
+          { label: "Product Views", val: productViews },
+          { label: "Add to Cart", val: addToCartEvents },
+          { label: "Checkout Started", val: checkoutEvents },
+          { label: "Orders Completed", val: completedOrders },
         ],
       });
     } catch (error) {
