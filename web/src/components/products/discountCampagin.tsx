@@ -25,12 +25,15 @@ export default function DiscountCampaign() {
   const [products, setProducts] = useState<Product[]>([]);
   const [discounts, setDiscounts] = useState<{ [productId: string]: number }>({});
   const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
 
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("/api/products");
+        const res = await axios.get(`${backendUrl}/api/products`, {
+          withCredentials: true,
+        });
         setProducts(res.data);
         const initialDiscounts = Object.fromEntries(
           res.data.map((p: Product) => [p.id, p.discount ?? 0])
@@ -61,7 +64,16 @@ export default function DiscountCampaign() {
         return;
       }
 
-      await axios.patch(`/api/products/discount/${slug}`, { discount });
+      await axios.put(
+        `${backendUrl}/api/products/${slug}`,
+        { discount },
+        { withCredentials: true }
+      );
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === productId ? { ...product, discount } : product
+        )
+      );
       toast.success("Discount updated");
     } catch (err) {
       console.error(err);

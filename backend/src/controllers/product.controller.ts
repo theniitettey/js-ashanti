@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 import { auth } from '../lib/auth';
 import { fromNodeHeaders } from 'better-auth/node';
+import { trackSystemEvent } from '../websocket/ws';
 
 export class ProductController {
     static async createProduct(req: Request, res: Response) {
@@ -163,6 +164,37 @@ export class ProductController {
                     sku: data.sku,
                 }
             });
+
+            const hasDiscountUpdate = typeof data.discount === "number";
+            const hasStockUpdate = typeof data.stock === "number";
+
+            if (hasDiscountUpdate) {
+                await trackSystemEvent({
+                    eventType: "INVENTORY_UPDATED",
+                    userId: session.user.id,
+                    sessionId: "admin",
+                    metadata: {
+                        productId: product.id,
+                        slug: product.slug,
+                        updateType: "discount",
+                        discount: data.discount,
+                    },
+                });
+            }
+
+            if (hasStockUpdate) {
+                await trackSystemEvent({
+                    eventType: "INVENTORY_UPDATED",
+                    userId: session.user.id,
+                    sessionId: "admin",
+                    metadata: {
+                        productId: product.id,
+                        slug: product.slug,
+                        updateType: "stock",
+                        stock: data.stock,
+                    },
+                });
+            }
 
             return res.json(product);
         } catch (error) {

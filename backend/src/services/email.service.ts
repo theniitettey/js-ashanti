@@ -2,11 +2,16 @@ import { Resend } from "resend";
 import { VerificationEmailTemplate } from "../mail/verification-template";
 
 export class EmailService {
-  private static resend = new Resend(process.env.RESEND_API_KEY);
+  private static resend = process.env.RESEND_API_KEY
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
 
   static async sendEmail(to: string, subject: string, html: string) {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not configured");
+    if (!this.resend) {
+      console.warn(
+        `[EmailService] RESEND_API_KEY is not configured. Email to ${to} with subject "${subject}" was not sent.`
+      );
+      return;
     }
 
     await this.resend.emails.send({

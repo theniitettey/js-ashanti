@@ -27,6 +27,7 @@ yarn-error.log*
 # IDE
 .idea/
 .vscode/settings.json
+.cursor/
 *.swp
 *.swo
 
@@ -39,3 +40,6 @@ temp/
 # References & Generated
 references/
 generated/
+
+# local dev helpers
+.dev-logs/

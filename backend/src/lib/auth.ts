@@ -10,7 +10,19 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: [process.env.FRONTEND_URL || "http://localhost:3000"],
+  // Must include any Origin the clients send. Web uses FRONTEND_URL; Expo injects
+  // X-Expo-Origin (see server.ts) — typically http://localhost:8081 for Metro.
+  trustedOrigins: [
+    process.env.FRONTEND_URL || "http://localhost:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+    "http://localhost:8082",
+    ...(process.env.BETTER_AUTH_ADDITIONAL_ORIGINS?.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean) || []),
+  ],
   emailVerification: {
     sendVerificationEmail: async ({ url, user }) => {
       try {

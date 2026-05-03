@@ -1,16 +1,19 @@
 import { Router } from "express";
 import { MobileController } from "../controllers/mobile.controller";
-import { requireAuth } from "../middleware/auth";
+import { getSession, requireAuth } from "../middleware/auth";
 
 const router = Router();
 
-// Dashboard & Analytics
-router.get("/analytics/dashboard", requireAuth, MobileController.getDashboard);
-router.get("/analytics/reports", requireAuth, MobileController.getReports);
-router.get("/analytics/ai-insights", requireAuth, MobileController.getAIInsights);
+// Dashboard & Analytics (getSession reads Bearer token and sets req.session)
+router.get("/analytics/dashboard", getSession, requireAuth, MobileController.getDashboard);
+router.get("/analytics/reports", getSession, requireAuth, MobileController.getReports);
+router.get("/analytics/ai-insights", getSession, requireAuth, MobileController.getAIInsights);
 
 // Products & Inventory
-router.get("/products", requireAuth, MobileController.getProducts);
-router.get("/inventory/metrics", requireAuth, MobileController.getInventoryMetrics);
+router.get("/products", getSession, requireAuth, MobileController.getProducts);
+router.post("/products", getSession, requireAuth, MobileController.createProduct);
+router.patch("/products/:id/stock", getSession, requireAuth, MobileController.updateProductStock);
+router.delete("/products/:id", getSession, requireAuth, MobileController.deleteProduct);
+router.get("/inventory/metrics", getSession, requireAuth, MobileController.getInventoryMetrics);
 
 export default router;

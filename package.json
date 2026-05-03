@@ -1,0 +1,10 @@
+{
+  "name": "js-ashanti-workspace",
+  "private": true,
+  "scripts": {
+    "start:all": "bash ./scripts/start-all.sh",
+    "start:all:ios": "bash ./scripts/start-all.sh --ios",
+    "start:all:expo-web": "bash ./scripts/start-all.sh --expo-web",
+    "stop:all": "bash ./scripts/stop-all.sh"
+  }
+}

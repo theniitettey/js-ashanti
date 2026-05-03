@@ -1,29 +1,29 @@
 export const heroData = [
-    {
-      id: 1,
-      title: "Big Discounts!",
-      description: "Save up to 50% on kitchen appliances",
-      imageUrl: "/img/fridge.png",
-    },
-    {
-      id: 2,
-      title: "Turkey Cooking Pans",
-      description: "Enjpoy up to 30% off on Turkey sets",
-      imageUrl: "/img/blender.png",
-    },
-    {
-      id: 3,
-      title: "Big Discounts!",
-      description: "Save up to 50% on kitchen appliances",
-      imageUrl: "/img/mixed1.png",
-    },
-    {
-      id: 4,
-      title: "Complete Cooking Sets",
-      description: "Save up to 20% on cooking appliances",
-      imageUrl: "/img/cookingset.png",
-    },
-  ];
+  {
+    id: 1,
+    title: "Big Discounts!",
+    description: "Save up to 50% on kitchen appliances",
+    imageUrl: "/img/fridge.png",
+  },
+  {
+    id: 2,
+    title: "Turkey Cooking Pans",
+    description: "Enjpoy up to 30% off on Turkey sets",
+    imageUrl: "/img/blender.png",
+  },
+  {
+    id: 3,
+    title: "Big Discounts!",
+    description: "Save up to 50% on kitchen appliances",
+    imageUrl: "/img/mixed1.png",
+  },
+  {
+    id: 4,
+    title: "Complete Cooking Sets",
+    description: "Save up to 20% on cooking appliances",
+    imageUrl: "/img/cookingset.png",
+  },
+];
 
 export const categories = [
   {
@@ -47,12 +47,13 @@ export const categories = [
     title: "Home Essentials",
     link: "/products#home-essentials",
     image: "/optimized/clothesRack.webp",
-  }, 
+  },
 ]
 
 
 export const products = [
   {
+    id: "mock-1",
     title: "Complete Tableware Set",
     slug: "complete-tableware-set",
     description: "Includes plates, bowls, and jugs for 6 people. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum",
@@ -73,6 +74,7 @@ export const products = [
     sku: "TAB-SET-001"
   },
   {
+    id: "mock-2",
     title: "8L Silver Crest Air Fryer",
     slug: "8l-air-fryer",
     description: "Healthy frying with no oil and digital display",
@@ -82,12 +84,13 @@ export const products = [
     badge: "Hot Deal",
     badgeColor: "bg-red-500",
     link: "/products/8l-air-fryer",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: ["red", "green", "blue", "gold"],
     stock: 8,
     sku: "AIR-FRY-8L"
   },
   {
+    id: "mock-3",
     title: "5L Rice Cooker - 3 Pins",
     slug: "5l-rice-cooker",
     description: "Efficient rice cooker for medium-sized families",
@@ -97,12 +100,13 @@ export const products = [
     badge: "Popular",
     badgeColor: "bg-blue-500",
     link: "/products/5l-rice-cooker",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
-    colors: [ "blue", "gold"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
+    colors: ["blue", "gold"],
     stock: 20,
     sku: "RICE-COOK-5L"
   },
   {
+    id: "mock-4",
     title: "Silver Crest 3-in-1 Blender",
     slug: "sc5532-blender",
     description: "Powerful 5500W motor with multi-speed settings",
@@ -112,12 +116,13 @@ export const products = [
     badge: "Top Rated",
     badgeColor: "bg-yellow-500",
     link: "/products/sc5532-blender",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: ["sliver", "gold"],
     stock: 12,
     sku: "BLEND-3IN1"
   },
   {
+    id: "mock-5",
     title: "13PCS Non-Stick Fry Pan Set",
     slug: "13pcs-frypan-set",
     description: "Cook like a pro with this complete fry pan set",
@@ -126,13 +131,14 @@ export const products = [
     price: 4999,
     badge: "Limited Stock",
     badgeColor: "bg-orange-500",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     link: "/products/13pcs-frypan-set",
     colors: ["red", "green", "blue", "gold"],
     stock: 5,
     sku: "FRY-PAN-13"
   },
   {
+    id: "mock-6",
     title: "LS 2010 - 10PCS Pot Set",
     slug: "ls2010-pot-set",
     description: "Durable and elegant stainless steel pots",
@@ -142,12 +148,13 @@ export const products = [
     badge: "Featured",
     badgeColor: "bg-purple-500",
     link: "/products/ls2010-pot-set",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 7,
     sku: "POT-SET-10"
   },
   {
+    id: "mock-7",
     title: "4L Electric Kettle",
     slug: "4l-electric-kettle",
     description: "Fast-boiling and energy-saving electric kettle",
@@ -157,13 +164,14 @@ export const products = [
     badge: "Trending",
     badgeColor: "bg-teal-500",
     link: "/products/4l-electric-kettle",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 25,
     sku: "KETTLE-4L"
 
   },
   {
+    id: "mock-8",
     title: "3PCS Insulation Barrel Set",
     slug: "insulation-barrel-3pcs",
     description: "Keeps food hot for hours – perfect for travel",
@@ -173,13 +181,14 @@ export const products = [
     badge: "Customer Favorite",
     badgeColor: "bg-pink-500",
     link: "/products/insulation-barrel-3pcs",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 18,
     sku: "INSUL-BAR-3"
 
   },
   {
+    id: "mock-9",
     title: "Vmigo Cast Iron Dutch Oven",
     slug: "vmigo-dutch-oven",
     description: "Heavy-duty cast iron, perfect for stews & baking",
@@ -189,13 +198,14 @@ export const products = [
     badge: "Premium",
     badgeColor: "bg-gray-800 text-white",
     link: "/products/vmigo-dutch-oven",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 4,
     sku: "DUTCH-OVEN"
 
   },
   {
+    id: "mock-10",
     title: "Fufu Pounding Machine",
     slug: "fufu-maker",
     description: "Pound fufu and banku effortlessly at home",
@@ -205,13 +215,14 @@ export const products = [
     badge: "Ghana Choice",
     badgeColor: "bg-red-600",
     link: "/products/fufu-maker",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 9,
     sku: "FUFU-MAKER"
 
   },
   {
+    id: "mock-11",
     title: "Juicer Extractor",
     slug: "juicer-extractor",
     description: "Extract fresh juices with powerful blade motor",
@@ -221,13 +232,14 @@ export const products = [
     badge: "Daily Pick",
     badgeColor: "bg-cyan-500",
     link: "/products/juicer-extractor",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 14,
     sku: "JUICER-EX"
 
   },
   {
+    id: "mock-12",
     title: "Slow Juicer – Big Mouth",
     slug: "slow-juicer",
     description: "Retains more nutrients with slow-press tech",
@@ -237,13 +249,14 @@ export const products = [
     badge: "Healthy Choice",
     badgeColor: "bg-lime-600",
     link: "/products/slow-juicer",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 6,
     sku: "JUICER-SLOW"
 
   },
   {
+    id: "mock-13",
     title: "6-Slot Lunch Box",
     slug: "lunch-box",
     description: "Perfect for school, work, or travel meals",
@@ -253,13 +266,14 @@ export const products = [
     badge: "Budget Pick",
     badgeColor: "bg-green-600",
     link: "/products/lunch-box",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 50,
     sku: "LUNCH-BOX-6"
 
   },
   {
+    id: "mock-14",
     title: "10L Round Cooking Pot",
     slug: "round-cooking-pot",
     description: "Even heat distribution with 3-pin plug",
@@ -269,15 +283,16 @@ export const products = [
     badge: "Classic",
     badgeColor: "bg-indigo-500",
     link: "/products/round-cooking-pot",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 11,
     sku: "POT-ROUND-10L"
 
   },
   {
-    imageUrl: "/products/storage-rack.jpg",
+    id: "mock-15",
     title: "5-Layer Kitchen Storage Rack",
+    imageUrl: "/products/storage-rack.jpg",
     slug: "kitchen-storage-rack",
     description: "Organize your kitchenware with ease",
     rating: 4.1,
@@ -286,15 +301,16 @@ export const products = [
     badge: "Organizer's Pick",
     badgeColor: "bg-yellow-400",
     link: "/products/kitchen-storage-rack",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 22,
     sku: "RACK-KITCHEN"
 
   },
   {
-    imageUrl: "/products/clothes-rack.jpg",
+    id: "mock-16",
     title: "Double Rod Cloth Rack",
+    imageUrl: "/products/clothes-rack.jpg",
     slug: "cloths-rack",
     description: "Sturdy steel rack for daily clothing needs",
     rating: 4.0,
@@ -303,15 +319,16 @@ export const products = [
     badge: "Space Saver",
     badgeColor: "bg-blue-600",
     link: "/products/cloths-rack",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 16,
     sku: "RACK-CLOTH"
 
   },
   {
-    imageUrl: "/products/pot-set-bosch.jpg",
+    id: "mock-17",
     title: "Bosch 12PCS Pot Set – BO-2023",
+    imageUrl: "/products/pot-set-bosch.jpg",
     slug: "bosch-pot-set",
     description: "German precision with stainless finish",
     rating: 4.9,
@@ -320,15 +337,16 @@ export const products = [
     badge: "Premium",
     badgeColor: "bg-black text-white",
     link: "/products/bosch-pot-set",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 3,
     sku: "POT-BOSCH-12"
 
   },
   {
-    imageUrl: "/products/commercial-blender.jpg",
+    id: "mock-18",
     title: "2L Commercial Blender",
+    imageUrl: "/products/commercial-blender.jpg",
     slug: "commercial-blender",
     description: "Built for heavy use – cafes and homes",
     rating: 4.6,
@@ -337,15 +355,16 @@ export const products = [
     badge: "Power Pick",
     badgeColor: "bg-rose-500",
     link: "/products/commercial-blender",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 8,
     sku: "BLEND-COM-2L"
 
   },
   {
-    imageUrl: "/products/square-pot.jpg",
+    id: "mock-19",
     title: "8L Square Cooking Pot",
+    imageUrl: "/products/square-pot.jpg",
     slug: "square-pot",
     description: "Large family-size pot with quick heating",
     rating: 4.3,
@@ -354,15 +373,16 @@ export const products = [
     badge: "Family Size",
     badgeColor: "bg-orange-400",
     link: "/products/square-pot",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 13,
     sku: "POT-SQUARE-8L"
 
   },
   {
-    imageUrl: "/products/tableware-gold.jpg",
+    id: "mock-20",
     title: "24PCS Gold Tableware Set",
+    imageUrl: "/products/tableware-gold.jpg",
     slug: "gold-tableware",
     description: "Elegant dining set for classy meals",
     rating: 5.0,
@@ -371,7 +391,7 @@ export const products = [
     badge: "Luxury",
     badgeColor: "bg-yellow-700 text-white",
     link: "/products/gold-tableware",
-    images: ["/a.jpg","/a.jpg","/a.jpg","/a.jpg"],
+    images: ["/a.jpg", "/a.jpg", "/a.jpg", "/a.jpg"],
     colors: [],
     stock: 5,
     sku: "TABLE-GOLD-24"

@@ -23,6 +23,7 @@ type Product = {
 export function Hero() {
   const [displayProducts, setDisplayProducts] = React.useState<Product[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
 
   const autoplayPlugin = React.useRef(
     Autoplay({ delay: 7000, stopOnInteraction: false })
@@ -31,7 +32,9 @@ export function Hero() {
   React.useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await axios.get("/api/products");
+        const res = await axios.get(`${backendUrl}/api/products`, {
+          withCredentials: true,
+        });
         const allProducts: Product[] = res.data;
 
         const discounted = allProducts.filter(

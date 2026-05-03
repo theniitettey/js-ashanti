@@ -58,6 +58,7 @@ export function ProductForm({ product }: ProductFormProps) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4001'}/api/products/${product.slug}`, {
         method: "PUT",
+          credentials: "include" as RequestCredentials,
         headers: {
           "Content-Type": "application/json",
         },

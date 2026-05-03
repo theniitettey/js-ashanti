@@ -159,7 +159,10 @@ export class AnalyticsController {
                 performance: {
                     avg_analysis_time_ms: avgAnalysisTime._avg.analysis_time_ms || 0,
                     p95_analysis_time_ms: p95Val,
-                    avg_batch_size: 0 // Not easily queryable without aggregate on relation, can leave as 0 for now or add complex query
+                    avg_batch_size: await prisma.batch.aggregate({
+                        _avg: { event_count: true },
+                        where: { status: { in: ["SEALED", "ANALYZED", "ARCHIVED"] } }
+                    }).then(r => r._avg.event_count || 0)
                 },
                 circuit_breaker: {
                     state: cbMetrics.state,

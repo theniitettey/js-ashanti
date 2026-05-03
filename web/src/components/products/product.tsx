@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { ProductsList } from "./ProductsList";
 import { ProductCardSkeleton } from "./ProductCardSkeleton";
-import { getRandomProducts } from "@/lib/utils";
+import { pickFeaturedProducts } from "@/lib/utils";
 
 export default async function Products() {
   try {
@@ -18,7 +18,7 @@ export default async function Products() {
     }
 
     const data = await res.json();
-    const limitedProducts = getRandomProducts(data, 16);
+    const limitedProducts = pickFeaturedProducts(data, 16);
 
     return (
       <div className="max-w-7xl mx-auto md:px-4 py-10 mb-8 md:mb-24">
