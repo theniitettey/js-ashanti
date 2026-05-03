@@ -189,8 +189,9 @@ export default function AdminOrdersPage() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Mark order as fulfilled?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This moves order <span className="font-medium">{order.id}</span>{" "}
-                                    from PAID to FULFILLED.
+                                    This will fulfill <span className="font-medium">{order.customerName || "this customer"}&apos;s</span> order
+                                    of <span className="font-medium">GH₵{order.totalAmount.toFixed(2)}</span> and
+                                    update the status from PAID to FULFILLED.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -214,8 +215,9 @@ export default function AdminOrdersPage() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    This marks order <span className="font-medium">{order.id}</span>{" "}
-                                    as CANCELLED and cannot be undone from this screen.
+                                    This will cancel <span className="font-medium">{order.customerName || "this customer"}&apos;s</span> order
+                                    of <span className="font-medium">GH₵{order.totalAmount.toFixed(2)}</span>.
+                                    This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>

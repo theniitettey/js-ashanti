@@ -52,10 +52,15 @@ export function MetricCard({
 const styles = StyleSheet.create({
   metricCard: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     gap: 8,
     flex: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   metricIconWrap: {
     width: 36,

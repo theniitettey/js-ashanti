@@ -106,7 +106,7 @@ export class MobileController {
 
       res.json({
         metrics: {
-          totalRevenue: `$${totalRevenue.toLocaleString()}`,
+          totalRevenue: `GH₵${totalRevenue.toLocaleString()}`,
           totalOrders: String(totalOrders),
           newCustomers: String(totalCustomers),
           conversionRate: `${(conversionRate * 100).toFixed(1)}%`,
@@ -118,7 +118,7 @@ export class MobileController {
         topProducts: topProducts.map((p: any) => ({
           name: p.name,
           units: p.stock,
-          rev: `$${(p.price * p.stock).toFixed(0)}`,
+          rev: `GH₵${(p.price * p.stock).toFixed(0)}`,
         })),
         funnel: [
           { label: "Page Views", val: pageViews },
@@ -256,6 +256,64 @@ export class MobileController {
     }
   }
 
+  // PATCH /api/mobile/products/:id/stock
+  static async updateProductStock(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { additionalStock } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ error: "Product ID is required" });
+      }
+
+      const qty = Number(additionalStock);
+      if (!Number.isFinite(qty) || qty <= 0) {
+        return res.status(400).json({ error: "additionalStock must be a positive number" });
+      }
+
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const updated = await prisma.product.update({
+        where: { id },
+        data: { stock: product.stock + qty },
+      });
+
+      return res.json({
+        message: `Stock updated: ${product.stock} → ${updated.stock}`,
+        product: updated,
+      });
+    } catch (error) {
+      console.error("[Mobile] Error updating stock:", error);
+      res.status(500).json({ error: "Failed to update stock" });
+    }
+  }
+
+  // DELETE /api/mobile/products/:id
+  static async deleteProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({ error: "Product ID is required" });
+      }
+
+      const product = await prisma.product.findUnique({ where: { id } });
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      await prisma.product.delete({ where: { id } });
+
+      return res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("[Mobile] Error deleting product:", error);
+      res.status(500).json({ error: "Failed to delete product" });
+    }
+  }
+
   // GET /api/mobile/inventory/metrics
   static async getInventoryMetrics(req: Request, res: Response) {
     try {
@@ -265,24 +323,46 @@ export class MobileController {
           name: true,
           sku: true,
           stock: true,
+          category: true,
+          price: true,
         },
       });
 
       const processed = products.map((p: any) => {
-        let status: "CRITICAL" | "LOW STOCK" | "HEALTHY" = "HEALTHY";
-        if (p.stock === 0) status = "CRITICAL";
-        else if (p.stock <= 10) status = "LOW STOCK";
+        let status: "CRITICAL" | "LOW" | "HEALTHY" | "OUT" = "HEALTHY";
+        if (p.stock === 0) status = "OUT";
+        else if (p.stock <= 5) status = "CRITICAL";
+        else if (p.stock <= 15) status = "LOW";
 
         return {
           id: p.id,
           name: p.name,
-          sku: p.sku,
+          sku: p.sku || `SKU-${p.id.slice(0, 8).toUpperCase()}`,
+          category: p.category || "",
+          price: `GH₵${(p.price || 0).toLocaleString()}`,
+          stock: p.stock,
           stockCount: p.stock,
           status,
+          image: "",
         };
       });
 
-      res.json(processed);
+      // Metrics summary
+      const totalProducts = products.length;
+      const outOfStock = processed.filter((p: any) => p.status === "OUT").length;
+      const lowStock = processed.filter((p: any) => p.status === "LOW").length;
+      const criticalStock = processed.filter((p: any) => p.status === "CRITICAL").length;
+      const healthy = processed.filter((p: any) => p.status === "HEALTHY").length;
+
+      res.json({
+        metrics: [
+          { id: "total", label: "Total Products", value: String(totalProducts), icon: "cube.box.fill", iconColor: "#5E6AD2", progress: 1, progressColor: "#5E6AD2" },
+          { id: "healthy", label: "In Stock", value: String(healthy), icon: "checkmark.circle.fill", iconColor: "#059669", progress: totalProducts > 0 ? healthy / totalProducts : 0, progressColor: "#059669" },
+          { id: "low", label: "Low Stock", value: String(lowStock + criticalStock), icon: "exclamationmark.triangle.fill", iconColor: "#D97706", progress: totalProducts > 0 ? (lowStock + criticalStock) / totalProducts : 0, progressColor: "#D97706" },
+          { id: "out", label: "Out of Stock", value: String(outOfStock), icon: "xmark.circle.fill", iconColor: "#DC2626", progress: totalProducts > 0 ? outOfStock / totalProducts : 0, progressColor: "#DC2626" },
+        ],
+        products: processed,
+      });
     } catch (error) {
       console.error("[Mobile] Error fetching inventory metrics:", error);
       res.status(500).json({ error: "Failed to fetch inventory" });

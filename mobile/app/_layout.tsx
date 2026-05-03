@@ -9,7 +9,7 @@ import "react-native-reanimated";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { View, ActivityIndicator } from "react-native";
@@ -58,12 +58,11 @@ function RootLayoutNav() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView
+      <View
         style={{
           flex: 1,
           backgroundColor: Colors[colorScheme ?? "light"].background,
         }}
-        edges={["top"]}
       >
         <ThemeProvider
           value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
@@ -82,7 +81,7 @@ function RootLayoutNav() {
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
-      </SafeAreaView>
+      </View>
     </SafeAreaProvider>
   );
 }

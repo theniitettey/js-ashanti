@@ -4,14 +4,21 @@ services:
   db:
     image: postgres:15-alpine
     container_name: js_ashanti_db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: js_ashanti_db
     ports:
-      - "5432:5432"
+      - "55432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d js_ashanti_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
 
 volumes:
   postgres_data:

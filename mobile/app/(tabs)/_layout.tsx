@@ -5,11 +5,12 @@ import { HapticTab } from "@/components/haptic-tab";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = Colors[colorScheme ?? "light"];
+  const isDark = colorScheme === "dark";
 
   return (
     <Tabs
@@ -18,9 +19,25 @@ export default function TabLayout() {
         tabBarInactiveTintColor: theme.mutedForeground,
         headerShown: false,
         tabBarButton: HapticTab,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          letterSpacing: 0.2,
+        },
         tabBarStyle: {
-          backgroundColor: theme.background,
-          borderTopColor: theme.border,
+          position: "absolute",
+          backgroundColor: isDark
+            ? "rgba(5, 5, 6, 0.78)"
+            : "rgba(248, 250, 252, 0.82)",
+          borderTopWidth: 0,
+          elevation: 0,
+          paddingTop: 6,
+          height: Platform.OS === "ios" ? 88 : 68,
+          // Subtle top glow line
+          shadowColor: isDark ? "#5E6AD2" : "#000",
+          shadowOffset: { width: 0, height: -1 },
+          shadowOpacity: isDark ? 0.15 : 0.04,
+          shadowRadius: isDark ? 12 : 4,
         },
       }}
     >
@@ -28,8 +45,10 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <IconSymbol size={24} name="house.fill" color={color} />
+            </View>
           ),
         }}
       />
@@ -37,20 +56,10 @@ export default function TabLayout() {
         name="reports"
         options={{
           title: "Reports",
-          headerTitle: () => (
-            <View>
-              <Text
-                style={{ fontSize: 18, fontWeight: "600", color: theme.foreground }}
-              >
-                Reports
-              </Text>
-              <Text style={{ fontSize: 12, color: theme.mutedForeground }}>
-                Analytics & Insights
-              </Text>
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <IconSymbol size={24} name="chart.bar.fill" color={color} />
             </View>
-          ),
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),
         }}
       />
@@ -61,30 +70,16 @@ export default function TabLayout() {
           tabBarButton: (props) => (
             <HapticTab
               {...props}
-              // merge styles so the button visually appears lifted
               // @ts-ignore
               style={[(props as any)?.style, styles.liftedButton]}
             >
-              <View
-                style={[
-                  styles.coloredBg,
-                  {
-                    backgroundColor: theme.background,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.whiteCircle,
-                    {
-                      backgroundColor: theme.primary,
-                    },
-                  ]}
-                >
+              <View style={styles.fabOuter}>
+                <View style={[styles.fabInner, { backgroundColor: theme.primary }]}>
                   <IconSymbol
-                    size={20}
+                    size={22}
                     name="plus"
                     color={theme.primaryForeground}
+                    weight="bold"
                   />
                 </View>
               </View>
@@ -96,8 +91,10 @@ export default function TabLayout() {
         name="stock"
         options={{
           title: "Stock",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="cube.box.fill" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <IconSymbol size={24} name="cube.box.fill" color={color} />
+            </View>
           ),
         }}
       />
@@ -106,8 +103,10 @@ export default function TabLayout() {
         options={{
           title: "Settings",
           headerBackButtonDisplayMode: "minimal",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="gearshape.fill" color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconWrap : undefined}>
+              <IconSymbol size={24} name="gearshape.fill" color={color} />
+            </View>
           ),
         }}
       />
@@ -116,34 +115,32 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
+  activeIconWrap: {
+    transform: [{ scale: 1.1 }],
+  },
   liftedButton: {
     justifyContent: "center",
     alignItems: "center",
-    top: -18,
+    top: -22,
   },
-  whiteCircle: {
-    borderRadius: 999,
-    padding: 8,
+  fabOuter: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 6,
-  },
-  coloredBg: {
-    borderRadius: 999,
-    padding: 10,
-    minWidth: 76,
-    minHeight: 76,
-    justifyContent: "center",
-    alignItems: "center",
-    // container shadow instead
-    shadowColor: "#000",
+    // Indigo glow
+    shadowColor: "#5E6AD2",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOpacity: 0.45,
+    shadowRadius: 14,
+    elevation: 10,
+  },
+  fabInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

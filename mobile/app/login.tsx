@@ -9,6 +9,7 @@ import {
   Platform,
   useColorScheme,
 } from "react-native";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Typography from "@/constants/typography";
@@ -18,11 +19,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { API_ENDPOINTS, apiRequest } from "@/lib/api";
 import { Colors } from "@/constants/theme";
 
+// Importing ScrollView locally specifically for internal keyboard handling layout
+import { ScrollView } from "react-native-gesture-handler";
+
 export default function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
   const colorScheme = useColorScheme() ?? "dark";
   const theme = Colors[colorScheme];
+  const isDark = colorScheme === "dark";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -85,114 +90,161 @@ export default function LoginScreen() {
         style={styles.keyboardView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            {/* Logo/Header */}
-            <View style={styles.header}>
-            <View style={[styles.logoContainer, { backgroundColor: theme.muted, borderColor: theme.border }]}>
-                <IconSymbol name="bag.fill" size={40} color={theme.foreground} />
-            </View>
-            <Text style={[styles.title, { color: theme.foreground }]}>Welcome back</Text>
-            <Text style={[styles.subtitle, { color: theme.mutedForeground }]}>Sign in to your Admin Dashboard</Text>
-            </View>
+          {/* Logo/Header */}
+          <View style={styles.header}>
+            <Animated.View
+              entering={FadeInDown.delay(100).duration(600).springify().damping(14)}
+              style={[styles.logoContainer, {
+                backgroundColor: isDark ? "rgba(94, 106, 210, 0.12)" : "rgba(94, 106, 210, 0.08)",
+                borderColor: isDark ? "rgba(94, 106, 210, 0.25)" : "rgba(94, 106, 210, 0.15)",
+              }]}
+            >
+              <View style={styles.logoInner}>
+                <IconSymbol name="bag.fill" size={36} color={theme.primary} />
+              </View>
+            </Animated.View>
 
-            {/* Login Form */}
-            <View style={styles.formContainer}>
+            <Animated.Text
+              entering={FadeInDown.delay(200).duration(600).springify().damping(14)}
+              style={[styles.title, { color: theme.foreground }]}
+            >
+              Welcome back
+            </Animated.Text>
+
+            <Animated.Text
+              entering={FadeInDown.delay(280).duration(600).springify().damping(14)}
+              style={[styles.subtitle, { color: theme.mutedForeground }]}
+            >
+              Sign in to your Admin Dashboard
+            </Animated.Text>
+          </View>
+
+          {/* Login Form */}
+          <Animated.View
+            entering={FadeInDown.delay(380).duration(600).springify().damping(16)}
+            style={[styles.formContainer, {
+              backgroundColor: isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)",
+              borderColor: theme.border,
+            }]}
+          >
             {error ? (
-                <View style={[styles.errorContainer, { backgroundColor: theme.destructive + "15", borderColor: theme.destructive }]}>
+              <Animated.View
+                entering={FadeInDown.duration(300)}
+                style={[styles.errorContainer, { backgroundColor: theme.destructive + "15", borderColor: theme.destructive }]}
+              >
                 <IconSymbol
-                    name="exclamationmark.circle.fill"
-                    size={16}
-                    color={theme.destructive}
+                  name="exclamationmark.circle.fill"
+                  size={16}
+                  color={theme.destructive}
                 />
                 <Text style={[styles.errorText, { color: theme.destructive }]}>{error}</Text>
-                </View>
+              </Animated.View>
             ) : null}
 
             <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.foreground }]}>Email Address</Text>
-                <View style={[styles.inputContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.foreground }]}>Email Address</Text>
+              <View style={[styles.inputContainer, {
+                backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : theme.background,
+                borderColor: theme.border,
+              }]}>
                 <IconSymbol
-                    name="envelope.fill"
-                    size={18}
-                    color={theme.mutedForeground}
+                  name="envelope.fill"
+                  size={18}
+                  color={theme.mutedForeground}
                 />
                 <TextInput
-                    style={[styles.input, { color: theme.foreground }]}
-                    placeholder="Enter your email"
-                    placeholderTextColor={theme.mutedForeground}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoCorrect={false}
+                  style={[styles.input, { color: theme.foreground }]}
+                  placeholder="Enter your email"
+                  placeholderTextColor={theme.mutedForeground}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
                 />
-                </View>
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
-                <Text style={[styles.label, { color: theme.foreground }]}>Password</Text>
-                <View style={[styles.inputContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.foreground }]}>Password</Text>
+              <View style={[styles.inputContainer, {
+                backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : theme.background,
+                borderColor: theme.border,
+              }]}>
                 <IconSymbol
-                    name="lock.fill"
-                    size={18}
-                    color={theme.mutedForeground}
+                  name="lock.fill"
+                  size={18}
+                  color={theme.mutedForeground}
                 />
                 <TextInput
-                    style={[styles.input, { color: theme.foreground }]}
-                    placeholder="Enter your password"
-                    placeholderTextColor={theme.mutedForeground}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
+                  style={[styles.input, { color: theme.foreground }]}
+                  placeholder="Enter your password"
+                  placeholderTextColor={theme.mutedForeground}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
                 />
                 <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIcon}
                 >
-                    <IconSymbol
+                  <IconSymbol
                     name={showPassword ? "eye.slash.fill" : "eye.fill"}
                     size={18}
                     color={theme.mutedForeground}
-                    />
+                  />
                 </TouchableOpacity>
-                </View>
+              </View>
             </View>
 
             <TouchableOpacity style={styles.forgotPassword}>
-                <Text style={[styles.forgotPasswordText, { color: theme.mutedForeground }]}>Forgot Password?</Text>
+              <Text style={[styles.forgotPasswordText, { color: theme.primary }]}>Forgot Password?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-                style={[
+              style={[
                 styles.loginButton,
                 { backgroundColor: theme.primary },
                 loading && styles.loginButtonDisabled,
-                ]}
-                onPress={handleLogin}
-                disabled={loading}
+              ]}
+              onPress={handleLogin}
+              disabled={loading}
             >
-                {loading ? (
+              {loading ? (
                 <Text style={[styles.loginButtonText, { color: theme.primaryForeground }]}>Signing in...</Text>
-                ) : (
+              ) : (
                 <>
-                    <Text style={[styles.loginButtonText, { color: theme.primaryForeground }]}>Sign In</Text>
-                    <IconSymbol
+                  <Text style={[styles.loginButtonText, { color: theme.primaryForeground }]}>Sign In</Text>
+                  <IconSymbol
                     name="arrow.right"
                     size={16}
                     color={theme.primaryForeground}
-                    />
+                  />
                 </>
-                )}
+              )}
             </TouchableOpacity>
+          </Animated.View>
+
+          {/* Footer */}
+          <Animated.View
+            entering={FadeInUp.delay(500).duration(500)}
+            style={styles.footer}
+          >
+            <View style={styles.footerDivider}>
+              <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
+              <Text style={[styles.dividerText, { color: theme.mutedForeground }]}>JS Ashanti</Text>
+              <View style={[styles.dividerLine, { backgroundColor: theme.border }]} />
             </View>
+            <Text style={[styles.footerVersion, { color: theme.mutedForeground }]}>
+              Admin Dashboard v1.0 • Built with Expo
+            </Text>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-// Importing ScrollView locally specifically for internal keyboard handling layout
-import { ScrollView } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
   container: {
@@ -209,40 +261,54 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 32,
   },
   logoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
+    width: 88,
+    height: 88,
+    borderRadius: 28,
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
+    // Glow effect
+    shadowColor: "#5E6AD2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  logoInner: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 30,
+    fontWeight: "800",
     marginBottom: 8,
     textAlign: "center",
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: Typography.md,
     textAlign: "center",
+    lineHeight: 22,
   },
   formContainer: {
-    gap: 20,
+    gap: 18,
     padding: 24,
-    borderRadius: 20,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'transparent', // Will be visually distinct if shaded
   },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
   },
   errorText: {
@@ -256,11 +322,12 @@ const styles = StyleSheet.create({
     fontSize: Typography.sm,
     fontWeight: "600",
     marginLeft: 4,
+    letterSpacing: 0.2,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -279,23 +346,53 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 10,
     paddingVertical: 16,
-    borderRadius: 12,
-    marginTop: 8,
+    borderRadius: 14,
+    marginTop: 4,
+    // Button glow
+    shadowColor: "#5E6AD2",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
   },
   loginButtonDisabled: {
     opacity: 0.6,
   },
   loginButtonText: {
     fontSize: Typography.md,
-    fontWeight: "600",
+    fontWeight: "700",
+    letterSpacing: 0.3,
   },
   forgotPassword: {
     alignSelf: "flex-end",
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
   forgotPasswordText: {
     fontSize: Typography.sm,
-    fontWeight: "500",
-    textDecorationLine: "underline",
+    fontWeight: "600",
+  },
+  footer: {
+    alignItems: "center",
+    marginTop: 40,
+    gap: 12,
+  },
+  footerDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    width: "100%",
+  },
+  dividerLine: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+  },
+  dividerText: {
+    fontSize: 13,
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  footerVersion: {
+    fontSize: 11,
+    letterSpacing: 0.3,
   },
 });

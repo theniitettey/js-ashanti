@@ -161,13 +161,13 @@ async function processJob(job: ClaimedJob): Promise<void> {
       `[Worker] Processing ${events.length} events for batch: ${job.batch_id}`
     );
 
-    const userEvents = events.map((e: any) => ({
+    const userEvents: UserEvent[] = events.map((e) => ({
       eventId: e.id,
       eventType: e.event_type,
       userId: e.user_id || "anonymous",
       sessionId: job.batch_id,
       timestamp: e.timestamp.toISOString(),
-      metadata: e.data as Record<string, any>,
+      metadata: e.data as Record<string, unknown>,
     }));
 
     const insights = await analyzeEventBatch(userEvents);

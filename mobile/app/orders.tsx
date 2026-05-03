@@ -58,8 +58,8 @@ function OrderCard({
 }: {
   order: AdminOrder;
   theme: any;
-  onFulfill: (id: string) => void;
-  onCancel: (id: string) => void;
+  onFulfill: (order: AdminOrder) => void;
+  onCancel: (order: AdminOrder) => void;
   busy: boolean;
 }) {
   const statusColors = getStatusColors(order.status, theme);
@@ -110,7 +110,7 @@ function OrderCard({
       <View style={styles.orderActionsRow}>
         <TouchableOpacity
           disabled={!canFulfill || busy}
-          onPress={() => onFulfill(order.id)}
+          onPress={() => onFulfill(order)}
           style={[
             styles.primaryBtn,
             {
@@ -131,7 +131,7 @@ function OrderCard({
 
         <TouchableOpacity
           disabled={!canCancel || busy}
-          onPress={() => onCancel(order.id)}
+          onPress={() => onCancel(order)}
           style={[
             styles.secondaryBtn,
             {
@@ -162,16 +162,18 @@ export default function OrdersScreen() {
       ? (cancel.variables as string | undefined)
       : undefined;
 
-  const handleFulfill = (orderId: string) => {
+  const handleFulfill = (order: AdminOrder) => {
+    const customer = order.customerName || "this customer";
+    const amount = formatAmount(order.totalAmount);
     Alert.alert(
       "Mark order as fulfilled?",
-      `This moves order ${orderId} from PAID to FULFILLED.`,
+      `This will fulfill ${customer}'s order of ${amount} and update the status from PAID to FULFILLED.`,
       [
         { text: "Back", style: "cancel" },
         {
           text: "Confirm Fulfill",
           onPress: () =>
-            fulfill.mutate(orderId, {
+            fulfill.mutate(order.id, {
               onError: (err: any) =>
                 Alert.alert("Failed to fulfill order", err?.message || "Please try again."),
             }),
@@ -180,17 +182,19 @@ export default function OrdersScreen() {
     );
   };
 
-  const handleCancel = (orderId: string) => {
+  const handleCancel = (order: AdminOrder) => {
+    const customer = order.customerName || "this customer";
+    const amount = formatAmount(order.totalAmount);
     Alert.alert(
       "Cancel this order?",
-      `This marks order ${orderId} as CANCELLED and cannot be undone from this screen.`,
+      `This will cancel ${customer}'s order of ${amount}. This action cannot be undone.`,
       [
         { text: "Back", style: "cancel" },
         {
           text: "Confirm Cancel",
           style: "destructive",
           onPress: () =>
-            cancel.mutate(orderId, {
+            cancel.mutate(order.id, {
               onError: (err: any) =>
                 Alert.alert("Failed to cancel order", err?.message || "Please try again."),
             }),
@@ -359,10 +363,15 @@ const styles = StyleSheet.create({
   summaryCard: {
     flexGrow: 1,
     flexBasis: "47%",
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 14,
     gap: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   summaryDot: {
     width: 8,
@@ -393,10 +402,15 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   orderCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: 14,
-    gap: 12,
+    padding: 16,
+    gap: 14,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   orderHeaderRow: {
     flexDirection: "row",

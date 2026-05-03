@@ -12,6 +12,8 @@ router.get("/analytics/ai-insights", getSession, requireAuth, MobileController.g
 // Products & Inventory
 router.get("/products", getSession, requireAuth, MobileController.getProducts);
 router.post("/products", getSession, requireAuth, MobileController.createProduct);
+router.patch("/products/:id/stock", getSession, requireAuth, MobileController.updateProductStock);
+router.delete("/products/:id", getSession, requireAuth, MobileController.deleteProduct);
 router.get("/inventory/metrics", getSession, requireAuth, MobileController.getInventoryMetrics);
 
 export default router;

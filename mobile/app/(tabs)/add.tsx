@@ -15,6 +15,7 @@ import Typography from "@/constants/typography";
 import { useRouter } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/theme";
 import { useCreateProduct } from "@/hooks/use-products";
 
@@ -146,7 +147,7 @@ export default function AddScreen() {
   };
 
   return (
-    <View style={[styles.screen, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]} edges={["top"]}>
       <View style={[styles.header, { borderBottomColor: theme.border }]}>
         <TouchableOpacity style={[styles.headerIconButton, { backgroundColor: theme.muted }]} onPress={() => router.back()}>
           <IconSymbol name="chevron.left" size={20} color={theme.foreground} />
@@ -227,7 +228,7 @@ export default function AddScreen() {
           <View style={{ flex: 1, marginBottom: 16 }}>
             <Label label="Price" required theme={theme} />
             <View style={[styles.inputWithIcon, { backgroundColor: theme.card, borderColor: theme.border }]}>
-              <Text style={{ color: theme.mutedForeground, paddingRight: 4 }}>$</Text>
+              <Text style={{ color: theme.mutedForeground, paddingRight: 4 }}>GH₵</Text>
               <TextInput value={formData.price} onChangeText={(text) => handleInputChange("price", text)} placeholderTextColor={theme.mutedForeground} style={[styles.inputBare, { color: theme.foreground }]} keyboardType="decimal-pad" placeholder="0.00" />
             </View>
           </View>
@@ -258,7 +259,7 @@ export default function AddScreen() {
           </View>
         </View>
 
-        <View style={{ height: 100 }} />
+        <View style={{ height: 140 }} />
       </ScrollView>
 
       {/* Footer */}
@@ -302,7 +303,7 @@ export default function AddScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -336,7 +337,7 @@ const styles = StyleSheet.create({
   infoBanner: { flexDirection: "row", gap: 12, alignItems: "center", borderRadius: 8, borderWidth: 1, padding: 12, marginTop: 4 },
   infoIcon: { width: 24, height: 24, borderRadius: 12, justifyContent: "center", alignItems: "center" },
   infoText: { fontSize: Typography.sm },
-  footerActions: { position: "absolute", bottom: 0, left: 0, right: 0, flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 16, borderTopWidth: 1 },
+  footerActions: { position: "absolute", bottom: 80, left: 0, right: 0, flexDirection: "row", gap: 12, paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 16, borderTopWidth: 1, shadowColor: "#000", shadowOffset: { width: 0, height: -3 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 8 },
   actionButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 14, borderRadius: 8 },
   cancelButton: { borderWidth: 1 },
   cancelText: { fontSize: Typography.sm, fontWeight: "600" },

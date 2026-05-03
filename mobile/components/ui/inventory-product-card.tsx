@@ -2,6 +2,24 @@ import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from "react-
 import { IconSymbol } from "./icon-symbol";
 import { Colors } from "@/constants/theme";
 
+const AVATAR_GRADIENTS = [
+  ["#5E6AD2", "#7C3AED"],
+  ["#059669", "#10B981"],
+  ["#D97706", "#F59E0B"],
+  ["#DC2626", "#EF4444"],
+  ["#2563EB", "#3B82F6"],
+  ["#7C3AED", "#A855F7"],
+  ["#0891B2", "#06B6D4"],
+  ["#BE185D", "#EC4899"],
+];
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  const colors = AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
+  return colors[0];
+}
+
 export interface InventoryProductCardProps {
   id?: string;
   name: string;
@@ -28,6 +46,8 @@ export function InventoryProductCard({
 }: InventoryProductCardProps) {
   const colorScheme = useColorScheme() ?? "dark";
   const theme = Colors[colorScheme];
+  const avatarBg = getAvatarColor(name || "P");
+  const initial = (name || "P").charAt(0).toUpperCase();
 
   const getStatusTheme = (s: string) => {
     switch (s) {
@@ -49,8 +69,8 @@ export function InventoryProductCard({
   return (
     <View style={[styles.productCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <View style={styles.productImageContainer}>
-        <View style={[styles.productImagePlaceholder, { backgroundColor: theme.muted, borderColor: theme.border }]}>
-          <IconSymbol name="photo" size={32} color={theme.mutedForeground} />
+        <View style={[styles.productAvatar, { backgroundColor: avatarBg }]}>
+          <Text style={styles.avatarText}>{initial}</Text>
         </View>
         <View style={[styles.statusDot, { backgroundColor: statusTheme.text, borderColor: theme.card }]} />
       </View>
@@ -108,14 +128,18 @@ const styles = StyleSheet.create({
   productImageContainer: {
     position: "relative",
   },
-  productImagePlaceholder: {
+  productAvatar: {
     width: 72,
     height: 72,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    borderStyle: "dashed",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontSize: 26,
+    fontWeight: "700",
+    letterSpacing: -0.5,
   },
   statusDot: {
     position: "absolute",

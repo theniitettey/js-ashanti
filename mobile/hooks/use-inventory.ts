@@ -32,27 +32,64 @@ export interface InventoryData {
   products: InventoryProduct[];
 }
 
+/** Derive a stock status from the quantity when the backend doesn't provide one */
+function computeStatus(stock: number): InventoryProduct["status"] {
+  if (stock === 0) return "OUT";
+  if (stock <= 5) return "CRITICAL";
+  if (stock <= 15) return "LOW";
+  return "HEALTHY";
+}
+
+/** Normalise any product-like object coming from the API into our InventoryProduct shape */
+function normalizeProduct(raw: any): InventoryProduct {
+  const stock = raw.stock ?? raw.stockCount ?? 0;
+  return {
+    id: raw.id,
+    name: raw.name || "Unknown",
+    sku: raw.sku || "",
+    category: raw.category || "",
+    price: typeof raw.price === "number" ? `GH₵${raw.price.toLocaleString()}` : raw.price || "",
+    stock,
+    status: raw.status && ["CRITICAL", "LOW", "HEALTHY", "OUT"].includes(raw.status)
+      ? raw.status
+      : computeStatus(stock),
+    image: raw.image || "",
+    subcategories: raw.subcategories,
+    colors: raw.colors,
+  };
+}
+
 async function fetchInventory(): Promise<InventoryData> {
   try {
     const metricsData = await apiRequestWithAuth(
       API_ENDPOINTS.MOBILE.INVENTORY.METRICS
     );
 
-    let products: InventoryProduct[] = metricsData.products || [];
+    // The endpoint now returns { metrics: [], products: [] }
+    // but handle the old flat-array shape too for safety
+    let products: InventoryProduct[];
+    if (Array.isArray(metricsData)) {
+      // Old shape: flat array of products
+      products = metricsData.map(normalizeProduct);
+    } else {
+      products = (metricsData.products || []).map(normalizeProduct);
+    }
 
-    // Fallback: if metrics endpoint doesn't include products, fetch separately
+    // Fallback: if we got no products from metrics, fetch from product list
     if (products.length === 0) {
       try {
         const productsData = await apiRequestWithAuth(
           API_ENDPOINTS.MOBILE.PRODUCTS.LIST
         );
-        products = productsData.products || productsData || [];
+        const raw = productsData.products || productsData || [];
+        products = (Array.isArray(raw) ? raw : []).map(normalizeProduct);
       } catch {
         // Ignore — metrics data is still valid
       }
     }
 
-    return { metrics: metricsData.metrics || [], products };
+    const metrics = Array.isArray(metricsData) ? [] : (metricsData.metrics || []);
+    return { metrics, products };
   } catch {
     return { metrics: [], products: [] };
   }

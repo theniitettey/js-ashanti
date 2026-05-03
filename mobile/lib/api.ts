@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// API Configuration - supports environment variables via Expo
-const API_BASE_URL = (
-  process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:4001"
-).replace(/\/+$/, "");
+import { resolveApiBaseUrl } from "./apiBase";
+
+// Prefer EXPO_PUBLIC_API_BASE_URL; in __DEV__, infer your Mac LAN IP from Expo so a physical device hits the backend.
+const API_BASE_URL = resolveApiBaseUrl();
 
 const REQUEST_TIMEOUT_MS = 12000;
 const MAX_RETRIES = 2;
@@ -59,7 +59,8 @@ export const apiRequest = async (
   options: RequestInit = {},
 ): Promise<any> => {
   let lastError: unknown;
-  const method = (options.method || "GET").toUpperCase();
+  const { credentials = "include", ...restOptions } = options;
+  const method = (restOptions.method || "GET").toUpperCase();
   const isRetryableMethod = method === "GET";
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -68,13 +69,13 @@ export const apiRequest = async (
 
     try {
       const response = await fetch(url, {
-        ...options,
+        ...restOptions,
         signal: controller.signal,
-        credentials: "include",
+        credentials,
         headers: {
           "Content-Type": "application/json",
           "X-Expo-Origin": "http://localhost:8081",
-          ...options.headers,
+          ...restOptions.headers,
         },
       });
 

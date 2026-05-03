@@ -3,11 +3,10 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Animated,
   StyleSheet,
   useColorScheme,
-  Image,
 } from "react-native";
+import Animated, { FadeInDown, useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from "react-native-reanimated";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import Divider from "@/components/ui/divider";
 import { SFSymbol } from "expo-symbols";
@@ -24,28 +23,33 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { InventoryProductCard } from "@/components/ui/inventory-product-card";
 
 const LiveIndicator = ({ connected }: { connected: boolean }) => {
-  const [opacity] = useState(new Animated.Value(1));
   const colorScheme = useColorScheme() ?? "dark";
   const theme = Colors[colorScheme];
+  const pulse = useSharedValue(1);
 
   useEffect(() => {
     if (connected) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(opacity, { toValue: 0.3, duration: 1000, useNativeDriver: true }),
-          Animated.timing(opacity, { toValue: 1, duration: 1000, useNativeDriver: true }),
-        ]),
-      ).start();
+      pulse.value = withRepeat(
+        withTiming(0.3, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+        -1,
+        true
+      );
+    } else {
+      pulse.value = 1;
     }
-  }, [opacity, connected]);
+  }, [connected]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: connected ? pulse.value : 1,
+  }));
 
   return (
     <Animated.View
-      style={{
-        ...styles.liveIndicator,
-        backgroundColor: connected ? theme.success : theme.destructive,
-        opacity: connected ? opacity : 1,
-      }}
+      style={[
+        styles.liveIndicator,
+        { backgroundColor: connected ? theme.success : theme.destructive },
+        animatedStyle,
+      ]}
     />
   );
 };
@@ -72,12 +76,12 @@ export default function HomeScreen() {
   const wsConnected = !isLoading;
 
   const lowStockProducts = inventoryProducts
-    .filter((p: InventoryProduct) => p.status === "CRITICAL" || p.status === "LOW" || p.stock < 15)
+    .filter((p: InventoryProduct) => p.status === "CRITICAL" || p.status === "LOW" || p.status === "OUT" || p.stock <= 15)
     .slice(0, 3);
 
   const formatCurrency = (val: number) => {
-    if (val >= 1000) return `$${(val / 1000).toFixed(1)}k`;
-    return `$${val.toFixed(0)}`;
+    if (val >= 1000) return `GH₵${(val / 1000).toFixed(1)}k`;
+    return `GH₵${val.toFixed(0)}`;
   };
 
   return (
@@ -102,7 +106,9 @@ export default function HomeScreen() {
               </View>
             )}
           </TouchableOpacity>
-          <Image source={{ uri: "https://randomuser.me/api/portraits/men/75.jpg" }} style={styles.profileImg} />
+          <View style={[styles.profileImg, { backgroundColor: theme.primary }]}>
+            <Text style={{ color: theme.primaryForeground, fontSize: 14, fontWeight: "700" }}>SA</Text>
+          </View>
         </View>
       </View>
 
@@ -110,7 +116,7 @@ export default function HomeScreen() {
         <View style={styles.sectionContainer}>
 
           {/* Live Traffic */}
-          <View>
+          <Animated.View entering={FadeInDown.delay(0).duration(500).springify().damping(18)}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Live Traffic</Text>
               <View style={styles.liveStatusWrap}>
@@ -150,10 +156,10 @@ export default function HomeScreen() {
                 </View>
               </View>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Sales Overview — from API */}
-          <View>
+          <Animated.View entering={FadeInDown.delay(80).duration(500).springify().damping(18)}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Sales Overview</Text>
               <TouchableOpacity style={[styles.timeFilterBtn, { backgroundColor: theme.muted }]}>
@@ -176,40 +182,42 @@ export default function HomeScreen() {
                 iconColor={theme.primary}
               />
             </View>
-          </View>
+          </Animated.View>
 
           {/* AI Insights — from API */}
-          <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <View style={[styles.insightBadge, { backgroundColor: theme.primary }]}>
-              <IconSymbol size={12} name="sparkles" color={theme.primaryForeground} />
-              <Text style={[styles.insightBadgeText, { color: theme.primaryForeground }]}>AI INSIGHTS</Text>
-            </View>
-            <View style={styles.insightList}>
-              {insights.length > 0 ? insights.slice(0, 2).map((insight, i) => (
-                <View key={insight.id || i} style={styles.insightRow}>
-                  <View style={[styles.insightDot, { backgroundColor: theme.primary }]} />
-                  <Text style={[styles.insightText, { color: theme.mutedForeground }]}>{insight.description}</Text>
-                </View>
-              )) : (
-                <>
-                  <View style={styles.insightRow}>
+          <Animated.View entering={FadeInDown.delay(160).duration(500).springify().damping(18)}>
+            <View style={[styles.cardContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.insightBadge, { backgroundColor: theme.primary }]}>
+                <IconSymbol size={12} name="sparkles" color={theme.primaryForeground} />
+                <Text style={[styles.insightBadgeText, { color: theme.primaryForeground }]}>AI INSIGHTS</Text>
+              </View>
+              <View style={styles.insightList}>
+                {insights.length > 0 ? insights.slice(0, 2).map((insight, i) => (
+                  <View key={insight.id || i} style={styles.insightRow}>
                     <View style={[styles.insightDot, { backgroundColor: theme.primary }]} />
-                    <Text style={[styles.insightText, { color: theme.mutedForeground }]}>Loading AI insights...</Text>
+                    <Text style={[styles.insightText, { color: theme.mutedForeground }]}>{insight.description}</Text>
                   </View>
-                </>
-              )}
+                )) : (
+                  <>
+                    <View style={styles.insightRow}>
+                      <View style={[styles.insightDot, { backgroundColor: theme.primary }]} />
+                      <Text style={[styles.insightText, { color: theme.mutedForeground }]}>Loading AI insights...</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+              <TouchableOpacity
+                style={[styles.askAiBtn, { backgroundColor: theme.muted }]}
+                onPress={() => router.push("/(tabs)/reports")}
+              >
+                <IconSymbol size={16} name="sparkles" color={theme.foreground} />
+                <Text style={[styles.askAiText, { color: theme.foreground }]}>View Full Analytics</Text>
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              style={[styles.askAiBtn, { backgroundColor: theme.muted }]}
-              onPress={() => router.push("/(tabs)/reports")}
-            >
-              <IconSymbol size={16} name="sparkles" color={theme.foreground} />
-              <Text style={[styles.askAiText, { color: theme.foreground }]}>View Full Analytics</Text>
-            </TouchableOpacity>
-          </View>
+          </Animated.View>
 
           {/* Inventory Status — from API */}
-          <View>
+          <Animated.View entering={FadeInDown.delay(240).duration(500).springify().damping(18)}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: theme.foreground }]}>Inventory Status</Text>
               <TouchableOpacity onPress={() => router.push("/(tabs)/stock")}>
@@ -222,7 +230,7 @@ export default function HomeScreen() {
                   key={p.id || i}
                   name={p.name}
                   sku={p.sku}
-                  status={p.status || "HEALTHY"}
+                  status={p.status}
                   stockCount={p.stock}
                 />
               )) : (
@@ -231,10 +239,10 @@ export default function HomeScreen() {
                 </>
               )}
             </View>
-          </View>
+          </Animated.View>
 
           {/* Revenue by Category */}
-          <View>
+          <Animated.View entering={FadeInDown.delay(320).duration(500).springify().damping(18)}>
             <Text style={[styles.sectionTitle, { color: theme.foreground, marginBottom: 12 }]}>Revenue by Category</Text>
             <View style={[styles.chartContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
               <View style={styles.chartBarsWrap}>
@@ -245,7 +253,7 @@ export default function HomeScreen() {
                 <BarChartBar height={35} label="Sport" color={theme.mutedForeground} theme={theme} />
               </View>
             </View>
-          </View>
+          </Animated.View>
 
         </View>
       </ScrollView>
@@ -264,7 +272,7 @@ const styles = StyleSheet.create({
   bellIconWrap: { position: "relative" },
   bellBadgeCount: { position: "absolute", top: -6, right: -8, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4, alignItems: "center", justifyContent: "center" },
   bellBadgeText: { color: "#ffffff", fontSize: 10, fontWeight: "700", lineHeight: 12 },
-  profileImg: { width: 36, height: 36, borderRadius: 18 },
+  profileImg: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
   scrollContent: { paddingVertical: 20, paddingBottom: 100 },
   sectionContainer: { paddingHorizontal: 16, gap: 24 },
   liveIndicator: { width: 10, height: 10, borderRadius: 5 },
@@ -272,7 +280,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 18, fontWeight: "600" },
   liveStatusWrap: { flexDirection: "row", alignItems: "center", gap: 6 },
   liveStatusText: { fontSize: 12, fontWeight: "600" },
-  cardContainer: { borderRadius: 16, borderWidth: 1, padding: 18 },
+  cardContainer: { borderRadius: 20, borderWidth: 1, padding: 18, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8, elevation: 2 },
   cardLabel: { fontSize: 13, marginBottom: 8, fontWeight: "500" },
   cardHeaderRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 },
   cardMainValue: { fontSize: 32, fontWeight: "700" },

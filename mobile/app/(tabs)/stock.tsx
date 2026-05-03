@@ -226,7 +226,7 @@ export default function StockScreen() {
                   category={product.category}
                   price={product.price}
                   stockCount={product.stock}
-                  status={product.status || "HEALTHY"}
+                  status={product.status}
                   onEdit={() => handleEdit(product)}
                   onRestock={() => handleRestockOpen(product)}
                   onDelete={() => handleDelete(product)}

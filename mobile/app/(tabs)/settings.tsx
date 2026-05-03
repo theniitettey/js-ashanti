@@ -173,6 +173,15 @@ export default function SettingsScreen() {
           <IconSymbol name="rectangle.portrait.and.arrow.right" size={20} color={theme.destructive} />
           <Text style={[styles.logoutButtonText, { color: theme.destructive }]}>Logout</Text>
         </TouchableOpacity>
+        {/* App Info Footer */}
+        <View style={styles.appFooter}>
+          <View style={[styles.appFooterIcon, { backgroundColor: theme.primary + "15" }]}>
+            <IconSymbol name="bag.fill" size={20} color={theme.primary} />
+          </View>
+          <Text style={[styles.appName, { color: theme.foreground }]}>JS Ashanti</Text>
+          <Text style={[styles.appVersion, { color: theme.mutedForeground }]}>Version 1.0.0 • Admin Dashboard</Text>
+          <Text style={[styles.appCopyright, { color: theme.mutedForeground }]}>Built with Expo & React Native</Text>
+        </View>
 
         <View style={{ height: 100 }} />
       </ScrollView>
@@ -189,4 +198,9 @@ const styles = StyleSheet.create({
   section: { borderRadius: 16, borderWidth: 1, overflow: "hidden" },
   logoutButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 16, borderRadius: 16, marginTop: 32, gap: 10 },
   logoutButtonText: { fontSize: 16, fontWeight: "600" },
+  appFooter: { alignItems: "center", marginTop: 40, gap: 8 },
+  appFooterIcon: { width: 44, height: 44, borderRadius: 14, justifyContent: "center", alignItems: "center", marginBottom: 4 },
+  appName: { fontSize: 16, fontWeight: "700", letterSpacing: 0.3 },
+  appVersion: { fontSize: 12 },
+  appCopyright: { fontSize: 11, marginTop: 2 },
 });

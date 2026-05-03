@@ -1,8 +1,6 @@
-import { API_ENDPOINTS } from "./api";
+import { resolveApiBaseUrl } from "./apiBase";
 
-// Get the base URL from environment
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:4001";
+const API_BASE_URL = resolveApiBaseUrl();
 
 export interface WebSocketMessage {
   type: "metrics_update" | "alert" | "ai_insight" | "inventory_change";
