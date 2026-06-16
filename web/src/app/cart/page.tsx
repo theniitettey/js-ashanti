@@ -6,17 +6,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaPlus, FaMinus } from "react-icons/fa";
 import { FiShoppingCart } from "react-icons/fi";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 export default function CartPage() {
   const { items, removeItem, getTotalPrice } = useCartStore();
+  const { trackAddToCart, trackRemoveFromCart, trackCheckout } = useAnalytics();
 
   const shipping = 0.0;
   const tax = 0.00;
   const subtotal = getTotalPrice();
   const total = subtotal + shipping + tax;
 
-  
-  if (items.length === 0){
+
+  if (items.length === 0) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center">
         <FiShoppingCart className="text-4xl" />
@@ -40,7 +42,7 @@ export default function CartPage() {
 
             <ul role="list" className="divide-y divide-gray-200 border-b border-t border-gray-200">
               {items.map((product, productIdx) => (
-                <li key={product.id} className="flex py-6 sm:py-10">
+                <li key={product.id || productIdx} className="flex py-6 sm:py-10">
                   <div className="flex-shrink-0">
                     <Image
                       src={product.image}
@@ -69,15 +71,21 @@ export default function CartPage() {
                       <div className="flex items-center gap-2 mt-3">
                         <button
                           type="button"
-                          onClick={() => useCartStore.getState().decreaseQuantity(product.id)}
+                          onClick={() => {
+                            useCartStore.getState().decreaseQuantity(product.id);
+                            trackRemoveFromCart(product.id);
+                          }}
                           className="px-2 py-1 border rounded text-gray-700 hover:bg-gray-200"
                         >
-                          <FaMinus/>
+                          <FaMinus />
                         </button>
                         <span className="px-2">{product.quantity}</span>
                         <button
                           type="button"
-                          onClick={() => useCartStore.getState().increaseQuantity(product.id)}
+                          onClick={() => {
+                            useCartStore.getState().increaseQuantity(product.id);
+                            trackAddToCart(product.id, 1);
+                          }}
                           className="px-2 py-1 border rounded text-gray-700 hover:bg-gray-200"
                         >
                           <FaPlus />
@@ -87,7 +95,10 @@ export default function CartPage() {
                       <div className="mt-4 sm:mt-0 sm:pr-9">
                         <div className="absolute right-0 top-0">
                           <button
-                            onClick={() => removeItem(product.id)}
+                            onClick={() => {
+                              removeItem(product.id);
+                              trackRemoveFromCart(product.id);
+                            }}
                             type="button"
                             className="-m-2 inline-flex p-2 text-gray-400 hover:text-gray-500"
                           >
@@ -136,14 +147,15 @@ export default function CartPage() {
             </dl>
 
             <div className="mt-6">
-            <Link href="/checkout">
-              <button
-                type="submit"
-                className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
-              >
-                Checkout
-              </button>
-            </Link>
+              <Link href="/checkout">
+                <button
+                  type="submit"
+                  onClick={() => trackCheckout("start", total)}
+                  className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                >
+                  Checkout
+                </button>
+              </Link>
             </div>
           </section>
         </form>

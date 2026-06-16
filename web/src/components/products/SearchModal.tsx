@@ -1,10 +1,11 @@
 'use client';
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import { products as mockProducts } from "@/data/data";
 
-export function SearcModal({ 
+export function SearchModal({ 
     isOpen, 
     onClose, 
     placeholder = "Search products..." }: 
@@ -15,6 +16,7 @@ export function SearcModal({
     }) {
     const [search, setSearch] = useState("");
     const [products, setProducts] = useState<Array<{ name: string; description: string; slug: string }>>([]);
+    const [loadError, setLoadError] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -27,19 +29,28 @@ export function SearcModal({
     };
 
     useEffect(() => {
-        try{
-            const fetchProducts = async () => {
-                const response = await fetch('/api/products');
+        const fetchProducts = async () => {
+            try {
+                const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4001";
+                const response = await fetch(`${backendUrl}/api/products`);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch products');
+                    throw new Error(`Failed to fetch products (${response.status})`);
                 }
                 const data = await response.json();
-                setProducts(data);
-            };
-            fetchProducts();
-        } catch(error){
-            console.error("Error fetching products:", error);
-        }
+                if (Array.isArray(data) && data.length > 0) {
+                    setProducts(data);
+                    setLoadError(null);
+                    return;
+                }
+                setProducts(mockProducts);
+                setLoadError("Using fallback products while backend product list is empty.");
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                setProducts(mockProducts);
+                setLoadError("Unable to load products from backend. Showing fallback products.");
+            }
+        };
+        fetchProducts();
     }, []);
   
 
@@ -66,6 +77,10 @@ export function SearcModal({
                         Search
                     </button>
                 </form>
+
+                {loadError && (
+                    <p className="mt-2 text-sm text-amber-600">{loadError}</p>
+                )}
 
                 <div className="max-h-80 overflow-y-auto mt-4 space-y-2">
                 {filteredProducts.length > 0 ? (

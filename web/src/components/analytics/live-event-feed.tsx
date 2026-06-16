@@ -10,20 +10,28 @@ export function LiveEventFeed() {
   const { socket, isConnected } = useSocket();
   const [events, setEvents] = useState<UserEvent[]>([]);
 
+  const [authError, setAuthError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!socket) return;
 
-    // Join admin room to receive events
     socket.emit("admin:join");
 
-    // Listen for incoming events
     socket.on("admin:event", (event: UserEvent) => {
-      setEvents((prev) => [event, ...prev].slice(0, 50)); // Keep last 50
+      setAuthError(null);
+      setEvents((prev) => [event, ...prev].slice(0, 50));
+    });
+
+    socket.on("event:error", (data: any) => {
+      if (data?.code === "FORBIDDEN" || data?.code === "AUTH_FAILED") {
+        setAuthError(data.error || "Admin authentication required");
+      }
     });
 
     return () => {
       socket.emit("admin:leave");
       socket.off("admin:event");
+      socket.off("event:error");
     };
   }, [socket]);
 
@@ -52,7 +60,11 @@ export function LiveEventFeed() {
       </CardHeader>
       <CardContent>
         <div className="h-[500px] overflow-y-auto">
-          {events.length === 0 ? (
+          {authError ? (
+            <p className="text-destructive text-center py-8">
+              {authError}
+            </p>
+          ) : events.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
               Waiting for events...
             </p>
