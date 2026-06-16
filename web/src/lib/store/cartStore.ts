@@ -19,7 +19,8 @@ interface CartState {
   decreaseQuantity: (id: string) => void;
   getTotalPrice: () => number;
   getItemCount: () => number;
-  getDiscountedPrice?: () => number;
+  getSubtotal: () => number;
+  getDiscount: () => number;
 }
 
 export const useCartStore = create<CartState>()(
@@ -70,8 +71,23 @@ export const useCartStore = create<CartState>()(
           (acc, item) => acc + item.price * item.quantity,
           0
         );
-        const discount = subtotal > 300 ? 0.1 * subtotal : 0; // 10% discount if subtotal > 300
-        return subtotal;
+        const discount = subtotal > 300 ? 0.1 * subtotal : 0;
+        return subtotal - discount;
+      },
+
+      getSubtotal: () => {
+        return get().items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        );
+      },
+
+      getDiscount: () => {
+        const subtotal = get().items.reduce(
+          (acc, item) => acc + item.price * item.quantity,
+          0
+        );
+        return subtotal > 300 ? 0.1 * subtotal : 0;
       },
 
       getItemCount: () => {

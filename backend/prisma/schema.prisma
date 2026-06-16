@@ -117,24 +117,70 @@ model BusinessSettings {
   @@map("business_settings")
 } 
 
-model Order {
-  id           String    @id @default(cuid())
-  customerName String
-  email        String
-  phone        String
-  address      String
-  status       String    @default("pending")
-  totalAmount  Float
-  items        Json      // store items as JSON array
-  createdAt    DateTime  @default(now())
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
 }
+
+model Order {
+  id              String        @id @default(cuid())
+  customerName    String
+  email           String
+  phone           String
+  address         String
+  status          OrderStatus   @default(PENDING)
+  totalAmount     Float
+  items           Json
+  paymentRef      String?       @db.VarChar(255)
+  paymentProvider String?       @db.VarChar(50)
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+}
+enum PaymentStatus {
+  INITIATED
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  SIMULATION
+  PAYSTACK
+  STRIPE
+}
+
+model Payment {
+  id              String         @id @default(cuid())
+  paymentRef      String         @unique @db.VarChar(255)
+  orderId         String         @db.VarChar(255)
+  amount          Float
+  currency        String         @default("GHS")
+  provider        PaymentProvider @default(SIMULATION)
+  status          PaymentStatus  @default(INITIATED)
+  customerEmail   String
+  customerName    String
+  metadata        Json?
+  failureReason   String?
+  processedAt     DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("payments")
+}
+
 
 model Insight {
   id         String   @id @default(cuid())
   summary    String
   confidence Float
   patterns   String[] // Array of detected patterns
-  timeWindow String
+  timeWindow String   @unique
   eventCount Int
   createdAt  DateTime @default(now())
 

@@ -6,32 +6,27 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:400
 
 export const dynamic = "force-dynamic";
 
+function safeJsonParse<T>(raw: string): T | null {
+  if (!raw || !raw.trim()) return null;
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
 
 export default async function NewUsersPage() {
   const currentHeaders = await headers();
   const cookie = currentHeaders.get("cookie") ?? "";
 
-  // Get session from backend
   const sessionRes = await fetch(`${BACKEND_URL}/api/auth/get-session`, {
     headers: { cookie },
+    cache: "no-store",
   });
-  const session = await sessionRes.json();
-  if (!session) return redirect("/login");
-
-  // Check permissions from backend
-  const permissionRes = await fetch(`${BACKEND_URL}/api/auth/user-has-permission`, {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      cookie 
-    },
-    body: JSON.stringify({
-      userId: session.user.id,
-      permission: { Dashboard: ["update"] },
-    }),
-  });
-  const { success } = await permissionRes.json();
-  if (!success) return redirect("/");
+  const sessionText = await sessionRes.text();
+  const session = safeJsonParse<{ user?: { role?: string } }>(sessionText);
+  if (!session?.user) return redirect("/login");
+  if (session.user.role !== "admin") return redirect("/");
 
   return (
     <div className="container mx-auto px-4 py-8">

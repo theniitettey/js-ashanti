@@ -1,95 +1,109 @@
 # JS Ashanti - E-commerce Platform
 
-**SAMUEL OWUSU ASANTE - 10211100307**
+Full-stack e-commerce platform with:
+- `backend/` (Express + Prisma + Better Auth + workers)
+- `web/` (Next.js)
+- `mobile/` (Expo React Native)
 
-A full-stack e-commerce application with web and mobile clients.
+## One-command local startup (recommended)
 
-## Project Structure
+From repo root:
 
+```bash
+npm run start:all
 ```
-├── web/          # Next.js web application (Frontend)
-├── backend/      # Node.js Express API & Background Workers
-├── mobile/       # React Native Expo mobile app
-└── README.md
+
+This command now:
+- ensures `backend/.env` and `web/.env` exist
+- applies local Docker DB defaults for backend (`localhost:55432`)
+- starts Docker Postgres (`docker compose up -d db`)
+- starts backend and web dev servers
+- waits for health checks before reporting success
+
+Optional variants:
+
+```bash
+# Backend + web + iOS simulator build/run
+npm run start:all:ios
+
+# Backend + web + Expo web
+npm run start:all:expo-web
 ```
 
-## Backend (Node.js Express)
+Stop all dev services:
 
-The backend is located in the `backend/` folder and handles API requests, authentication, and background processing.
+```bash
+npm run stop:all
+```
 
-### Getting Started
+## Why this fixes recurring setup issues
 
+The recurring local issues were usually from:
+- missing `.env` files in fresh worktrees
+- backend pointing at wrong DB port (`5432` vs Docker `55432`)
+- services started in inconsistent order
+
+Using `start:all` keeps startup deterministic each time.
+
+## Required local prerequisites
+
+- Docker Desktop (or compatible Docker engine)
+- Node + npm
+- macOS + Xcode tools for iOS simulator (`start:all:ios`)
+
+## Local URLs
+
+- Web app: [http://localhost:3000](http://localhost:3000)
+- Backend health: [http://localhost:4001/api/health](http://localhost:4001/api/health)
+- Expo web (if started): [http://localhost:8081](http://localhost:8081)
+
+## Environment files
+
+Do not commit real secrets.
+
+- `backend/.env.example` now uses Docker DB default:
+  - `DATABASE_URL="postgresql://user:password@localhost:55432/js_ashanti_db"`
+- `web/.env.example` points web to local backend:
+  - `NEXT_PUBLIC_BACKEND_URL=http://localhost:4001`
+
+## Admin login notes
+
+- Admin route: [http://localhost:3000/admin](http://localhost:3000/admin)
+- Login route: [http://localhost:3000/login](http://localhost:3000/login)
+- Backend validates auth session from cookie.
+
+## Starting Servers Individually
+
+If you prefer to start each component in its own terminal window (e.g. to monitor logs without them combining together), follow these steps in separate terminal windows:
+
+### 1. Database (PostgreSQL)
+Ensure Docker is running on your machine, then start your local database:
+```bash
+docker compose up -d db
+```
+The database will be exposed on port `55432`.
+
+### 2. Backend (Express API)
+The backend requires the database to be running.
 ```bash
 cd backend
-npm install
 npm run dev
 ```
+Wait until you see `Server running on port 4001`. The backend handles all APIs and Authentication.
 
-### Features
-- **Unified Entry Point**: Starts both the Express API and background workers (Batch Processor, Job Worker, Recovery Loop) with a single command.
-- **Database**: Prisma ORM with PostgreSQL.
-- **Auth**: Better-Auth integrated for secure session management.
-- **AI**: Background workers powered by Groq SDK.
-
-## Web Application (Next.js)
-
-The web app is located in the `web/` folder.
-
-### Getting Started
-
+### 3. Web Client (Customer & Admin)
+In a new terminal window:
 ```bash
 cd web
-npm install
 npm run dev
 ```
+The web app is available at `http://localhost:3000`.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-### Environment Variables
-
-Copy `.env.example` to `.env` and fill in the required values:
-
-```bash
-cp .env.example .env
-```
-
-### Tech Stack
-
-- Next.js 14+ (App Router)
-- Prisma ORM
-- TailwindCSS
-- Better Auth
-
-## Mobile Application (React Native Expo)
-
-The mobile app is located in the `mobile/` folder.
-
-### Getting Started
-
+### 4. Mobile App (Expo / React Native)
+Make sure the backend is fully running first so the mobile app can connect successfully to authentication and data routes.
 ```bash
 cd mobile
-npm install
-npx expo start
+npm run ios
 ```
-
-### Running on devices
-
-- **Android**: `npm run android` or scan QR with Expo Go
-- **iOS**: `npm run ios` (macOS only) or scan QR with Expo Go
-- **Web**: `npm run web`
-
-### Tech Stack
-
-- React Native with Expo
-- TypeScript
-
-## Links
-
-- **Live Web App**: https://jsashanti.vercel.app/products
-- **Admin Panel**: https://jsashanti.vercel.app/admin
-
-## Notes
-
-- The `.env` files in `web/` and `backend/` contain sensitive info - never commit them.
-- Use `.env.example` in each directory as a template for your local setup.
-- The backend must be running for both web and mobile clients to function correctly.
+Wait for Expo to start the Metro bundler completely and deploy to the iOS simulator. The Expo bundler runs locally on port `8081`. 
+*Note*: If you only need the Metro packager to connect an existing app via Expo Go, you can do `npm start` instead of `npm run ios`.

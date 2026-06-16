@@ -39,7 +39,10 @@ export function ProductsClient({ products, searchParams }: { products: any[]; se
   useEffect(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "");
-      if (hash && (hash === "all-Products" || Object.keys(categoryMap).includes(hash))) {
+      if (
+        hash &&
+        (hash === "all-Products" || hash === "on-sale" || Object.keys(categoryMap).includes(hash))
+      ) {
         setSelectedTab(hash);
       }
     }
@@ -52,6 +55,10 @@ export function ProductsClient({ products, searchParams }: { products: any[]; se
   const endIndex = startIndex + itemsPerPage;
 
   const paginatedProduct = products.slice(startIndex, endIndex);
+  const discountedProducts = products.filter(
+    (product) => (Number(product.discount) || 0) > 0
+  );
+  const paginatedDiscountedProducts = discountedProducts.slice(startIndex, endIndex);
 
   const categoryMap: Record<string, string> = {
     "kitchen-appliances": "KITCHEN APPLIANCES",
@@ -91,48 +98,76 @@ export function ProductsClient({ products, searchParams }: { products: any[]; se
       />
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full flex-col justify-start gap-6">
-          <Select value={selectedTab} onValueChange={setSelectedTab}>
+        <Select value={selectedTab} onValueChange={setSelectedTab}>
           <SelectTrigger
-                  className="flex lg:hidden"
-                  size="sm"
-                  id="view-selector"
-                >
-              <SelectValue placeholder="Select a view" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-Products">All Products</SelectItem>
-              <SelectItem value="kitchen-appliances">Kitchen Appliances</SelectItem>
-              <SelectItem value="cooking-ware">Cookware</SelectItem>
-              <SelectItem value="insulations">Insulation & Food Storage</SelectItem>
-              <SelectItem value="home-essentials">Home Essentials</SelectItem>
-            </SelectContent>
-          </Select>
+            className="flex lg:hidden"
+            size="sm"
+            id="view-selector"
+          >
+            <SelectValue placeholder="Select a view" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all-Products">All Products</SelectItem>
+            <SelectItem value="on-sale">On Sale</SelectItem>
+            <SelectItem value="kitchen-appliances">Kitchen Appliances</SelectItem>
+            <SelectItem value="cooking-ware">Cookware</SelectItem>
+            <SelectItem value="insulations">Insulation & Food Storage</SelectItem>
+            <SelectItem value="home-essentials">Home Essentials</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-2 hidden lg:flex gap-3 text-sm font-medium">
-            <TabsTrigger value="all-Products">All Products</TabsTrigger>
-            <TabsTrigger value="kitchen-appliances">Kitchen Appliances</TabsTrigger>
-            <TabsTrigger value="cooking-ware">Cookware</TabsTrigger>
-            <TabsTrigger value="insulations">Insulation & Food Storage</TabsTrigger>
-            <TabsTrigger value="home-essentials">Home Essentials</TabsTrigger>
-          </TabsList>
+        <TabsList className="**:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:px-2 hidden lg:flex gap-3 text-sm font-medium">
+          <TabsTrigger value="all-Products">All Products</TabsTrigger>
+          <TabsTrigger value="on-sale">On Sale</TabsTrigger>
+          <TabsTrigger value="kitchen-appliances">Kitchen Appliances</TabsTrigger>
+          <TabsTrigger value="cooking-ware">Cookware</TabsTrigger>
+          <TabsTrigger value="insulations">Insulation & Food Storage</TabsTrigger>
+          <TabsTrigger value="home-essentials">Home Essentials</TabsTrigger>
+        </TabsList>
 
         {/* All Products */}
         <TabsContent value="all-Products">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
-          {isLoading
+            {isLoading
               ? Array.from({ length: 4 }).map((_, idx) => (
-                  <ProductCardSkeleton key={idx} />
-                ))
+                <ProductCardSkeleton key={idx} />
+              ))
               : paginatedProduct.map((product, index) => (
-                    <ProductsCardDetails
-                      {...product}
-                      mainImage={product.images[0]}
-                      rating={product.ratingFromManufacturer}
-                    />
-                ))}
+                <ProductsCardDetails
+                  key={product.id || index}
+                  {...product}
+                  mainImage={product.images[0]}
+                  rating={product.ratingFromManufacturer}
+                />
+              ))}
           </div>
           <div className="mt-12">
             <PaginationWithLinks page={currentPage} pageSize={itemsPerPage} totalCount={products.length} />
+          </div>
+        </TabsContent>
+
+        {/* On Sale Products */}
+        <TabsContent value="on-sale">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, idx) => (
+                <ProductCardSkeleton key={idx} />
+              ))
+              : paginatedDiscountedProducts.map((product, index) => (
+                <ProductsCardDetails
+                  key={product.id || index}
+                  {...product}
+                  mainImage={product.images[0]}
+                  rating={product.ratingFromManufacturer}
+                />
+              ))}
+          </div>
+          <div className="mt-12">
+            <PaginationWithLinks
+              page={currentPage}
+              pageSize={itemsPerPage}
+              totalCount={discountedProducts.length}
+            />
           </div>
         </TabsContent>
 
@@ -142,17 +177,18 @@ export function ProductsClient({ products, searchParams }: { products: any[]; se
           return (
             <TabsContent key={category} value={category}>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
-              {isLoading
+                {isLoading
                   ? Array.from({ length: 8 }).map((_, idx) => (
-                      <ProductCardSkeleton key={idx} />
-                    ))
+                    <ProductCardSkeleton key={idx} />
+                  ))
                   : filtered.map((product, index) => (
-                        <ProductsCardDetails
-                          {...product}
-                          mainImage={product.images[0]}
-                          rating={product.ratingFromManufacturer}
-                        />
-                    ))}
+                    <ProductsCardDetails
+                      key={product.id || index}
+                      {...product}
+                      mainImage={product.images[0]}
+                      rating={product.ratingFromManufacturer}
+                    />
+                  ))}
               </div>
               <div className="mt-12">
                 <PaginationWithLinks

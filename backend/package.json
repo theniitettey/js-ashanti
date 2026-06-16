@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npx prisma db push && node dist/index.js",
-    "dev": "npx prisma db push && nodemon src/index.ts",
+    "dev": "npx prisma db push --accept-data-loss && nodemon src/index.ts",
     "worker": "npx prisma db push && ts-node src/index.ts",
     "build": "npx prisma generate && tsc"
   },
@@ -36,6 +36,7 @@
     "@types/node": "^20.12.7",
     "nodemon": "^3.1.0",
     "prisma": "^6.11.1",
+    "socket.io-client": "^4.8.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   }
